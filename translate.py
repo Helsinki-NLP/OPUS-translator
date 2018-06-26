@@ -1,0 +1,160 @@
+from flask import Flask, render_template, request, jsonify, redirect, url_for, flash, session
+from wtforms import Form, BooleanField, TextField, PasswordField, validators
+from passlib.hash import sha256_crypt
+from pymysql import escape_string as thwart
+import gc
+import socket
+from dbconnect import connection
+from functools import wraps
+
+app = Flask(__name__)
+
+with open("/home/cloud-user/secrets/secretkey") as f:
+    key = f.read()[:-1].encode("utf-8")
+app.secret_key = key
+
+@app.route('/')
+def index():
+    return render_template("index.html")
+
+@app.route('/translate')
+def translate():
+    sock = socket.socket()
+
+    sent = request.args.get('sent', 'empty', type=str)
+    if sent.strip() == "":
+        sock.close()
+        return jsonify(result="")
+    
+    direction = request.args.get('direction', 'empty', type=str)
+    if direction == "en-de":
+        sock.connect(("localhost", 5001))
+    elif direction == "en-fr":
+        sock.connect(("localhost", 5002))
+
+    sock.send(bytes(sent, 'utf-8'))
+    translation = sock.recv(1024)
+
+    sock.close()
+    
+    return jsonify(result=translation.decode('utf-8'))
+
+@app.route('/suggest/')
+def suggest():
+    if session:
+        username = session['username']
+    else:
+        username = request.remote_addr
+        
+    direction = request.args.get('direction', 'empty', type=str)
+    source = request.args.get('source', 'empty', type=str)
+    suggestion = request.args.get('suggestion', 'empty', type=str)
+
+    c, conn = connection()
+
+    c.execute("INSERT INTO suggestions (username, direction, source, suggestion) VALUES (%s, %s, %s, %s)",
+              (username, thwart(direction), thwart(source), thwart(suggestion)))
+    conn.commit()
+    c.close()
+    conn.close()
+    gc.collect()
+
+    print(username, direction, source, suggestion, timestamp)
+    
+@app.route('/login/', methods=["GET", "POST"])
+def login_page():
+    error = ''
+    try:
+        c, conn = connection()
+        if request.method == "POST":
+            data = c.execute("SELECT * FROM users WHERE username = (%s)",
+                             thwart(request.form['username']))
+            
+            data = c.fetchone()['password']
+            
+            if sha256_crypt.verify(request.form['password'], data):
+                session['logged_in'] = True
+                session['username'] = request.form['username']
+                
+                #flash("You are now logged in")
+                return redirect(url_for("index"))
+            
+            else:
+                error = "Invalid credentials, try again."
+                
+        gc.collect()
+                
+        return render_template("login.html", error=error)
+
+    except Exception as e:
+        #flash(e)
+        error = "Invalid credentials, try again."
+        return render_template("login.html", error=error)
+
+class RegistrationForm(Form):
+    username = TextField('Username', [validators.Length(min=4, max=20)])
+    email = TextField('Email Address', [validators.Length(min=6, max=50)])
+    password = PasswordField('New Password', [
+        validators.Required(),
+        validators.EqualTo('confirm', message='Passwords must match')
+    ])
+    confirm = PasswordField('Repeat Password')
+    
+@app.route('/register/', methods=["GET", "POST"])
+def register_page():
+    try:
+        form = RegistrationForm(request.form)
+
+        if request.method == "POST" and form.validate():
+            username = form.username.data
+            email = form.email.data
+            password = sha256_crypt.encrypt((str(form.password.data)))
+            c, conn = connection()
+
+            x =  c.execute("SELECT * FROM users WHERE username = (%s)", (thwart(username)))
+
+            if int(x) > 0:
+                error = "That username is already taken, please choose another"
+                return render_template('register.html', form=form, error=error)
+
+            else:
+                c.execute("INSERT INTO users (username, password, email, tracking) VALUES (%s, %s, %s, %s)",
+                         (thwart(username), thwart(password), thwart(email), thwart("translate")))
+
+                conn.commit()
+                #flash("Thanks for registering!")
+                c.close()
+                conn.close()
+                gc.collect()
+
+                session['logged_in'] = True
+                session['username'] = username
+
+                return redirect(url_for('index'))
+
+        return render_template("register.html", form=form)
+
+    except Exception as e:
+        return(str(e))
+
+def login_required(f):
+    @wraps(f)
+    def wrap(*args, **kwargs):
+        if 'logged_in' in session:
+            return f(*args, **kwargs)
+        else:
+            #flash("You need to login first")
+            return redirect(url_for('login_page'))
+        
+    return wrap
+
+@app.route("/logout/")
+@login_required
+def logout():
+    session.clear()
+    #flash("You have been logged out!")
+    gc.collect()
+    return redirect(url_for('index'))
+
+if __name__=='__main__':
+    app.run()

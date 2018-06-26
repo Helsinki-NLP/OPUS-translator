@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block content %}
+<body>
+  <div class="container">
+    {% if error %}
+    <span style="color: red">{{error}}</span>
+    {% endif %}
+    <h4>Please Login:</h4>
+    <br>
+    <form action="" class="form-inline" method="post">
+      <input type="text" class="form-control" placeholder = "Username" name="username" value="{{request.form.username}}">
+      <input type="password" class="form-control" placeholder = "Password" name="password" value="{{request.form.password}}">
+      <input class="btn btn-default" type="submit" value="Login">
+    </form>
+  </div>
+</body>
+{% endblock %}

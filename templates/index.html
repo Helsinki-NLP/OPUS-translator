@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+{% block content %}
+
+<body>
+  <div class="container">
+    
+    <h4>Translate</h4>
+    
+    <select id="direction">
+      <option value="en-de">en-de</option>
+      <option value="en-fr">en-fr</option>
+    </select>
+
+    <input id="sentence">
+    <button id="translate">Translate</button>
+    <br>
+    <i><span id="status"></span></i>
+    <br>
+    <span id="translation"></span>
+    <br>
+    <span style="visibility: hidden" id="source"></span>
+    <span style="visibility: hidden" id="sourcedirection"></span>
+    <br>
+    <button id="suggestionbutton" style="visibility: hidden">Suggest a better translation</button>
+    <br>
+    <span id="asksuggestion" style="visibility: hidden"></span>
+    <input id="suggestion" style="visibility: hidden">
+    <button id="suggest" style="visibility: hidden">Suggest</button>
+    
+  </div>
+</body>
+
+<script src="static/jquery-3.3.1.min.js"> </script>
+<script type="text/javascript">
+    function translate() {
+	$("#asksuggestion").css("visibility", "hidden");
+	$("#source").text("");
+	$("#suggestion").css("visibility", "hidden");
+	$("#suggestion").val("");
+	$("#suggest").css("visibility", "hidden");
+	var sentence = $("#sentence").val();
+	var direction = $("#direction").val();
+	if ($.trim(sentence) != "") {
+	    $("#status").text("Translating...");
+	    $.getJSON("https://vm1617.kaj.pouta.csc.fi/translate", {
+		sent: sentence,
+		direction: direction
+	    }, function(data) {
+		$("#suggestionbutton").css("visibility", "visible");
+		$("#asksuggestion").text('Suggest a better translation for "' + sentence + '":');
+		$("#source").text(sentence);
+		$("#sourcedirection").text(direction);
+		$("#status").text("");
+		$("#translation").text(data.result);
+	    });
+	    return false;
+	} else {
+	    $("#translation").text("");
+	    $("#suggestionbutton").css("visibility", "hidden");
+	}
+    }
+
+    $("#translate").on("click", function() {
+	translate();
+    });
+
+    $("#sentence").keyup(function(ev) {
+	if (ev.which === 13) {
+	    translate();
+	}
+    });
+
+    $("#direction").on('change', function() {
+	translate();
+    });
+
+    function suggest() {
+	$.getJSON("https://vm1617.kaj.pouta.csc.fi/suggest", {
+	    direction: $("#sourcedirection").text(),
+	    source: $("#source").text(),
+	    suggestion: $("#suggestion").val()
+	});
+	$("#asksuggestion").text("Translation added!");
+	$("#suggestion").css("visibility", "hidden");
+	$("#suggest").css("visibility", "hidden");
+    }
+
+    $("#suggest").on("click", function() {
+	suggest();
+    });
+
+    $("#suggestion").keyup(function(ev) {
+	if (ev.which === 13) {
+	    suggest();
+	}
+    });
+
+    $("#suggestionbutton").on("click", function() {
+	$("#suggestionbutton").css("visibility", "hidden");
+	$("#asksuggestion").css("visibility", "visible");
+	$("#suggestion").css("visibility", "visible");
+	$("#suggest").css("visibility", "visible");
+    });
+    
+</script>
+{% endblock %}

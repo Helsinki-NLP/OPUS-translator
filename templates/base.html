@@ -1,0 +1,46 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Translate</title>
+<style>
+ul {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    background-color: #E6E6E6;
+}
+li {
+    float: left;
+}
+#right {
+    float: right;
+}
+li a {
+    display: block;
+    color: black;
+    text-align: center;
+    padding: 14px 16px;
+    text-decoration: none;
+}
+li a:hover {
+    background-color: #D8D8D8;
+}
+</style>
+</head>
+
+<ul>
+  <li><a class="active" href="/">Home</a></li>
+  {% if session.logged_in %}
+  <li id="right"><a href="/logout">Logout</a></li>
+  <li id="right"><a>{{ session.username }}</a></li>
+  {% else %}
+  <li id="right"><a href="/login">Login</a></li>
+  <li id="right"><a href="/register">Register</a></li>
+  {% endif %}
+</ul>
+
+{% block content %}{% endblock %}
+
+</html>
