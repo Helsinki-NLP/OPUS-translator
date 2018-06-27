@@ -53,7 +53,7 @@ def suggest():
     c, conn = connection()
 
     c.execute("INSERT INTO suggestions (username, direction, source, suggestion) VALUES (%s, %s, %s, %s)",
-              (username, thwart(direction), thwart(source), thwart(suggestion)))
+              (thwart(username), thwart(direction), thwart(source), thwart(suggestion)))
     conn.commit()
     c.close()
     conn.close()

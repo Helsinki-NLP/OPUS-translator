@@ -18,17 +18,27 @@ while True:
     
     sentence = c.recv(1024)
     sentence = sentence.decode('utf-8')
-    sentence = sp.Popen(["./preprocess.sh", sentence], stdout=sp.PIPE).stdout.read().decode('utf-8').strip()
-    sentence = [sentence]
+    sentences = sp.Popen(["./split.sh", sentence], stdout=sp.PIPE).stdout.read().decode('utf-8')
+    sentences = sentences[:-1].split("\n")
+
+    result = ""
     
-    translation = libamunmt.translate(sentence)
-    translation = " ".join(translation)
+    for sentence in sentences:
+        sentence = sp.Popen(["./preprocess.sh", sentence], stdout=sp.PIPE).stdout.read().decode('utf-8').strip()
+        sentence = [sentence]
+    
+        translation = libamunmt.translate(sentence)
+        translation = " ".join(translation)
 
-    translation = translation.replace("@@ ", "")
-    translation = translation.replace("&quot;", '"')
-    translation = translation.replace("&apos;", "'")
+        translation = translation.replace("@@ ", "")
+        translation = translation.replace("&quot;", '"')
+        translation = translation.replace("&apos;", "'")
 
-    c.send(bytes(translation, 'utf-8'))
+        result = result + translation + " "
+
+    result = sp.Popen(["./postprocess.sh", result], stdout=sp.PIPE).stdout.read().decode('utf-8').strip()
+    
+    c.send(bytes(result, 'utf-8'))
 
     c.close()
     

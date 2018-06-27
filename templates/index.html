@@ -10,22 +10,26 @@
       <option value="en-de">en-de</option>
       <option value="en-fr">en-fr</option>
     </select>
-
-    <input id="sentence">
+    <br>
+    <br>
+    <textarea id="sentence" rows="4" cols="50"></textarea>
+    <br>
+    <br>
     <button id="translate">Translate</button>
     <br>
     <i><span id="status"></span></i>
     <br>
     <span id="translation"></span>
     <br>
-    <span style="visibility: hidden" id="source"></span>
-    <span style="visibility: hidden" id="sourcedirection"></span>
     <br>
     <button id="suggestionbutton" style="visibility: hidden">Suggest a better translation</button>
     <br>
     <span id="asksuggestion" style="visibility: hidden"></span>
     <input id="suggestion" style="visibility: hidden">
     <button id="suggest" style="visibility: hidden">Suggest</button>
+    <br>
+    <span style="visibility: hidden" id="source"></span>
+    <span style="visibility: hidden" id="sourcedirection"></span>
     
   </div>
 </body>
@@ -63,13 +67,13 @@
     $("#translate").on("click", function() {
 	translate();
     });
-
+    
     $("#sentence").keyup(function(ev) {
-	if (ev.which === 13) {
+	if (ev.ctrlKey && ev.which === 13) {
 	    translate();
 	}
     });
-
+    
     $("#direction").on('change', function() {
 	translate();
     });
