@@ -10,27 +10,37 @@
       <option value="en-de">en-de</option>
       <option value="en-fr">en-fr</option>
     </select>
-    <br>
-    <br>
-    <textarea id="sentence" rows="4" cols="50"></textarea>
-    <br>
-    <br>
     <button id="translate">Translate</button>
     <br>
-    <i><span id="status"></span></i>
     <br>
-    <span id="translation"></span>
+    <div overflow="hidden">
+      <div style="float: left;">
+	<textarea id="sentence" rows="4" cols="30" style="font-size: 20px"></textarea>
+      </div>
+      <div style="margin-left: 450px;">
+	<textarea id="translation" rows="4" cols="30" style="color: black; font-size: 20px;" disabled></textarea>
+      </div>
+    </div>
     <br>
     <br>
     <button id="suggestionbutton" style="visibility: hidden">Suggest a better translation</button>
     <br>
-    <span id="asksuggestion" style="visibility: hidden"></span>
-    <input id="suggestion" style="visibility: hidden">
-    <button id="suggest" style="visibility: hidden">Suggest</button>
     <br>
-    <span style="visibility: hidden" id="source"></span>
+    <div id="asksuggestion" style="visibility: hidden;" overflow="hidden">
+      <div style="float: left;">
+	<span>Source text:</span>
+	<br>
+	<textarea id="source" rows="4" cols="30" style="color: black; font-size: 20px;" disabled></textarea>
+      </div>
+      <div style="margin-left: 450px">
+	<span>Your translation:</span>
+	<br>
+	<textarea id="suggestion" rows="4" cols="30" style="font-size: 20px;"></textarea>
+      </div>
+    </div>
+    <br>
+    <button id="suggest" style="visibility: hidden">Suggest</button>
     <span style="visibility: hidden" id="sourcedirection"></span>
-    
   </div>
 </body>
 
@@ -45,16 +55,17 @@
 	var sentence = $("#sentence").val();
 	var direction = $("#direction").val();
 	if ($.trim(sentence) != "") {
-	    $("#status").text("Translating...");
+	    $("#translation").css("font-style", "italic");
+	    $("#translation").text("Translating...");
 	    $.getJSON("https://vm1617.kaj.pouta.csc.fi/translate", {
 		sent: sentence,
 		direction: direction
 	    }, function(data) {
 		$("#suggestionbutton").css("visibility", "visible");
-		$("#asksuggestion").text('Suggest a better translation for "' + sentence + '":');
-		$("#source").text(sentence);
+		$("#source").val(sentence);
 		$("#sourcedirection").text(direction);
 		$("#status").text("");
+		$("#translation").css("font-style", "normal");
 		$("#translation").text(data.result);
 	    });
 	    return false;
@@ -81,7 +92,7 @@
     function suggest() {
 	$.getJSON("https://vm1617.kaj.pouta.csc.fi/suggest", {
 	    direction: $("#sourcedirection").text(),
-	    source: $("#source").text(),
+	    source: $("#source").val(),
 	    suggestion: $("#suggestion").val()
 	});
 	$("#asksuggestion").text("Translation added!");
@@ -100,7 +111,6 @@
     });
 
     $("#suggestionbutton").on("click", function() {
-	$("#suggestionbutton").css("visibility", "hidden");
 	$("#asksuggestion").css("visibility", "visible");
 	$("#suggestion").css("visibility", "visible");
 	$("#suggest").css("visibility", "visible");
