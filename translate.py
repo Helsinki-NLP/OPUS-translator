@@ -49,7 +49,8 @@ def suggest():
     direction = request.args.get('direction', 'empty', type=str)
     source = request.args.get('source', 'empty', type=str)
     suggestion = request.args.get('suggestion', 'empty', type=str)
-
+    suggestion = suggestion[:500]
+    
     c, conn = connection()
 
     c.execute("INSERT INTO suggestions (username, direction, source, suggestion) VALUES (%s, %s, %s, %s)",

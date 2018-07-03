@@ -18,6 +18,7 @@ while True:
     
     sentence = c.recv(1024)
     sentence = sentence.decode('utf-8')
+    sentence = sentence[:500]
     sentences = sp.Popen(["./split.sh", sentence], stdout=sp.PIPE).stdout.read().decode('utf-8')
     sentences = sentences[:-1].split("\n")
 
