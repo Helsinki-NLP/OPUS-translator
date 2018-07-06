@@ -1,12 +1,12 @@
 import pymysql.cursors
 
-with open("/home/cloud-user/secrets/user") as f:
+with open("secrets/user") as f:
     user = f.read()[:-1]
 
-with open("/home/cloud-user/secrets/password") as f:
+with open("secrets/password") as f:
     password = f.read()[:-1]
 
-with open("/home/cloud-user/secrets/database") as f:
+with open("secrets/database") as f:
     db = f.read()[:-1]
 
 def connection():

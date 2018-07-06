@@ -1,5 +1,5 @@
 import sys
-with open("/home/cloud-user/secrets/marianpath") as f:
+with open("secrets/marianpath") as f:
     marianpath = f.read()[:-1]
 sys.path.append(marianpath)
 import libamunmt

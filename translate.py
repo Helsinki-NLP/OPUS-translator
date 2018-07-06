@@ -6,12 +6,16 @@ import gc
 import socket
 from dbconnect import connection
 from functools import wraps
+import sqlite3
+from sqlalchemy import create_engine
 
 app = Flask(__name__)
 
-with open("/home/cloud-user/secrets/secretkey") as f:
+with open("secrets/secretkey") as f:
     key = f.read()[:-1].encode("utf-8")
 app.secret_key = key
+
+opusapi_connection = create_engine('sqlite:///opusdata.db')
 
 @app.route('/')
 def index():
@@ -61,7 +65,64 @@ def suggest():
     gc.collect()
 
     print(username, direction, source, suggestion, timestamp)
+
+def make_sql_command(parameters, direction):
+    sql_command = "SELECT url FROM opusfile WHERE "
+    so = parameters[0][1]
+    ta = parameters[1][1]
     
+    if direction:
+        sql_command += "((source='"+so+"' AND target='"+ta+"') OR (source='"+so+\
+                       "' AND target='') OR (source='"+ta+"' AND target='')) AND "
+        parameters[0] = ("source", "#EMPTY#")
+        parameters[1] = ("target", "#EMPTY#")
+    elif ta == "#EMPTY#":
+        sql_command += "((source='"+so+"') or (target='"+so+"')) AND "
+        parameters[0] = ("source", "#EMPTY#")
+        
+    for i in parameters:
+        if i[1] != "#EMPTY#":
+            sql_command += i[0] + "='" + i[1] + "' AND "
+    sql_command = sql_command.strip().split(" ")
+    sql_command = " ".join(sql_command[:-1])
+    
+    print(sql_command)
+    return sql_command
+    
+@app.route('/opusapi/')
+def opusapi():
+    try:
+        source = request.args.get('source', '#EMPTY#', type=str)
+        target = request.args.get('target', '#EMPTY#', type=str)
+        corpus = request.args.get('corpus', '#EMPTY#', type=str)
+        preprocessing = request.args.get('preprocessing', '#EMPTY#', type=str)
+        version = request.args.get('version', '#EMPTY#', type=str)
+
+        sou_tar = [thwart(source), thwart(target)]
+        sou_tar.sort()
+
+        direction = True
+        if "#EMPTY#" in sou_tar or "" in sou_tar:
+            sou_tar.sort(reverse=True)
+            direction = False
+
+        parameters = [("source", sou_tar[0]), ("target", sou_tar[1]), ("corpus", thwart(corpus)),
+                      ("preprocessing", thwart(preprocessing)), ("version", thwart(version))]
+
+        sql_command = make_sql_command(parameters, direction)
+        if sql_command == "SELECT url FROM opusfile":
+            sql_command = sql_command + " LIMIT 10"
+
+        conn = opusapi_connection.connect()
+        query = conn.execute(sql_command)
+
+        ret = [dict(zip(tuple(query.keys()), i)) for i in query.cursor]
+
+        return jsonify(corpora=ret)
+
+    except Exception as e:
+        print(e)
+
 @app.route('/login/', methods=["GET", "POST"])
 def login_page():
     error = ''
