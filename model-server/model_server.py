@@ -5,27 +5,38 @@ sys.path.append(marianpath)
 import libamunmt
 import socket
 import subprocess as sp
+import pickle
 
-libamunmt.init("-c " + sys.argv[1])
+configFile = sys.argv[1]
+port = sys.argv[2]
+preprocess = sys.argv[3]
+postprocess = sys.argv[4]
+splitter = sys.argv[5]
+
+libamunmt.init("-c " + configFile)
 
 s = socket.socket()
-s.bind(("localhost", int(sys.argv[2])))
+s.bind(("localhost", int(port)))
 
 s.listen(5)
 
 while True:
     c, addr = s.accept()
     
-    sentence = c.recv(1024)
-    sentence = sentence.decode('utf-8')
+    data = c.recv(1024)
+    print(data)
+    sentencedata = pickle.loads(data)
+    print(sentencedata)
+    sentence = sentencedata[0]
+    language = sentencedata[1]
     sentence = sentence[:500]
-    sentences = sp.Popen(["./split.sh", sentence], stdout=sp.PIPE).stdout.read().decode('utf-8')
+    sentences = sp.Popen(["./"+splitter, sentence], stdout=sp.PIPE).stdout.read().decode('utf-8')
     sentences = sentences[:-1].split("\n")
 
     result = ""
     
     for sentence in sentences:
-        sentence = sp.Popen(["./preprocess.sh", sentence], stdout=sp.PIPE).stdout.read().decode('utf-8').strip()
+        sentence = sp.Popen(["./"+preprocess, sentence, language], stdout=sp.PIPE).stdout.read().decode('utf-8').strip()
         sentence = [sentence]
     
         translation = libamunmt.translate(sentence)
@@ -37,7 +48,7 @@ while True:
 
         result = result + translation + " "
 
-    result = sp.Popen(["./postprocess.sh", result], stdout=sp.PIPE).stdout.read().decode('utf-8').strip()
+    result = sp.Popen(["./"+postprocess, result], stdout=sp.PIPE).stdout.read().decode('utf-8').strip()
     
     c.send(bytes(result, 'utf-8'))
 

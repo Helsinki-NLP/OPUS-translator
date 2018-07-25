@@ -8,6 +8,7 @@ from dbconnect import connection
 from functools import wraps
 import sqlite3
 from sqlalchemy import create_engine
+import pickle
 
 app = Flask(__name__)
 
@@ -35,8 +36,13 @@ def translate():
         sock.connect(("localhost", 5001))
     elif direction == "en-fr":
         sock.connect(("localhost", 5002))
+    elif direction in ["da-fi", "no-fi", "sv-fi"]:
+        sock.connect(("localhost", 5003))
+    
+    sentencedata = [sent, direction[:2]]
 
-    sock.send(bytes(sent, 'utf-8'))
+    data = pickle.dumps(sentencedata)
+    sock.send(data)
     translation = sock.recv(1024)
 
     sock.close()
@@ -67,7 +73,8 @@ def suggest():
     print(username, direction, source, suggestion, timestamp)
 
 def make_sql_command(parameters, direction):
-    sql_command = "SELECT url FROM opusfile WHERE "
+    sql_command = "SELECT url, size, source, target, corpus, preprocessing, version FROM opusfile WHERE "
+    
     so = parameters[0][1]
     ta = parameters[1][1]
     
@@ -76,16 +83,29 @@ def make_sql_command(parameters, direction):
                        "' AND target='') OR (source='"+ta+"' AND target='')) AND "
         parameters[0] = ("source", "#EMPTY#")
         parameters[1] = ("target", "#EMPTY#")
-    elif ta == "#EMPTY#":
+    
+    if ta == "#EMPTY#" and so != "#EMPTY#":
         sql_command += "((source='"+so+"') or (target='"+so+"')) AND "
         parameters[0] = ("source", "#EMPTY#")
-        
+     
     for i in parameters:
         if i[1] != "#EMPTY#":
             sql_command += i[0] + "='" + i[1] + "' AND "
+
     sql_command = sql_command.strip().split(" ")
     sql_command = " ".join(sql_command[:-1])
-    
+
+    if direction and parameters[3][1] not in ["dic", "moses", "smt", "xml", "tmx", "wordalign"]:
+        sql_command += " UNION SELECT url, size, source, target, corpus, preprocessing, version FROM opusfile WHERE source='"+so+"' AND target='"+ta+"' AND "        
+        for i in parameters:
+            if i[0] == "preprocessing":
+                sql_command += "preprocessing='xml' AND "
+            elif i[1] != "#EMPTY#":
+                sql_command += i[0] + "='" + i[1] + "' AND "
+        sql_command = sql_command.strip().split(" ")
+        sql_command = " ".join(sql_command[:-1])
+
+        
     print(sql_command)
     return sql_command
     
@@ -110,8 +130,8 @@ def opusapi():
                       ("preprocessing", thwart(preprocessing)), ("version", thwart(version))]
 
         sql_command = make_sql_command(parameters, direction)
-        if sql_command == "SELECT url FROM opusfile":
-            sql_command = sql_command + " LIMIT 10"
+        #if sql_command == "SELECT url FROM opusfile":
+        #    sql_command = sql_command + " LIMIT 10"
 
         conn = opusapi_connection.connect()
         query = conn.execute(sql_command)
