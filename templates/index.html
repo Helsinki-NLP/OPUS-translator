@@ -1,7 +1,5 @@
 {% extends "base.html" %}
 {% block content %}
-
-<body>
   <div class="container">
     
     <h4>Translate</h4>
@@ -14,9 +12,8 @@
       <option value="sv-fi">sv-fi</option>
     </select>
     <button id="translate">Translate</button>
-    <br>
-    <br>
-    <div overflow="hidden">
+    <br><br>
+    <div overflow="none">
       <div style="float: left;">
 	<textarea id="sentence" maxlength="500" rows="4" cols="30" style="font-size: 20px"></textarea>
       </div>
@@ -24,12 +21,11 @@
 	<textarea id="translation" rows="4" cols="30" style="color: black; font-size: 20px;" disabled></textarea>
       </div>
     </div>
-    <br>
-    <br>
-    <button id="suggestionbutton" style="visibility: hidden">Suggest a better translation</button>
-    <br>
-    <br>
-    <div id="asksuggestion" style="visibility: hidden;" overflow="hidden">
+    <br><br>
+    <button id="suggestionbutton" style="display: none">Suggest a better translation</button>
+    <button id="reportbutton" style="display: none">Report a bad translation</button>
+    <p style="color: green"><span id="suggestionmessage"></span> <span id="reportmessage"></span><p>
+    <div id="asksuggestion" style="display: none;" overflow="none">
       <div style="float: left;">
 	<span>Source text:</span>
 	<br>
@@ -40,84 +36,20 @@
 	<br>
 	<textarea id="suggestion" maxlength="500" rows="4" cols="30" style="font-size: 20px;"></textarea>
       </div>
-    </div>
     <br>
-    <button id="suggest" style="visibility: hidden">Suggest</button>
-    <span style="visibility: hidden" id="sourcedirection"></span>
+    <button id="suggest">Submit</button>
+    <span style="display: none" id="sourcedirection"></span>
+    </div>
   </div>
-</body>
+  <div style="display: none" id="trash-div">
+    Mark the words that are rubbish or 
+    <button id="trash-sentence">Mark the whole text</button> :
+    <br><br>
+    <div id="words"></div>
+    <br><br>
+    <button id="report">Submit</button>
+  </div>
 
 <script src="static/jquery-3.3.1.min.js"> </script>
-<script type="text/javascript">
-    function translate() {
-	$("#asksuggestion").css("visibility", "hidden");
-	$("#source").text("");
-	$("#suggestion").css("visibility", "hidden");
-	$("#suggestion").val("");
-	$("#suggest").css("visibility", "hidden");
-	var sentence = $("#sentence").val();
-	var direction = $("#direction").val();
-	if ($.trim(sentence) != "") {
-	    $("#translation").css("font-style", "italic");
-	    $("#translation").text("Translating...");
-	    $.getJSON("https://vm1617.kaj.pouta.csc.fi/translate", {
-		sent: sentence,
-		direction: direction
-	    }, function(data) {
-		$("#suggestionbutton").css("visibility", "visible");
-		$("#source").val(sentence);
-		$("#sourcedirection").text(direction);
-		$("#status").text("");
-		$("#translation").css("font-style", "normal");
-		$("#translation").text(data.result);
-	    });
-	    return false;
-	} else {
-	    $("#translation").text("");
-	    $("#suggestionbutton").css("visibility", "hidden");
-	}
-    }
-
-    $("#translate").on("click", function() {
-	translate();
-    });
-    
-    $("#sentence").keyup(function(ev) {
-	if (ev.ctrlKey && ev.which === 13) {
-	    translate();
-	}
-    });
-    
-    $("#direction").on('change', function() {
-	translate();
-    });
-
-    function suggest() {
-	$.getJSON("https://vm1617.kaj.pouta.csc.fi/suggest", {
-	    direction: $("#sourcedirection").text(),
-	    source: $("#source").val(),
-	    suggestion: $("#suggestion").val()
-	});
-	$("#asksuggestion").text("Translation added!");
-	$("#suggestion").css("visibility", "hidden");
-	$("#suggest").css("visibility", "hidden");
-    }
-
-    $("#suggest").on("click", function() {
-	suggest();
-    });
-
-    $("#suggestion").keyup(function(ev) {
-	if (ev.which === 13) {
-	    suggest();
-	}
-    });
-
-    $("#suggestionbutton").on("click", function() {
-	$("#asksuggestion").css("visibility", "visible");
-	$("#suggestion").css("visibility", "visible");
-	$("#suggest").css("visibility", "visible");
-    });
-    
-</script>
+<script type="text/javascript" src="{{ url_for('static', filename='functionality.js') }}"> </script>
 {% endblock %}

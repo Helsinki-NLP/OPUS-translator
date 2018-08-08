@@ -9,4 +9,4 @@ echo $1 |\
     $PATHTO/normalize-punctuation.perl -l $2 |\
     $PATHTO/tokenizer.perl -no-escape -l $2 |\
     sed 's/  */ /g;s/^ *//g;s/ *$$//g' |\
-    subword-nmt apply-bpe -c /home/cloud-user/models/bpe_codes/bpe50000.train.sv
+    subword-nmt apply-bpe -c $PATHPBE

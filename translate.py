@@ -70,10 +70,33 @@ def suggest():
     conn.close()
     gc.collect()
 
-    print(username, direction, source, suggestion, timestamp)
+    print(username, direction, source, suggestion)
 
+@app.route('/report/')
+def report():
+    if session:
+        username = session['username']
+    else:
+        username = request.remote_addr
+
+    direction = request.args.get('direction', 'empty', type=str)
+    source = request.args.get('source', 'empty', type=str)
+    sentence = request.args.get('sentence', 'empty', type=str)
+
+    c, conn = connection()
+
+    c.execute("INSERT INTO rubbish (username, direction, source, sentence) VALUES (%s, %s, %s, %s)",
+              (thwart(username), thwart(direction), thwart(source), thwart(sentence)))
+    conn.commit()
+    c.close()
+    conn.close()
+    gc.collect()
+
+    print(username, direction, source, suggestion)
+    
+    
 def make_sql_command(parameters, direction):
-    sql_command = "SELECT url, size, source, target, corpus, preprocessing, version FROM opusfile WHERE "
+    sql_command = "SELECT * FROM opusfile WHERE "
     
     so = parameters[0][1]
     ta = parameters[1][1]
