@@ -6,7 +6,7 @@ function translate() {
     $("#suggestion").val("");
     $("#trash-div").css("display", "none");
     var sentence = $("#sentence").val();
-    var direction = $("#direction").val();
+    let direction = $("#direction").val();
     if ($.trim(sentence) != "") {
 	$("#translation").css("font-style", "italic");
 	$("#translation").text("Translating...");
@@ -81,7 +81,7 @@ $("#reportbutton").on("click", function() {
 });
 
 $("#report").on("click", function() {
-    var sentence = coloredToBracketed();
+    let sentence = coloredToBracketed();
     console.log(sentence);
     $.getJSON("https://vm1617.kaj.pouta.csc.fi/report", {
 	direction: $("#sourcedirection").text(),
@@ -93,7 +93,7 @@ $("#report").on("click", function() {
     $("#reportbutton").css("display", "none");
 });
     
-var isDown = false;
+let isDown = false;
 $(document).mousedown(function() {
     isDown = true;
 })
@@ -103,11 +103,11 @@ $(document).mouseup(function() {
 
 function trash() {
     $("#words").html("");
-    var buttons = 0;
+    let buttons = 0;
     words = $("#translation").val().split(" ");
     $.each(words, function(i, val) {
 
-	var valid = "word" + buttons.toString();
+	let valid = "word" + buttons.toString();
 	buttons += 1;
 
 	createButton(val, valid);
@@ -123,11 +123,20 @@ function trash() {
 }
 
 function createButton(word, wordid) {
-    $("#words").append('<button id="'+wordid+'-word" class="word-button" style="border: none; padding: 0; font-size: 20px;">'+word+'</button> ');
+    let color = $("body").css("background-color");
+    word = word.split("\n");
+    if (word[word.length-1] != "") {
+	for (let i=0; i<word.length; i++) {
+	    if (word[i] == "") {
+		$("#words").append("<br>");
+	    }
+	}
+	$("#words").append('<button id="'+wordid+'-word" class="word-button" style="border: none; padding: 0; margin: 0px 3px; font-size: 20px; background-color: '+color+';">'+word[word.length-1]+'</button>');
+    }
 }
 
 function changeColor(word) {
-    color = $("#"+word+"-word").css("color")
+    let color = $("#"+word+"-word").css("color")
     if (color == "rgb(255, 0, 0)") {
 	$("#"+word+"-word").css("color", "black");
     } else {
@@ -136,20 +145,22 @@ function changeColor(word) {
 }
 
 $("#trash-sentence").on("click", function() {
-    var color = "red";
-    if ($("#word0-word").css("color") == "rgb(255, 0, 0)") {
-	color = "black";
-    }
+    let color = "black";
+    $(".word-button").each(function(index) {
+	if ($(this).css("color") != "rgb(255, 0, 0)") {
+	    color = "red";
+	}
+    });
     $(".word-button").each(function(index) {
 	$(this).css("color", color);
     });
 });
 
 function coloredToBracketed() {
-    var sentence = "";
-    var prevRed = false;
+    let sentence = "";
+    let prevRed = false;
     $(".word-button").each(function(index) {
-	var color = $(this).css("color");
+	let color = $(this).css("color");
 	if (color == "rgb(255, 0, 0)") {
 	    if (!prevRed) {
 		sentence += "<rubbish>";

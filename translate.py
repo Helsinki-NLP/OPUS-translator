@@ -38,8 +38,10 @@ def translate():
         sock.connect(("localhost", 5002))
     elif direction in ["da-fi", "no-fi", "sv-fi"]:
         sock.connect(("localhost", 5003))
+    elif direction in ["fi-da", "fi-no", "fi-sv"]:
+        sock.connect(("localhost", 5004))
     
-    sentencedata = [sent, direction[:2]]
+    sentencedata = [sent, direction[:2], direction[-2:]]
 
     data = pickle.dumps(sentencedata)
     sock.send(data)
@@ -92,7 +94,7 @@ def report():
     conn.close()
     gc.collect()
 
-    print(username, direction, source, suggestion)
+    print(username, direction, source, sentence)
     
     
 def make_sql_command(parameters, direction):

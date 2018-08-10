@@ -24,32 +24,47 @@ while True:
     c, addr = s.accept()
     
     data = c.recv(1024)
-    print(data)
+
     sentencedata = pickle.loads(data)
-    print(sentencedata)
+
     sentence = sentencedata[0]
-    language = sentencedata[1]
+    sourcelan = sentencedata[1]
+    targetlan = sentencedata[2]
     sentence = sentence[:500]
-    sentences = sp.Popen(["./"+splitter, sentence], stdout=sp.PIPE).stdout.read().decode('utf-8')
-    sentences = sentences[:-1].split("\n")
 
     result = ""
-    
-    for sentence in sentences:
-        sentence = sp.Popen(["./"+preprocess, sentence, language], stdout=sp.PIPE).stdout.read().decode('utf-8').strip()
-        sentence = [sentence]
-    
-        translation = libamunmt.translate(sentence)
-        translation = " ".join(translation)
 
-        translation = translation.replace("@@ ", "")
-        translation = translation.replace("&quot;", '"')
-        translation = translation.replace("&apos;", "'")
+    paragraphs = sentence.split("\n")
 
-        result = result + translation + " "
+    for paragraph in paragraphs:
 
-    result = sp.Popen(["./"+postprocess, result], stdout=sp.PIPE).stdout.read().decode('utf-8').strip()
-    
+        if paragraph.strip() == "":
+            result += "\n"
+            continue
+        
+        sentences = sp.Popen(["./"+splitter, paragraph], stdout=sp.PIPE).stdout.read().decode('utf-8')
+        sentences = sentences[:-1].split("\n")
+
+        for sentence in sentences:
+            sentence = sp.Popen(["./"+preprocess, sentence, sourcelan], stdout=sp.PIPE).stdout.read().decode('utf-8').strip()
+
+            if sourcelan == "fi" and targetlan in ["da", "no", "sv"]:
+                sentence = ">>"+targetlan+"<< "+sentence
+            
+            sentence = [sentence]
+            translation = libamunmt.translate(sentence)
+            translation = " ".join(translation)
+
+            translation = translation.replace("@@ ", "")
+            translation = translation.replace("&quot;", '"')
+            translation = translation.replace("&apos;", "'")
+            translation = sp.Popen(["./"+postprocess, translation], stdout=sp.PIPE).stdout.read().decode('utf-8').strip()
+
+            result = result + translation + " "
+
+        result += "\n"
+
+    result = result[:-1]
     c.send(bytes(result, 'utf-8'))
 
     c.close()

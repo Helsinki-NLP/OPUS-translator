@@ -5,17 +5,22 @@
     <h4>Translate</h4>
     
     <select id="direction">
-      <option value="en-de">en-de</option>
+      <!--
+	  <option value="en-de">en-de</option>
       <option value="en-fr">en-fr</option>
       <option value="da-fi">da-fi</option>
       <option value="no-fi">no-fi</option>
-      <option value="sv-fi">sv-fi</option>
+      -->
+      <option value="sv-fi">da/no/sv-fi</option>
+      <option value="fi-da">fi-da</option>
+      <option value="fi-no">fi-no</option>
+      <option value="fi-sv">fi-sv</option>
     </select>
     <button id="translate">Translate</button>
     <br><br>
     <div overflow="none">
       <div style="float: left;">
-	<textarea id="sentence" maxlength="500" rows="4" cols="30" style="font-size: 20px"></textarea>
+	<textarea id="sentence" maxlength="500" rows="4" cols="30" style="font-size: 20px" autofocus></textarea>
       </div>
       <div style="margin-left: 450px;">
 	<textarea id="translation" rows="4" cols="30" style="color: black; font-size: 20px;" disabled></textarea>
