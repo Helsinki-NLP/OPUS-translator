@@ -48,7 +48,7 @@ def translate():
     translation = sock.recv(1024)
 
     sock.close()
-    
+
     return jsonify(result=translation.decode('utf-8'))
 
 @app.route('/suggest/')
@@ -72,7 +72,6 @@ def suggest():
     conn.close()
     gc.collect()
 
-    print(username, direction, source, suggestion)
 
 @app.route('/report/')
 def report():
@@ -94,8 +93,6 @@ def report():
     conn.close()
     gc.collect()
 
-    print(username, direction, source, sentence)
-    
     
 def make_sql_command(parameters, direction):
     sql_command = "SELECT * FROM opusfile WHERE "

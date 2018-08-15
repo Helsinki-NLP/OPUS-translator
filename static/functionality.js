@@ -5,6 +5,9 @@ function translate() {
     $("#reportmessage").text("");
     $("#suggestion").val("");
     $("#trash-div").css("display", "none");
+    $("#suggestionbutton").css("display", "none");
+    $("#reportbutton").css("display", "none");
+
     var sentence = $("#sentence").val();
     let direction = $("#direction").val();
     if ($.trim(sentence) != "") {
@@ -25,8 +28,6 @@ function translate() {
 	return false;
     } else {
 	$("#translation").text("");
-	$("#suggestionbutton").css("display", "none");
-	$("#reportbutton").css("display", "none");
     }
 }
 
@@ -69,6 +70,7 @@ $("#suggestionbutton").on("click", function() {
     if ($("#suggestionmessage").text()=="") {
 	$("#trash-div").css("display", "none");
 	$("#asksuggestion").css("display", "block");
+	$("#suggestion").val($("#translation").val());
     }
 });
 
@@ -82,7 +84,6 @@ $("#reportbutton").on("click", function() {
 
 $("#report").on("click", function() {
     let sentence = coloredToBracketed();
-    console.log(sentence);
     $.getJSON("https://vm1617.kaj.pouta.csc.fi/report", {
 	direction: $("#sourcedirection").text(),
 	source: $("#source").val(),
@@ -104,7 +105,7 @@ $(document).mouseup(function() {
 function trash() {
     $("#words").html("");
     let buttons = 0;
-    words = $("#translation").val().split(" ");
+    words = $("#translation").text().split(" ");
     $.each(words, function(i, val) {
 
 	let valid = "word" + buttons.toString();
