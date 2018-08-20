@@ -1,6 +1,6 @@
 # HelTran
 
-HelTran is an online translation demonstrator. HelTran is an [Flask](http://flask.pocoo.org/) application that serves translation models online. The translation models are run on [Marian NMT](https://marian-nmt.github.io/).
+HelTran is an online translation demonstrator. HelTran is a [Flask](http://flask.pocoo.org/) application that serves translation models online. The translation models are run on [Marian NMT](https://marian-nmt.github.io/).
 
 ## How to deploy HelTran
 
@@ -15,7 +15,7 @@ The following only works if you have access to project 2000661.
 
 #### Launch an instance
 
-Launch instance from "translation_snapshot2" snapshot.
+Launch an instance from "translation_snapshot2" snapshot.
 
 In order to have enough memory (4G) to run two translation models reliably, use "standard.medium" flavor.
 
@@ -27,8 +27,8 @@ Connect to you instance and go to Apache configuration file at `/etc/apache2/sit
 
 Change `ServerName` to your server name or ip-address.
 
-If you want to use secure connection, you need to set up an SSL certificate. Secure connection is required if you want keep usernames and password safe, when users are registering or logging in. [Let's Encrypt](https://letsencrypt.org/) offers free SSL certificates.
-If you have an SSL certificate, replace `SSLCertificateFile` and `SSLCertigicateKeyFile`, with your files.
+If you want to use secure connection, you need to set up an SSL certificate. Secure connection is required if you want to keep usernames and passwords safe, when users are registering or logging in. [Let's Encrypt](https://letsencrypt.org/) offers free SSL certificates.
+If you have an SSL certificate, replace `SSLCertificateFile` and `SSLCertigicateKeyFile` with your files.
 
 If you are not worried about usernames and passwords, you can set up the server without a secure connection. In this case, replace the contents of the configuration file with:
 
@@ -55,6 +55,8 @@ NameVirtualHost *:80
 </VirtualHost>
     
 ```
+
+Remember to change `<your_server_name_or_ip-address>` in the configuration file.
 
 Restart apache server with:
 
@@ -84,7 +86,7 @@ To work with new translation models, first:
 cd ~/translation-demo/model-server
 ```
 
-To run a new translation model in the background and redirect errors to <log-file>, run:
+To run a new translation model in the background and redirect errors to `<log-file>`, run:
 
 ```
 python3 model_server.py <model_config_file> <port> <preprocess_script> <postprocess_script> <sentence_splitter_script> > <log_file> 2>&1 &
@@ -98,9 +100,9 @@ python3 model_server.py danosv-fi-config.yml 5003 preprocess_danosv.sh postproce
 
 **There are currently a couple of hardcoded things that you need to change, if you use different models than the ones that are currently on the virtual machine:**
 
-In `~/translation-demo/templates/index.html` under the select tag on line 7, change the option values and names to correspond with your translation directions.
+In `~/translation-demo/templates/index.html` under the `<select>` tag on line 7, change the option values and names to correspond with your translation directions.
 
-In `~/translation-demo/translate.py` on line 35 onwards, there are if clauses that tie the translation directions from `index.html` to translation model server ports.Add a clause, where your option value from `index.html` is tied to the port where set serve your translation model with `model_server.py`:
+In `~/translation-demo/translate.py` on line 35 onwards, there are if clauses that tie the translation directions from `index.html` to translation model server ports. Add a clause, where your option value from `index.html` is tied to the port where your translation model is served with `model_server.py`:
 
 ```
 elif direction == <value_from_index.html>:
