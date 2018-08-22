@@ -3,12 +3,13 @@ from wtforms import Form, BooleanField, TextField, PasswordField, validators
 from passlib.hash import sha256_crypt
 from pymysql import escape_string as thwart
 import gc
-import socket
 from dbconnect import connection
 from functools import wraps
 import sqlite3
 from sqlalchemy import create_engine
 import pickle
+from websocket import create_connection
+import subprocess as sp
 
 app = Flask(__name__)
 
@@ -24,32 +25,55 @@ def index():
 
 @app.route('/translate')
 def translate():
-    sock = socket.socket()
+    text = request.args.get('sent', 'empty', type=str)
 
-    sent = request.args.get('sent', 'empty', type=str)
-    if sent.strip() == "":
-        sock.close()
+    if text.strip() == "":
         return jsonify(result="")
-    
+
+    text = text[:500]
+
     direction = request.args.get('direction', 'empty', type=str)
-    if direction == "en-de":
-        sock.connect(("localhost", 5001))
-    elif direction == "en-fr":
-        sock.connect(("localhost", 5002))
-    elif direction in ["da-fi", "no-fi", "sv-fi"]:
-        sock.connect(("localhost", 5003))
+
+    if direction in ["da-fi", "no-fi", "sv-fi"]:
+        ws = create_connection("ws://localhost:{}/translate".format(5003))
+        preprocess = "preprocess_danosv.sh"
     elif direction in ["fi-da", "fi-no", "fi-sv"]:
-        sock.connect(("localhost", 5004))
+        ws = create_connection("ws://localhost:{}/translate".format(5004))
+        preprocess = "preprocess_fi.sh"
+
+    sourcelan = direction[:2]
+    targetlan = direction[-2:]
+
+    paragraphs = text.split("\n")
+
+    translation = ""
     
-    sentencedata = [sent, direction[:2], direction[-2:]]
+    for paragraph in paragraphs:
+        if paragraph.strip() == "":
+            translation += "\n"
+            continue
 
-    data = pickle.dumps(sentencedata)
-    sock.send(data)
-    translation = sock.recv(1024)
+        sentences = sp.Popen(["./scripts/split.sh", paragraph], stdout=sp.PIPE).stdout.read().decode("utf-8")
+        sentences = sentences[:-1].split("\n")
+    
+        for sentence in sentences:
+            sentence = sp.Popen(["./scripts/"+preprocess, sentence, sourcelan], stdout=sp.PIPE).stdout.read().decode("utf-8").strip()
+            if sourcelan == "fi" and targetlan in ["da", "no", "sv"]:
+                sentence = ">>"+targetlan+"<< "+sentence
 
-    sock.close()
+            ws.send(sentence)
+            translation_temp = ws.recv().strip()
+            translation_temp = sp.Popen(["./scripts/postprocess.sh", translation_temp], stdout=sp.PIPE).stdout.read().decode("utf-8").strip()
 
-    return jsonify(result=translation.decode('utf-8'))
+            translation = translation + translation_temp + " "
+        translation = translation[:-1] + "\n"
+
+    ws.close()
+
+    translation = translation[:-1]
+
+
+    return jsonify(result=translation)
 
 @app.route('/suggest/')
 def suggest():
@@ -133,37 +157,33 @@ def make_sql_command(parameters, direction):
     
 @app.route('/opusapi/')
 def opusapi():
-    try:
-        source = request.args.get('source', '#EMPTY#', type=str)
-        target = request.args.get('target', '#EMPTY#', type=str)
-        corpus = request.args.get('corpus', '#EMPTY#', type=str)
-        preprocessing = request.args.get('preprocessing', '#EMPTY#', type=str)
-        version = request.args.get('version', '#EMPTY#', type=str)
+    source = request.args.get('source', '#EMPTY#', type=str)
+    target = request.args.get('target', '#EMPTY#', type=str)
+    corpus = request.args.get('corpus', '#EMPTY#', type=str)
+    preprocessing = request.args.get('preprocessing', '#EMPTY#', type=str)
+    version = request.args.get('version', '#EMPTY#', type=str)
 
-        sou_tar = [thwart(source), thwart(target)]
-        sou_tar.sort()
+    sou_tar = [thwart(source), thwart(target)]
+    sou_tar.sort()
 
-        direction = True
-        if "#EMPTY#" in sou_tar or "" in sou_tar:
-            sou_tar.sort(reverse=True)
-            direction = False
+    direction = True
+    if "#EMPTY#" in sou_tar or "" in sou_tar:
+        sou_tar.sort(reverse=True)
+        direction = False
 
-        parameters = [("source", sou_tar[0]), ("target", sou_tar[1]), ("corpus", thwart(corpus)),
-                      ("preprocessing", thwart(preprocessing)), ("version", thwart(version))]
+    parameters = [("source", sou_tar[0]), ("target", sou_tar[1]), ("corpus", thwart(corpus)),
+                  ("preprocessing", thwart(preprocessing)), ("version", thwart(version))]
 
-        sql_command = make_sql_command(parameters, direction)
-        #if sql_command == "SELECT url FROM opusfile":
-        #    sql_command = sql_command + " LIMIT 10"
+    sql_command = make_sql_command(parameters, direction)
+    #if sql_command == "SELECT url FROM opusfile":
+    #    sql_command = sql_command + " LIMIT 10"
 
-        conn = opusapi_connection.connect()
-        query = conn.execute(sql_command)
+    conn = opusapi_connection.connect()
+    query = conn.execute(sql_command)
 
-        ret = [dict(zip(tuple(query.keys()), i)) for i in query.cursor]
+    ret = [dict(zip(tuple(query.keys()), i)) for i in query.cursor]
 
-        return jsonify(corpora=ret)
-
-    except Exception as e:
-        print(e)
+    return jsonify(corpora=ret)
 
 @app.route('/login/', methods=["GET", "POST"])
 def login_page():
