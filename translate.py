@@ -10,8 +10,18 @@ from sqlalchemy import create_engine
 import pickle
 from websocket import create_connection
 import subprocess as sp
+import os
+from werkzeug.utils import secure_filename
+import time
+
+import traceback
+
+UPLOAD_FOLDER = "/var/www/uploads"
+ALLOWED_EXTENSIONS = set(['txt', 'xml', 'html', 'tar'])
 
 app = Flask(__name__)
+
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 with open("secrets/secretkey") as f:
     key = f.read()[:-1].encode("utf-8")
@@ -19,10 +29,61 @@ app.secret_key = key
 
 opusapi_connection = create_engine('sqlite:///opusdata.db')
 
+letsmt_connect = "curl --silent --show-error --cacert /var/www/cert/vm1637.kaj.pouta.csc.fi/ca.crt --cert /var/www/cert/vm1637.kaj.pouta.csc.fi/user/certificates/developers@localhost.crt:letsmt --key /var/www/cert/vm1637.kaj.pouta.csc.fi/user/keys/developers@localhost.key"
+
+letsmt_url = "https://vm1637.kaj.pouta.csc.fi:443/ws"
+
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
 @app.route('/')
 def index():
     return render_template("index.html")
 
+@app.route('/letsmtui', methods=['GET', 'POST'])
+def letsmtui():
+    if request.method == 'POST':
+        if 'file' not in request.files:
+            flash('No file part')
+            return redirect(request.url)
+        file = request.files['file']
+        if file.filename == '':
+            flash('No selected file')
+            return redirect(request.url)
+        if file and allowed_file(file.filename):
+            filename = secure_filename(file.filename)
+            timename = str(time.time())+"###TIME###"+filename
+            directory = request.form['directory']
+            file.save(os.path.join(app.config['UPLOAD_FOLDER'], timename))
+            if session:
+                username = session['username']
+            try:
+                command = letsmt_connect.split() + ["-X", "PUT", letsmt_url + directory + "?uid=" + username, "--form", "payload=@/var/www/uploads/"+timename]
+                ret = sp.Popen(command , stdout=sp.PIPE).stdout.read().decode("utf-8")
+            except:
+                traceback.print_exc()
+            os.remove("/var/www/uploads/" + timename)
+            flash("Uploaded file " + filename + " to " + directory)
+            return redirect(url_for('letsmtui', directory=directory))
+    return render_template("letsmt.html")
+
+@app.route('/letsmt')
+def letsmt():
+    try:
+        method = request.args.get("method", "GET", type=str)
+        command = request.args.get("command", "/storage", type=str)
+        action = request.args.get("action", "", type=str)
+        payload = request.args.get("payload", "", type=str)
+        if payload != "":
+            payload = " --form payload=@/var/www/uploads/" + payload
+        username = ""
+        if session:
+            username = session['username']
+        ret = sp.Popen(letsmt_connect.split() + ["-X", method, letsmt_url+command+"?uid=" + username + action + payload], stdout=sp.PIPE).stdout.read().decode("utf-8")
+        return jsonify(result=ret)
+    except Exception:
+        traceback.print_exc()
+        
 @app.route('/translate')
 def translate():
     text = request.args.get('sent', 'empty', type=str)
@@ -200,7 +261,7 @@ def login_page():
                 session['logged_in'] = True
                 session['username'] = request.form['username']
                 
-                #flash("You are now logged in")
+                flash("You are now logged in")
                 return redirect(url_for("index"))
             
             else:
@@ -211,7 +272,7 @@ def login_page():
         return render_template("login.html", error=error)
 
     except Exception as e:
-        #flash(e)
+        flash(e)
         error = "Invalid credentials, try again."
         return render_template("login.html", error=error)
 
@@ -246,7 +307,7 @@ def register_page():
                          (thwart(username), thwart(password), thwart(email), thwart("translate")))
 
                 conn.commit()
-                #flash("Thanks for registering!")
+                flash("Thanks for registering!")
                 c.close()
                 conn.close()
                 gc.collect()
@@ -267,7 +328,7 @@ def login_required(f):
         if 'logged_in' in session:
             return f(*args, **kwargs)
         else:
-            #flash("You need to login first")
+            flash("You need to login first")
             return redirect(url_for('login_page'))
         
     return wrap
@@ -276,7 +337,7 @@ def login_required(f):
 @login_required
 def logout():
     session.clear()
-    #flash("You have been logged out!")
+    flash("You have been logged out!")
     gc.collect()
     return redirect(url_for('index'))
 

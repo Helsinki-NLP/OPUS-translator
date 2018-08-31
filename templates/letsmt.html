@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div style="padding: 10px">
+  <select id="method">
+    <option value="GET">GET</option>
+    <option value="POST">POST</option>
+    <option value="PUT">PUT</option>
+    <option value="DELETE">DELETE</option>
+  </select>
+
+  <input style="width: 30%" id="command" value="/storage">
+
+  <select id="action">
+    <option value="">action=none</option>
+    <option value="&action=cat">action=cat</option>
+    <option value="&action=download&archive=0">action=download</option>
+    <!--<option value="&action=import">action=import</option>-->
+  </select>
+
+  <button id="go">Go</button>
+  <button id="showupload">Show upload form</button>
+
+  <div id="fileupload" style="padding: 10px; display: none;">
+    <form method="post" enctype="multipart/form-data">
+      <input id="file" type="file" name="file">
+      <input id="directory" type="text" name="directory" style="width: 30%">
+      <input type="submit" value="Upload">
+    </form>
+  </div>
+
+  <div style="padding: 10px">
+    <button id="back">Back</button>
+    <div style="padding: 10px" id="result"></div>
+    <pre style="padding: 10px" id="xmlresult"></div>
+  </div>
+  
+</div>
+
+<script src="static/jquery-3.3.1.min.js"> </script>
+<script type="text/javascript" src="{{ url_for('static', filename='letsmt.js') }}"> </script>
+{% endblock %}

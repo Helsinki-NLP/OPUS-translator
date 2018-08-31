@@ -8,8 +8,8 @@
 
 <body>
   
-  <ul>
-    <li><a class="active" href="/">Home</a></li>
+  <ul id="navul">
+    <li id="left"><a class="active" href="/">Home</a></li>
     {% if session.logged_in %}
     <li id="right"><a href="/logout">Logout</a></li>
     <li id="right"><a>{{ session.username }}</a></li>
@@ -18,6 +18,17 @@
     <li id="right"><a href="/register">Register</a></li>
     {% endif %}
   </ul>
+
+  {% with messages = get_flashed_messages() %}
+  {% if messages %}
+  <ul class="flashes">
+    {% for message in messages %}
+    <li>{{ message }}</li>
+    {% endfor %}
+  </ul>
+  {% endif %}
+  {% endwith %}
+  
 {% block content %}{% endblock %}
 </body>
 </html>

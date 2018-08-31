@@ -1,11 +1,11 @@
-ul {
+#navul {
     list-style-type: none;
     margin: 0;
     padding: 0;
     overflow: hidden;
     background-color: #E6E6E6;
 }
-li {
+#left {
     float: left;
 }
 #right {
@@ -20,4 +20,12 @@ li a {
 }
 li a:hover {
     background-color: #D8D8D8;
+}
+a.button {
+    -webkit-appearance: button;
+    -moz-appearance: button;
+    appearance: button;
+
+    text-decoration: none;
+    color: initial;
 }
