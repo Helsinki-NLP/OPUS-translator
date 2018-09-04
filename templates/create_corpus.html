@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h3>Create Corpus</h3>
+
+<form id="corpus_form" method="post" style="padding: 20px">
+  <table style="float: left; padding-right: 20px">
+    <tr>
+      <td>name:</td>
+      <td><input type="text" name="name"></td>
+    </tr>
+    <tr>
+      <td>user group:</td>
+      <td>
+	<select name="group" form="corpus_form">
+	  {% for group in groups %}
+	  <option value="{{ group }}">{{ group }}</option>
+	  {% endfor %}
+	</select>
+      </td>
+    </tr>
+    <tr>
+      <td>domain:</td>
+      <td><input type="text" name="domain"></td>
+    </tr>
+    <tr>
+      <td>origin: </td>
+      <td><input type="text" name="origin"></td>
+    </tr>
+    <tr>
+      <td>private: </td>
+      <td><input type="checkbox" name="private"></td>
+    </tr>
+    <tr>
+      <td></td>
+      <td><input type="submit" name="submit" value="Create"></td>
+    </tr>
+  </table>
+  <span style="float: left; padding-right: 10px">description:</span>
+  <textarea style="float: left" rows="10" cols="40" name="description"></textarea>
+</form>
+
+{% endblock %}

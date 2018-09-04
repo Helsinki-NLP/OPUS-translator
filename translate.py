@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, jsonify, redirect, url_for, flash, session
+from flask import Flask, render_template, request, jsonify, redirect, url_for, flash, session, send_file
 from wtforms import Form, BooleanField, TextField, PasswordField, validators
 from passlib.hash import sha256_crypt
 from pymysql import escape_string as thwart
@@ -13,6 +13,7 @@ import subprocess as sp
 import os
 from werkzeug.utils import secure_filename
 import time
+import xml_parser
 
 import traceback
 
@@ -33,12 +34,83 @@ letsmt_connect = "curl --silent --show-error --cacert /var/www/cert/vm1637.kaj.p
 
 letsmt_url = "https://vm1637.kaj.pouta.csc.fi:443/ws"
 
+previous_download = ""
+
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 @app.route('/')
 def index():
     return render_template("index.html")
+
+@app.route('/frontpage')
+def frontpage():
+    if session:
+        username = session['username']
+            
+    command = letsmt_connect.split() + ["-X", "GET", letsmt_url + "/storage?uid=" + username]
+    corporaXml = sp.Popen(command, stdout=sp.PIPE).stdout.read().decode("utf-8")
+    parser = xml_parser.XmlParser(corporaXml.split("\n"))
+    corpora = parser.corporaForUser(username)
+
+    command = letsmt_connect.split() + ["-X", "GET", letsmt_url + "/group?uid=" + username]
+    groupsXml = sp.Popen(command, stdout=sp.PIPE).stdout.read().decode("utf-8")
+    parser = xml_parser.XmlParser(groupsXml.split("\n"))
+    groups = parser.groupsForUser(username)
+
+    return render_template("frontpage.html", corpora=corpora, groups=groups)
+
+@app.route('/create_corpus', methods=["GET", "POST"])
+def create_corpus():
+    if session:
+        username = session['username']
+
+    if request.method == "POST":
+        corpusName = request.form["name"]
+        command = letsmt_connect.split() + ["-X", "PUT", letsmt_url + "/storage/" + corpusName + "?uid=" + username]
+        response = sp.Popen(command, stdout=sp.PIPE).stdout.read().decode("utf-8")
+        
+        flash('Corpus "' + corpusName + '" created!')
+        return redirect(url_for('frontpage'))
+
+    command = letsmt_connect.split() + ["-X", "GET", letsmt_url + "/group?uid=" + username]
+    groupsXml = sp.Popen(command, stdout=sp.PIPE).stdout.read().decode("utf-8")
+    parser = xml_parser.XmlParser(groupsXml.split("\n"))
+    groups = parser.groupsForUser(username)            
+    
+    return render_template("create_corpus.html", groups=groups)
+
+@app.route('/create_group', methods=["GET", "POST"])
+def create_group():
+    if session:
+        username = session['username']
+    if request.method == "POST":
+        groupName = request.form["name"]
+        command = letsmt_connect.split() + ["-X", "POST", letsmt_url + "/group/" + groupName + "?uid=" + username]
+        response = sp.Popen(command, stdout=sp.PIPE).stdout.read().decode("utf-8")
+        print(response)
+        flash('Group "' + groupName + '" created!')
+        return redirect(url_for('frontpage'))
+        
+    return render_template("create_group.html")
+
+@app.route('/download/<filename>')
+def download(filename):
+    try:
+        if session:
+            username = session['username']
+        command = letsmt_connect.split() + ["-X", "GET", letsmt_url + "/storage/mikkoslot/mikkotest/xml/en/html/" + filename + "?uid=" + username + "&action=download&archive=0"]
+        ret = sp.Popen(command, stdout=sp.PIPE).stdout.read().decode("utf-8")
+        timename = str(time.time())+"###TIME###"+filename
+        global previous_download
+        if previous_download != "":
+            os.remove("/var/www/downloads/"+previous_download)
+        previous_download = timename
+        with open("/var/www/downloads/"+timename, "w") as f:
+            f.write(ret)
+        return send_file("/var/www/downloads/"+timename, attachment_filename=filename)
+    except:
+        traceback.print_exc()
 
 @app.route('/letsmtui', methods=['GET', 'POST'])
 def letsmtui():

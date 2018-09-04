@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div>
+  <div style="padding: 20px; float: left">
+    <b>My corpora</b>
+    <form style="display: inline" action="/create_corpus"><input type="submit" value="+"></form>
+    <ul id="corpora">
+      {% for corpus in corpora %}
+      <li>{{ corpus }}</li>
+      {% endfor %}
+  </div>
+  <div style="padding: 20px; float: left">
+    <b>My groups</b>
+    <form style="display: inline" action="/create_group"><input type="submit" value="+"></form>
+    <ul id="groups">
+      {% for group in groups %}
+      <li>{{ group }}</li>
+      {% endfor %}
+  </div>
+  <div style="padding: 20px; float: right">Search corpus: <input></div>
+</div>
+
+<script src="static/jquery-3.3.1.min.js"> </script>
+<script type="text/javascript" src="{{ url_for('static', filename='opus_interface.js') }}"> </script>
+{% endblock %}

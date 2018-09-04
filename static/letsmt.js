@@ -1,6 +1,7 @@
-let paramdir = window.location.search.substr(1).replace(/\%2F/g, "/").replace("directory=", "")
+let paramdir = window.location.search.replace(/\%2F/g, "/").replace("?directory=", "")
 if (paramdir != "") {
     $("#command").val(paramdir);
+    go();
 }
 
 function go() {

@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h3>Create group</h3>
+
+<form id="group_form" method="post" style="padding: 20px">
+  <table style="float: left; padding-right: 20px">
+    <tr>
+      <td>name:</td>
+      <td><input type="text" name="name"></td>
+    </tr>
+    <tr>
+      <td>members:</td>
+      <td><textarea style="float: left" rows="10" cols="40" name="members"></textarea>
+    </tr>
+    <tr>
+      <td></td>
+      <td><input type="submit" name="submit" value="Create"></td>
+    </tr>
+  </table>
+  <span style="float: left; padding-right: 10px">description:</span>
+  <textarea style="float: left" rows="10" cols="40" name="description"></textarea>
+</form>
+
+{% endblock %}
