@@ -53,38 +53,38 @@ class XmlParser:
                 corpora.append(self.chara)
         return corpora
             
-'''         
+    def branchesForCorpus(self, corpus):
+        branches = []
+        for line in self.xmlData:
+            info = self.parseLine(line)
+            if self.start == "name" and self.end == "name":
+                branches.append(self.chara)
+        return branches
+
+'''
 xmlData = """<letsmt-ws version="55">
-  <list path="/">
-    <entry kind="slot">
-      <name>slot_name914804797226</name>
-      <group>users</group>
-      <owner>root</owner>
-      <perm>drwrwrw</perm>
+  <list path="/mikkoslot">
+    <entry kind="branch" path="/mikkoslot/mikkotest">
+      <name>mikkotest</name>
+      <group>public</group>
+      <owner>mikkotest</owner>
     </entry>
-    <entry kind="slot">
-      <name>test2</name>
-      <group>users</group>
-      <owner>root</owner>
-      <perm>drwrwrw</perm>
+    <entry kind="branch" path="/mikkoslot/mikkotest">
+      <name>mikkotest</name>
+      <group>public</group>
+      <owner>mikkotest</owner>
     </entry>
-    <entry kind="slot">
-      <name>slot_name29507134416</name>
-      <group>users</group>
-      <owner>root</owner>
-      <perm>drwrwrw</perm>
+    <entry kind="branch" path="/mikkoslot/mikkotest">
+      <name>mikkotest</name>
+      <group>public</group>
+      <owner>mikkotest</owner>
     </entry>
-    <entry kind="slot">
-      <name>mikkoslot</name>
-      <group>users</group>
-      <owner>root</owner>
-      <perm>drwrwrw</perm>
-    </entry>
-</list>
-  <status code="0" location="/storage" operation="GET" type="ok"></status>
+  </list>
+  <status code="0" location="/storage/mikkoslot" operation="GET" type="ok"></status>
 </letsmt-ws>"""
 
 parser = XmlParser(xmlData.split("\n"))
 
-print(parser.corporaForUser("mikkotest"))
+print(parser.branchesForCorpus("mikkotest"))
+
 '''

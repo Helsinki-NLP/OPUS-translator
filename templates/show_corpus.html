@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div>
+  <div style="margin: 20px; float: left">
+    <b>My corpora</b>
+    <form style="display: inline" action="/create_corpus"><input type="submit" value="+"></form>
+    <br>
+    <div style="margin: 20px">
+      <b id="corpusname">{{ name }}</b>
+      <select id="choose-branch" style="margin-left: 20px">
+	{% for branch in branches %}
+	<option value="{{ branch }}">{{ branch }}</option>
+	{% endfor %}
+      </select>
+      <button style="margin-left: 20px">settings</button>
+    </div>
+  </div>
+  <div style="padding: 20px; float: right">Search corpus: <input></div>
+</div>
+
+<table class="borders" style="clear: left; margin: auto; width: 90%">
+  <tr>
+    <td style="text-align: center"><span style="padding-right: 25%; padding-left:25%">uploads</span><button>+</button></td>
+    <td style="text-align: center">monolingual</td>
+    <td style="text-align: center">parallel</td>
+  </tr>
+  <tr>
+    <td>
+      <ul>
+	<li>html</li>
+	<li>
+	  <ul>
+	    <li>en</li>
+	    <li>
+	      <ul>
+		<li>file1.html</li>
+		<li>file2.html</li>
+		<li>file3.html</li>
+	      </ul>
+	    </li>
+	  </ul>
+	<li>pdf</li>
+	<li>doc</li>
+      </ul>
+    </td>
+    <td></td>
+    <td></td>
+  </tr>
+</table>
+
+<script src="{{ url_for('static', filename='jquery-3.3.1.min.js') }}"> </script>
+<script type="text/javascript" src="{{ url_for('static', filename='opus_interface.js') }}"> </script>
+{% endblock %}

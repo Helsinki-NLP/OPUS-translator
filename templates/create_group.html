@@ -7,11 +7,11 @@
   <table style="float: left; padding-right: 20px">
     <tr>
       <td>name:</td>
-      <td><input type="text" name="name"></td>
+      <td><input type="text" name="name" value="{{ name }}"></td>
     </tr>
     <tr>
       <td>members:</td>
-      <td><textarea style="float: left" rows="10" cols="40" name="members"></textarea>
+      <td><textarea style="float: left" rows="10" cols="40" name="members">{{ members }}</textarea>
     </tr>
     <tr>
       <td></td>
@@ -19,7 +19,7 @@
     </tr>
   </table>
   <span style="float: left; padding-right: 10px">description:</span>
-  <textarea style="float: left" rows="10" cols="40" name="description"></textarea>
+  <textarea style="float: left" rows="10" cols="40" name="description">{{ description }}</textarea>
 </form>
 
 {% endblock %}

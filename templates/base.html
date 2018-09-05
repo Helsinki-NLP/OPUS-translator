@@ -9,13 +9,13 @@
 <body>
   
   <ul id="navul">
-    <li id="left"><a class="active" href="/">Home</a></li>
+    <li id="left"><a id="navlia" class="active" href="/">Home</a></li>
     {% if session.logged_in %}
-    <li id="right"><a href="/logout">Logout</a></li>
-    <li id="right"><a>{{ session.username }}</a></li>
+    <li id="right"><a id="navlia" href="/logout">Logout</a></li>
+    <li id="right"><a id="navlia">{{ session.username }}</a></li>
     {% else %}
-    <li id="right"><a href="/login">Login</a></li>
-    <li id="right"><a href="/register">Register</a></li>
+    <li id="right"><a id="navlia" href="/login">Login</a></li>
+    <li id="right"><a id="navlia" href="/register">Register</a></li>
     {% endif %}
   </ul>
 

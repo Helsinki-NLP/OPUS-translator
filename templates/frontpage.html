@@ -7,7 +7,7 @@
     <form style="display: inline" action="/create_corpus"><input type="submit" value="+"></form>
     <ul id="corpora">
       {% for corpus in corpora %}
-      <li>{{ corpus }}</li>
+      <li><a href="/show_corpus/{{ corpus }}">{{ corpus }}</a></li>
       {% endfor %}
   </div>
   <div style="padding: 20px; float: left">
@@ -21,6 +21,4 @@
   <div style="padding: 20px; float: right">Search corpus: <input></div>
 </div>
 
-<script src="static/jquery-3.3.1.min.js"> </script>
-<script type="text/javascript" src="{{ url_for('static', filename='opus_interface.js') }}"> </script>
 {% endblock %}

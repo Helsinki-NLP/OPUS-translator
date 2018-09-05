@@ -11,21 +11,22 @@
 #right {
     float: right;
 }
-li a {
+#navlia {
     display: block;
     color: black;
     text-align: center;
     padding: 14px 16px;
     text-decoration: none;
 }
-li a:hover {
+#navlia:hover {
     background-color: #D8D8D8;
 }
-a.button {
-    -webkit-appearance: button;
-    -moz-appearance: button;
-    appearance: button;
-
-    text-decoration: none;
-    color: initial;
+table.borders {
+    border-collapse: collapse;
+}
+table.borders, table.borders tr, table.borders td {
+    border: 2px solid black;
+}
+table.borders td {
+    width: 30%;
 }

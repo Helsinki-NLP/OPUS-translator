@@ -43,7 +43,19 @@ def allowed_file(filename):
 def index():
     return render_template("index.html")
 
+def login_required(f):
+    @wraps(f)
+    def wrap(*args, **kwargs):
+        if 'logged_in' in session:
+            return f(*args, **kwargs)
+        else:
+            flash("You need to login first")
+            return redirect(url_for('login_page'))
+        
+    return wrap
+
 @app.route('/frontpage')
+@login_required
 def frontpage():
     if session:
         username = session['username']
@@ -65,19 +77,26 @@ def create_corpus():
     if session:
         username = session['username']
 
+    command = letsmt_connect.split() + ["-X", "GET", letsmt_url + "/group?uid=" + username]
+    groupsXml = sp.Popen(command, stdout=sp.PIPE).stdout.read().decode("utf-8")
+    parser = xml_parser.XmlParser(groupsXml.split("\n"))
+    groups = parser.groupsForUser(username)            
+
     if request.method == "POST":
         corpusName = request.form["name"]
+        if corpusName == "" or " " in corpusName or not all(ord(char) < 128 for char in corpusName):
+            private = False
+            if "private" in request.form.keys():
+                private = True
+            flash("Name must be ASCII only and must not contain spaces")
+            return render_template("create_corpus.html", groups=groups, name=request.form['name'], domain=request.form['domain'], origin=request.form['origin'], description=request.form['description'], selectedgroup=request.form['group'], private=private)
+        
         command = letsmt_connect.split() + ["-X", "PUT", letsmt_url + "/storage/" + corpusName + "?uid=" + username]
         response = sp.Popen(command, stdout=sp.PIPE).stdout.read().decode("utf-8")
         
         flash('Corpus "' + corpusName + '" created!')
         return redirect(url_for('frontpage'))
 
-    command = letsmt_connect.split() + ["-X", "GET", letsmt_url + "/group?uid=" + username]
-    groupsXml = sp.Popen(command, stdout=sp.PIPE).stdout.read().decode("utf-8")
-    parser = xml_parser.XmlParser(groupsXml.split("\n"))
-    groups = parser.groupsForUser(username)            
-    
     return render_template("create_corpus.html", groups=groups)
 
 @app.route('/create_group', methods=["GET", "POST"])
@@ -86,13 +105,27 @@ def create_group():
         username = session['username']
     if request.method == "POST":
         groupName = request.form["name"]
+        if groupName == "" or " " in groupName or not all(ord(char) < 128 for char in groupName):
+            flash("Name must be ASCII only and must not contain spaces")
+            return render_template("create_group.html", name=request.form['name'], members=request.form['members'], description=request.form['description'])
         command = letsmt_connect.split() + ["-X", "POST", letsmt_url + "/group/" + groupName + "?uid=" + username]
         response = sp.Popen(command, stdout=sp.PIPE).stdout.read().decode("utf-8")
-        print(response)
+
         flash('Group "' + groupName + '" created!')
         return redirect(url_for('frontpage'))
         
     return render_template("create_group.html")
+
+@app.route('/show_corpus/<corpusname>')
+def show_corpus(corpusname):
+    if session:
+        username = session['username']
+    command = letsmt_connect.split() + ["-X", "GET", letsmt_url + "/storage/" + corpusname + "?uid=" + username]
+    branchesXml = sp.Popen(command, stdout=sp.PIPE).stdout.read().decode("utf-8")
+    parser = xml_parser.XmlParser(branchesXml.split("\n"))
+    branches = parser.branchesForCorpus(corpusname)
+    
+    return render_template("show_corpus.html", name=corpusname, branches=branches)
 
 @app.route('/download/<filename>')
 def download(filename):
@@ -142,6 +175,8 @@ def letsmtui():
 @app.route('/letsmt')
 def letsmt():
     try:
+        branch = request.args.get("branch", "", type=str)
+        corpusname = request.args.get("corpusname", "", type=str)
         method = request.args.get("method", "GET", type=str)
         command = request.args.get("command", "/storage", type=str)
         action = request.args.get("action", "", type=str)
@@ -151,8 +186,14 @@ def letsmt():
         username = ""
         if session:
             username = session['username']
-        ret = sp.Popen(letsmt_connect.split() + ["-X", method, letsmt_url+command+"?uid=" + username + action + payload], stdout=sp.PIPE).stdout.read().decode("utf-8")
-        return jsonify(result=ret)
+        if branch != "":
+            apicommand = letsmt_connect.split() + ["-X", "GET", letsmt_url+"/storage/"+corpusname+"/"+branch+"/uploads?uid=" + username]
+            uploadsContents = sp.Popen(apicommand, stdout=sp.PIPE).stdout.read().decode("utf-8")
+            apicommand = letsmt_connect.split() + ["-X", "GET", letsmt_url+"/storage/"+corpusname+"/"+branch+"/xml?uid=" + username]
+            xmlContents = sp.Popen(apicommand, stdout=sp.PIPE).stdout.read().decode("utf-8")
+        else:
+            ret = sp.Popen(letsmt_connect.split() + ["-X", method, letsmt_url+command+"?uid=" + username + action + payload], stdout=sp.PIPE).stdout.read().decode("utf-8")
+        return jsonify(result=ret, testlist=["ok"])
     except Exception:
         traceback.print_exc()
         
@@ -344,7 +385,6 @@ def login_page():
         return render_template("login.html", error=error)
 
     except Exception as e:
-        flash(e)
         error = "Invalid credentials, try again."
         return render_template("login.html", error=error)
 
@@ -393,17 +433,6 @@ def register_page():
 
     except Exception as e:
         return(str(e))
-
-def login_required(f):
-    @wraps(f)
-    def wrap(*args, **kwargs):
-        if 'logged_in' in session:
-            return f(*args, **kwargs)
-        else:
-            flash("You need to login first")
-            return redirect(url_for('login_page'))
-        
-    return wrap
 
 @app.route("/logout/")
 @login_required
