@@ -175,8 +175,16 @@ def letsmtui():
 @app.route('/letsmt')
 def letsmt():
     try:
+        ret = ""
+        uploads = []
+        monolingual = []
+        parallel = []
+        subdirs = []
+        
         branch = request.args.get("branch", "", type=str)
         corpusname = request.args.get("corpusname", "", type=str)
+        subdir = request.args.get("subdir", "", type=str)
+
         method = request.args.get("method", "GET", type=str)
         command = request.args.get("command", "/storage", type=str)
         action = request.args.get("action", "", type=str)
@@ -186,14 +194,35 @@ def letsmt():
         username = ""
         if session:
             username = session['username']
-        if branch != "":
-            apicommand = letsmt_connect.split() + ["-X", "GET", letsmt_url+"/storage/"+corpusname+"/"+branch+"/uploads?uid=" + username]
+        if subdir != "":
+            subdir = subdir.replace("-_-", "/")
+            subdir = subdir.replace("monolingual", "xml")
+            subdir = subdir.replace("parallel", "xml")
+            print(subdir)
+            apicommand = letsmt_connect.split() + ["-X", "GET", letsmt_url+"/storage/"+corpusname+"/"+branch+subdir+"?uid=" + username]
+            subdirContents = sp.Popen(apicommand, stdout=sp.PIPE).stdout.read().decode("utf-8")
+            print("subdir:", subdirContents)
+            parser = xml_parser.XmlParser(subdirContents.split("\n"))
+            subdirs = parser.navigateDirectory()
+            print(subdirs)
+        elif branch != "":
+            apicommand = letsmt_connect.split() + ["-X", "GET", letsmt_url+"/storage/"+corpusname+"/"+branch+"/uploads"+subdir+"?uid=" + username]
             uploadsContents = sp.Popen(apicommand, stdout=sp.PIPE).stdout.read().decode("utf-8")
-            apicommand = letsmt_connect.split() + ["-X", "GET", letsmt_url+"/storage/"+corpusname+"/"+branch+"/xml?uid=" + username]
+            parser = xml_parser.XmlParser(uploadsContents.split("\n"))
+            uploads = parser.navigateDirectory()
+            
+            apicommand = letsmt_connect.split() + ["-X", "GET", letsmt_url+"/storage/"+corpusname+"/"+branch+"/xml?uid=" + username]            
             xmlContents = sp.Popen(apicommand, stdout=sp.PIPE).stdout.read().decode("utf-8")
+            parser = xml_parser.XmlParser(xmlContents.split("\n"))
+            xml_files = parser.navigateDirectory()
+            for item in xml_files:
+                if "-" in item:
+                    parallel.append(item)
+                else:
+                    monolingual.append(item)
         else:
             ret = sp.Popen(letsmt_connect.split() + ["-X", method, letsmt_url+command+"?uid=" + username + action + payload], stdout=sp.PIPE).stdout.read().decode("utf-8")
-        return jsonify(result=ret, testlist=["ok"])
+        return jsonify(result=ret, uploads=uploads, parallel=parallel, monolingual=monolingual, subdirs=subdirs)
     except Exception:
         traceback.print_exc()
         
