@@ -2,7 +2,7 @@ function update_branch() {
     $("#uploads").text("");
     $("#monolingual").text("");
     $("#parallel").text("");
-    $.getJSON("https://vm1617.kaj.pouta.csc.fi/letsmt", {
+    $.getJSON("https://vm1617.kaj.pouta.csc.fi/get_branch", {
 	corpusname: $("#corpusname").text(),
 	branch: $("#choose-branch").val()
     }, function(data) {
@@ -15,7 +15,7 @@ function update_branch() {
 function subdir_to_list(directories, id_name){
     for (let i=0; i<directories.length; i++) {
 	let subdir = id_name+"-_-"+directories[i];
-	$("#"+id_name).append('<li id="'+subdir+'" opened="false">'+directories[i]+'</li>');
+	$("#"+id_name).append('<li id="'+subdir+'" opened="none">'+directories[i]+'</li>');
 	$("#"+subdir).on("click", function() {
 	    open_or_close(subdir);
 	});
@@ -23,16 +23,16 @@ function subdir_to_list(directories, id_name){
 }
 
 function open_subdir(subdir) {
-    $.getJSON("https://vm1617.kaj.pouta.csc.fi/letsmt", {
+    $.getJSON("https://vm1617.kaj.pouta.csc.fi/get_subdirs", {
 	corpusname: $("#corpusname").text(),
 	branch: $("#choose-branch").val(),
 	subdir: "/"+subdir
     }, function(data) {
 	let subdirs = data.subdirs;
-	let subdir_list = '<li id="'+subdir+'_list"><ul style="padding-left: 20px; list-style-type: none">'
+	let subdir_list = '<li id="'+subdir+'_list"><ul id="'+subdir+'_list2" style="padding-left: 20px; list-style-type: none">'
 	for (let i=0; i<subdirs.length; i++) {
 	    let subdir_id = subdir+"-_-"+subdirs[i]
-	    subdir_list += '<li id="'+subdir_id+'" opened="false">'+subdirs[i]+'</li>';
+	    subdir_list += '<li id="'+subdir_id+'" opened="none">'+subdirs[i]+'</li>';
 	    $(document).on("click", "#"+subdir_id, function() {
 		open_or_close(subdir_id);
 	    });
@@ -42,13 +42,24 @@ function open_subdir(subdir) {
     });
 }
 
+
 function open_or_close(subdir) {
-    if ($("#"+subdir).attr("opened") == "false") {
-	$("#"+subdir).attr("opened", "true");
+    if ($("#"+subdir).attr("opened") == "none") {
 	open_subdir(subdir);
-    } else {
+	$("#"+subdir).attr("opened", "true");
+    } else if ($("#"+subdir).attr("opened") == "true") {
+	$("#"+subdir+"_list").css("display", "none");
 	$("#"+subdir).attr("opened", "false");
+	/*
+	$("#"+subdir+"_list2").children().each(function( index ) {
+	    $(document).off("click", "#"+$(this).attr("id"));
+	});
 	$("#"+subdir+"_list").remove();
+	$("#"+subdir).attr("opened", "none");
+	*/
+    } else if ($("#"+subdir).attr("opened") == "false") {
+	$("#"+subdir+"_list").css("display", "block");
+	$("#"+subdir).attr("opened", "true");
     }
 }
 
