@@ -6,11 +6,11 @@
 <form id="upload_form" method="post" enctype="multipart/form-data" style="padding: 20px">
   <table style="float: left; padding-right: 20px">
     <tr>
-      <td>select file:</td>
+      <td align="right">select file:</td>
       <td><input id="file" type="file" name="file"></td>
     </tr>
     <tr>
-      <td>file format:</td>
+      <td align="right">file format:</td>
       <td>
 	<select name="format" form="upload_form">
 	  {% for format in formats %}
@@ -24,7 +24,7 @@
       </td>
     </tr>
     <tr>
-      <td>language:</td>
+      <td align="right">language:</td>
       <td>
 	<select name="language" form="upload_form">
 	  {% for language in languages %}
@@ -38,7 +38,7 @@
       </td>
     </tr>    
     <tr>
-      <td>translation: </td>
+      <td align="right">translation: </td>
       {% if translation %}
       <td><input type="checkbox" name="translation" checked></td>
       {% else %}
@@ -46,7 +46,7 @@
       {% endif %}
     </tr>
     <tr>
-      <td>automatic import:</td>
+      <td align="right">automatic import:</td>
       {% if autoimport %}
       <td><input type="checkbox" name="autoimport" checked></td>
       {% else %}
@@ -54,7 +54,7 @@
       {% endif %}
     </tr>
     <tr>
-      <td>internal path:</td>
+      <td align="right">internal path:</td>
       <td><input type="text" name="path" value="testpath" readonly></td>
     </tr>
     <tr>

@@ -6,12 +6,29 @@
 <form id="group_form" method="post" style="padding: 20px">
   <table style="float: left; padding-right: 20px">
     <tr>
-      <td>name:</td>
+      <td align="right">name:</td>
       <td><input type="text" name="name" value="{{ name }}"></td>
     </tr>
     <tr>
-      <td>members:</td>
-      <td><textarea style="float: left" rows="10" cols="40" name="members">{{ members }}</textarea>
+      <td align="right">members:</td>
+      <td>
+	<select id="userlist">
+	  {% for user in users %}
+	  <option>{{ user }}</option>
+	  {% endfor %}
+	</select>
+      </td>
+    </tr>
+    <tr>
+      <td></td>
+      <td><button id="adduser" type="button">Add</button></td>
+    </tr>
+    <tr>
+      <td></td>
+      <td>
+	<ul id="selected-users">
+	</ul>
+      </td>
     </tr>
     <tr>
       <td></td>
@@ -22,4 +39,6 @@
   <textarea style="float: left" rows="10" cols="40" name="description">{{ description }}</textarea>
 </form>
 
+<script src="{{ url_for('static', filename='jquery-3.3.1.min.js') }}"> </script>
+<script type="text/javascript" src="{{ url_for('static', filename='opus_interface.js') }}"> </script>
 {% endblock %}

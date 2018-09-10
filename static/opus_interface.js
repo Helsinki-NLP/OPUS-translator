@@ -67,4 +67,15 @@ $("#choose-branch").on("change", function() {
     update_branch();
 });
 
+let usernumber = 0
+
+$("#adduser").on("click", function() {
+    $("#selected-users").append('<li id="user' + usernumber + '">' + $("#userlist").val() + '<button type="button" style="padding: 0px">x</button></li>');
+    let userid = "#user" + usernumber
+    $(document).on("click", userid, function() {
+	$(userid).remove();
+    });
+    usernumber++;
+});
+
 update_branch();

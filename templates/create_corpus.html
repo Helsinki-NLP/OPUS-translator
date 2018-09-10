@@ -6,11 +6,11 @@
 <form id="corpus_form" method="post" style="padding: 20px">
   <table style="float: left; padding-right: 20px">
     <tr>
-      <td>name:</td>
+      <td align="right">name:</td>
       <td><input type="text" name="name" value="{{ name }}"></td>
     </tr>
     <tr>
-      <td>user group:</td>
+      <td align="right">user group:</td>
       <td>
 	<select name="group" form="corpus_form">
 	  {% for group in groups %}
@@ -24,15 +24,15 @@
       </td>
     </tr>
     <tr>
-      <td>domain:</td>
+      <td align="right">domain:</td>
       <td><input type="text" name="domain" value="{{ domain }}"></td>
     </tr>
     <tr>
-      <td>origin: </td>
+      <td align="right">origin: </td>
       <td><input type="text" name="origin" value="{{ origin }}"></td>
     </tr>
     <tr>
-      <td>private: </td>
+      <td align="right">private: </td>
       {% if private %}
       <td><input type="checkbox" name="private" checked></td>
       {% else %}

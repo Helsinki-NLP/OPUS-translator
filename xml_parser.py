@@ -1,4 +1,5 @@
 import xml.parsers.expat
+import re
 
 class XmlParser:
 
@@ -32,25 +33,23 @@ class XmlParser:
         for line in self.xmlData:
             print(self.parseLine(line))
 
-    def groupsForUser(self, username):
+    def groupsForUser(self):
         groups = []
-        currentGroup = ""
         for line in self.xmlData:
             self.parseLine(line)
-            if self.start == "entry" and "id" in self.attrs.keys() and "kind" in self.attrs.keys():
-                if self.attrs["kind"] == "group":
-                    currentGroup = self.attrs["id"]
-            if self.start == "user" and self.end == "user" and self.chara == username:
-                groups.append(currentGroup)
+            if self.start == "member_of" and self.end == "member_of":
+                groups = self.chara.split(",")
+                break
         return groups
 
-    def corporaForUser(self, username):
-        # TODO: filtering by username
+    def corporaForUser(self):
         corpora = []
         for line in self.xmlData:
             self.parseLine(line)
-            if self.start == "name" and self.end == "name":
-                corpora.append(self.chara)
+            if self.start == "entry" and self.end == "entry":
+                m = re.search("^(.*)\/", self.attrs["path"])
+                if m.group(1) not in corpora:
+                    corpora.append(m.group(1))
         return corpora
             
     def branchesForCorpus(self, corpus):
@@ -61,11 +60,13 @@ class XmlParser:
                 branches.append(self.chara)
         return branches
 
-    def monolingualForBranch(self, branch):
-        pass
-
-    def parallelForBranch(self, branch):
-        pass
+    def getUsers(self):
+        users = []
+        for line in self.xmlData:
+            self.parseLine(line)
+            if self.start == "user" and self.end == "user":
+                users.append(self.chara)
+        return users
 
     def navigateDirectory(self):
         dirs = []
@@ -79,54 +80,24 @@ class XmlParser:
                 dirs.append(self.chara)
                 kind = ""
         return dirs
+    
 '''
 xmlData = """
-<letsmt-ws version="55">
-  <list path="/mikkoslot/mikkotest/xml">
-    <entry kind="dir">
-      <name>ar-en</name>
-      <commit revision="HEAD">
-        <author>mikkotest</author>
-        <date>unknown</date>
-      </commit>
-      <group>public</group>
-      <owner>mikkotest</owner>
-    </entry>
-    <entry kind="dir">
-      <name>ar-es</name>
-      <commit revision="HEAD">
-        <author>mikkotest</author>
-        <date>unknown</date>
-      </commit>
-      <group>public</group>
-      <owner>mikkotest</owner>
-    </entry>
-    <entry kind="dir">
-      <name>tr</name>
-      <commit revision="HEAD">
-        <author>mikkotest</author>
-        <date>unknown</date>
-      </commit>
-      <group>public</group>
-      <owner>mikkotest</owner>
-    </entry>
-    <entry kind="dir">
-      <name>zh</name>
-      <commit revision="HEAD">
-        <author>mikkotest</author>
-        <date>unknown</date>
-      </commit>
-      <group>public</group>
-      <owner>mikkotest</owner>
+<letsmt-ws version="56">
+  <list path="/group/">
+    <entry id="public" kind="group" owner="admin">
+      <user>mikkotest</user>
+      <user>admin</user>
+      <user>mikkotest5</user>
+      <user>mikkotest3</user>
     </entry>
   </list>
-  <status code="0" location="/storage/mikkoslot/mikkotest/xml" operation="GET" type="ok"></status>
+  <status code="0" location="/group/public" operation="GET" type="ok"></status>
 </letsmt-ws>
 """
 
 parser = XmlParser(xmlData.split("\n"))
 
-print(parser.navigateDirectory())
+print(parser.getUsers())
 '''
-
 

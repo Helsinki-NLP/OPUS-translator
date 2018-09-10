@@ -59,16 +59,16 @@ def login_required(f):
 def frontpage():
     if session:
         username = session['username']
-            
-    command = letsmt_connect.split() + ["-X", "GET", letsmt_url + "/storage?uid=" + username]
+
+    command = letsmt_connect.split() + ["-X", "GET", letsmt_url + "/metadata?uid=" + username + "&owner=" + username + "&resource-type=branch"]
     corporaXml = sp.Popen(command, stdout=sp.PIPE).stdout.read().decode("utf-8")
     parser = xml_parser.XmlParser(corporaXml.split("\n"))
-    corpora = parser.corporaForUser(username)
+    corpora = parser.corporaForUser()
 
-    command = letsmt_connect.split() + ["-X", "GET", letsmt_url + "/group?uid=" + username]
+    command = letsmt_connect.split() + ["-X", "GET", letsmt_url + "/group/" + username + "?uid=" + username + "&action=showinfo"]
     groupsXml = sp.Popen(command, stdout=sp.PIPE).stdout.read().decode("utf-8")
     parser = xml_parser.XmlParser(groupsXml.split("\n"))
-    groups = parser.groupsForUser(username)
+    groups = parser.groupsForUser()
 
     return render_template("frontpage.html", corpora=corpora, groups=groups)
 
@@ -77,10 +77,10 @@ def create_corpus():
     if session:
         username = session['username']
 
-    command = letsmt_connect.split() + ["-X", "GET", letsmt_url + "/group?uid=" + username]
+    command = letsmt_connect.split() + ["-X", "GET", letsmt_url + "/group/" + username + "?uid=" + username + "&action=showinfo"]
     groupsXml = sp.Popen(command, stdout=sp.PIPE).stdout.read().decode("utf-8")
     parser = xml_parser.XmlParser(groupsXml.split("\n"))
-    groups = parser.groupsForUser(username)            
+    groups = parser.groupsForUser()            
 
     if request.method == "POST":
         corpusName = request.form["name"]
@@ -91,9 +91,20 @@ def create_corpus():
             flash("Name must be ASCII only and must not contain spaces")
             return render_template("create_corpus.html", groups=groups, name=request.form['name'], domain=request.form['domain'], origin=request.form['origin'], description=request.form['description'], selectedgroup=request.form['group'], private=private)
         
-        command = letsmt_connect.split() + ["-X", "PUT", letsmt_url + "/storage/" + corpusName + "?uid=" + username]
+        command = letsmt_connect.split() + ["-X", "PUT", letsmt_url + "/storage/" + corpusName + "/" + username + "?uid=" + username]
+        if request.form["group"] != "public":
+            command[-1] = command[-1] + "&gid=" + request.form["group"]
+
         response = sp.Popen(command, stdout=sp.PIPE).stdout.read().decode("utf-8")
+
+        command = letsmt_connect.split() + ["-X", "PUT", letsmt_url + "/metadata/" + corpusName + "/" + username + "?uid=" + username]
         
+        for key in request.form.keys():
+            if key in ["origin", "domain", "description"]:
+                command[-1] = command[-1] + "&" + key + "=" + request.form[key]
+
+        response = sp.Popen(command, stdout=sp.PIPE).stdout.read().decode("utf-8")
+                
         flash('Corpus "' + corpusName + '" created!')
         return redirect(url_for('frontpage'))
 
@@ -103,18 +114,23 @@ def create_corpus():
 def create_group():
     if session:
         username = session['username']
+    command = letsmt_connect.split() + ["-X", "GET", letsmt_url + "/group/public?uid=" + username + "&action=showinfo"]
+    usersXml = sp.Popen(command, stdout=sp.PIPE).stdout.read().decode("utf-8")
+    parser = xml_parser.XmlParser(usersXml.split("\n"))
+    users = parser.getUsers()
+
     if request.method == "POST":
         groupName = request.form["name"]
         if groupName == "" or " " in groupName or not all(ord(char) < 128 for char in groupName):
             flash("Name must be ASCII only and must not contain spaces")
-            return render_template("create_group.html", name=request.form['name'], members=request.form['members'], description=request.form['description'])
+            return render_template("create_group.html", name=request.form['name'], members=request.form['members'], description=request.form['description'], users=users)
         command = letsmt_connect.split() + ["-X", "POST", letsmt_url + "/group/" + groupName + "?uid=" + username]
         response = sp.Popen(command, stdout=sp.PIPE).stdout.read().decode("utf-8")
 
         flash('Group "' + groupName + '" created!')
         return redirect(url_for('frontpage'))
         
-    return render_template("create_group.html")
+    return render_template("create_group.html", users=users)
 
 @app.route('/show_corpus/<corpusname>')
 def show_corpus(corpusname):
@@ -226,7 +242,6 @@ def get_branch():
 @app.route('/get_subdirs')
 def get_subdirs():
     try:
-        start = time.time()
         subdirs = []
         
         branch = request.args.get("branch", "", type=str)
@@ -245,7 +260,7 @@ def get_subdirs():
 
         parser = xml_parser.XmlParser(subdirContents.split("\n"))
         subdirs = parser.navigateDirectory()
-        print(time.time()-start)
+
         return jsonify(subdirs=subdirs)
     except Exception:
         traceback.print_exc()
