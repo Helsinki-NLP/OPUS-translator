@@ -64,11 +64,13 @@ def frontpage():
     corporaXml = sp.Popen(command, stdout=sp.PIPE).stdout.read().decode("utf-8")
     parser = xml_parser.XmlParser(corporaXml.split("\n"))
     corpora = parser.corporaForUser()
+    corpora.sort()
 
     command = letsmt_connect.split() + ["-X", "GET", letsmt_url + "/group/" + username + "?uid=" + username + "&action=showinfo"]
     groupsXml = sp.Popen(command, stdout=sp.PIPE).stdout.read().decode("utf-8")
     parser = xml_parser.XmlParser(groupsXml.split("\n"))
     groups = parser.groupsForUser()
+    groups.sort()
 
     return render_template("frontpage.html", corpora=corpora, groups=groups)
 
@@ -80,7 +82,8 @@ def create_corpus():
     command = letsmt_connect.split() + ["-X", "GET", letsmt_url + "/group/" + username + "?uid=" + username + "&action=showinfo"]
     groupsXml = sp.Popen(command, stdout=sp.PIPE).stdout.read().decode("utf-8")
     parser = xml_parser.XmlParser(groupsXml.split("\n"))
-    groups = parser.groupsForUser()            
+    groups = parser.groupsForUser()
+    groups.sort()
 
     if request.method == "POST":
         corpusName = request.form["name"]
@@ -112,25 +115,36 @@ def create_corpus():
 
 @app.route('/create_group', methods=["GET", "POST"])
 def create_group():
-    if session:
-        username = session['username']
-    command = letsmt_connect.split() + ["-X", "GET", letsmt_url + "/group/public?uid=" + username + "&action=showinfo"]
-    usersXml = sp.Popen(command, stdout=sp.PIPE).stdout.read().decode("utf-8")
-    parser = xml_parser.XmlParser(usersXml.split("\n"))
-    users = parser.getUsers()
+    try:
+        if session:
+            username = session['username']
+        command = letsmt_connect.split() + ["-X", "GET", letsmt_url + "/group/public?uid=" + username + "&action=showinfo"]
+        usersXml = sp.Popen(command, stdout=sp.PIPE).stdout.read().decode("utf-8")
+        parser = xml_parser.XmlParser(usersXml.split("\n"))
+        users = parser.getUsers()
+        users.sort()
 
-    if request.method == "POST":
-        groupName = request.form["name"]
-        if groupName == "" or " " in groupName or not all(ord(char) < 128 for char in groupName):
-            flash("Name must be ASCII only and must not contain spaces")
-            return render_template("create_group.html", name=request.form['name'], members=request.form['members'], description=request.form['description'], users=users)
-        command = letsmt_connect.split() + ["-X", "POST", letsmt_url + "/group/" + groupName + "?uid=" + username]
-        response = sp.Popen(command, stdout=sp.PIPE).stdout.read().decode("utf-8")
+        if request.method == "POST":
+            groupName = request.form["name"]
+            if groupName == "" or " " in groupName or not all(ord(char) < 128 for char in groupName):
+                flash("Name must be ASCII only and must not contain spaces")
+                return render_template("create_group.html", name=request.form['name'], description=request.form['description'], users=users)
 
-        flash('Group "' + groupName + '" created!')
-        return redirect(url_for('frontpage'))
-        
-    return render_template("create_group.html", users=users)
+            command = letsmt_connect.split() + ["-X", "POST", letsmt_url + "/group/" + groupName + "/" + username + "?uid=" + username]
+            response = sp.Popen(command, stdout=sp.PIPE).stdout.read().decode("utf-8")
+
+            members = request.form["members"].split(",")
+            for i in range(len(members)-1):
+                command = letsmt_connect.split() + ["-X", "PUT", letsmt_url + "/group/" + groupName + "/" + members[i] + "?uid=" + username]
+                response = sp.Popen(command, stdout=sp.PIPE).stdout.read().decode("utf-8")
+                print(response)
+
+            flash('Group "' + groupName + '" created!')
+            return redirect(url_for('frontpage'))
+
+        return render_template("create_group.html", users=users)
+    except:
+        traceback.print_exc()
 
 @app.route('/show_corpus/<corpusname>')
 def show_corpus(corpusname):

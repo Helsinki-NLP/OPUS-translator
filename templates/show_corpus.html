@@ -21,7 +21,14 @@
 
 <table class="borders" style="clear: left; margin: auto; width: 90%">
   <tr>
-    <td style="text-align: center"><span style="padding-right: 25%; padding-left:25%">uploads</span><button>+</button></td>
+    <td style="text-align: center">
+      <span style="padding-right: 25%; padding-left:25%">uploads</span>
+      <form style="display: inline" action="/upload_file">
+	<input type="text" name="corpus" value="{{ name }}" style="display: none">
+	<input id="branch" type="text" name="branch" value="{{ branch }}" style="display: none">
+	<input type="submit" value="+">
+      </form>
+    </td>
     <td style="text-align: center">monolingual</td>
     <td style="text-align: center">parallel</td>
   </tr>

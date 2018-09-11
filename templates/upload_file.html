@@ -12,7 +12,7 @@
     <tr>
       <td align="right">file format:</td>
       <td>
-	<select name="format" form="upload_form">
+	<select id="format" name="format" form="upload_form">
 	  {% for format in formats %}
 	  {% if format == selectedformat %}
 	  <option value="{{ format }}" selected>{{ format }}</option>
@@ -26,7 +26,7 @@
     <tr>
       <td align="right">language:</td>
       <td>
-	<select name="language" form="upload_form">
+	<select id="language" name="language" form="upload_form">
 	  {% for language in languages %}
 	  {% if language == selectedlanguage %}
 	  <option value="{{ language }}" selected>{{ language }}</option>
@@ -55,7 +55,7 @@
     </tr>
     <tr>
       <td align="right">internal path:</td>
-      <td><input type="text" name="path" value="testpath" readonly></td>
+      <td><input id="path" type="text" name="path" size="30" readonly></td>
     </tr>
     <tr>
       <td></td>
@@ -66,4 +66,6 @@
   <textarea style="float: left" rows="10" cols="40" name="description">{{ description }}</textarea>
 </form>
 
+<script src="{{ url_for('static', filename='jquery-3.3.1.min.js') }}"> </script>
+<script type="text/javascript" src="{{ url_for('static', filename='upload_file.js') }}"> </script>
 {% endblock %}

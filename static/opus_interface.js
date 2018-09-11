@@ -2,6 +2,7 @@ function update_branch() {
     $("#uploads").text("");
     $("#monolingual").text("");
     $("#parallel").text("");
+    $("#branch").val($("#choose-branch").val());
     $.getJSON("https://vm1617.kaj.pouta.csc.fi/get_branch", {
 	corpusname: $("#corpusname").text(),
 	branch: $("#choose-branch").val()
@@ -42,7 +43,6 @@ function open_subdir(subdir) {
     });
 }
 
-
 function open_or_close(subdir) {
     if ($("#"+subdir).attr("opened") == "none") {
 	open_subdir(subdir);
@@ -65,17 +65,6 @@ function open_or_close(subdir) {
 
 $("#choose-branch").on("change", function() {
     update_branch();
-});
-
-let usernumber = 0
-
-$("#adduser").on("click", function() {
-    $("#selected-users").append('<li id="user' + usernumber + '">' + $("#userlist").val() + '<button type="button" style="padding: 0px">x</button></li>');
-    let userid = "#user" + usernumber
-    $(document).on("click", userid, function() {
-	$(userid).remove();
-    });
-    usernumber++;
 });
 
 update_branch();
