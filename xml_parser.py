@@ -77,7 +77,7 @@ class XmlParser:
             if self.start == "entry":
                 kind = self.attrs["kind"]
             if self.start == "name" and kind in ["dir", "file"]:
-                dirs.append(self.chara)
+                dirs.append([self.chara, kind])
                 kind = ""
         return dirs
     

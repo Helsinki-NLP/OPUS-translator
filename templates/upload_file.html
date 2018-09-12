@@ -40,17 +40,17 @@
     <tr>
       <td align="right">translation: </td>
       {% if translation %}
-      <td><input type="checkbox" name="translation" checked></td>
+      <td><input id="translation" type="checkbox" name="translation" checked></td>
       {% else %}
-      <td><input type="checkbox" name="translation"></td>
+      <td><input id="translation" type="checkbox" name="translation"></td>
       {% endif %}
     </tr>
     <tr>
       <td align="right">automatic import:</td>
       {% if autoimport %}
-      <td><input type="checkbox" name="autoimport" checked></td>
+      <td><input id="autoimport" type="checkbox" name="autoimport" checked></td>
       {% else %}
-      <td><input type="checkbox" name="autoimport"></td>
+      <td><input id="autoimport" type="checkbox" name="autoimport"></td>
       {% endif %}
     </tr>
     <tr>
@@ -63,7 +63,7 @@
     </tr>
   </table>
   <span style="float: left; padding-right: 10px">description:</span>
-  <textarea style="float: left" rows="10" cols="40" name="description">{{ description }}</textarea>
+  <textarea id="description" style="float: left" rows="10" cols="40" name="description">{{ description }}</textarea>
 </form>
 
 <script src="{{ url_for('static', filename='jquery-3.3.1.min.js') }}"> </script>

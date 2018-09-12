@@ -14,6 +14,7 @@ import os
 from werkzeug.utils import secure_filename
 import time
 import xml_parser
+import re
 
 import traceback
 
@@ -154,6 +155,7 @@ def show_corpus(corpusname):
     branchesXml = sp.Popen(command, stdout=sp.PIPE).stdout.read().decode("utf-8")
     parser = xml_parser.XmlParser(branchesXml.split("\n"))
     branches = parser.branchesForCorpus(corpusname)
+    branches.sort()
     
     return render_template("show_corpus.html", name=corpusname, branches=branches)
 
@@ -279,8 +281,60 @@ def get_subdirs():
     except Exception:
         traceback.print_exc()
 
-@app.route('/upload_file')
+@app.route('/upload_file', methods=['GET', 'POST'])
 def upload_file():
+    if request.method == 'POST':
+        path = request.form['path']
+        m = re.search("^\/(.*?)\/(.*?)\/", path)
+        corpus = m.group(1)
+        branch = m.group(2)
+        language = request.form['language']
+        fileformat = request.form['format']
+        description = request.form['description']
+        translation = "false"
+        autoimport = "false"
+        if "translation" in request.form.keys():
+            translation = "true"
+        if "autoimport" in request.form.keys():
+            autoimoprt = "true"
+        if 'file' not in request.files:
+            flash('No file part')
+            return redirect(url_for("upload_file", corpus=corpus, branch=branch, language=language, fileformat=fileformat, description=description, translation=translation, autoimport=autoimport))
+        file = request.files['file']
+        if file.filename == '':
+            flash('No selected file')
+            return redirect(url_for("upload_file", corpus=corpus, branch=branch, language=language, fileformat=fileformat, description=description, translation=translation, autoimport=autoimport))
+        if file and allowed_file(file.filename):
+            filename = secure_filename(file.filename)
+            timename = str(time.time())+"###TIME###"+filename
+            path = request.form['path']
+            description = request.form['description']
+            file.save(os.path.join(app.config['UPLOAD_FOLDER'], timename))
+            if session:
+                username = session['username']
+            try:
+                if "autoimport" in request.form.keys():
+                    command = letsmt_connect.split() + ["-X", "PUT", letsmt_url + "/storage" + path + "?uid=" + username + "&action=import", "--form", "payload=@/var/www/uploads/"+timename]
+                else:
+                    command = letsmt_connect.split() + ["-X", "PUT", letsmt_url + "/storage" + path + "?uid=" + username, "--form", "payload=@/var/www/uploads/"+timename]
+                
+                ret = sp.Popen(command, stdout=sp.PIPE).stdout.read().decode("utf-8")
+                
+                command = letsmt_connect.split() + ["-X", "PUT", letsmt_url + "/metadata" + path + "?uid=" + username + "&description=" + description]
+
+                response = sp.Popen(command, stdout=sp.PIPE).stdout.read().decode("utf-8")
+
+
+                traceback.print_exc()
+                    
+                os.remove("/var/www/uploads/" + timename)
+                flash('Uploaded file "' + filename + '" to "' + path + '"')
+            
+
+                return redirect(url_for('show_corpus', corpusname=corpus, branch=branch))
+            except:
+                traceback.print_exc()
+
     return render_template("upload_file.html", formats=["txt", "html", "pdf", "doc"], languages=["da", "en", "fi", "no", "sv"])
         
 @app.route('/translate')
