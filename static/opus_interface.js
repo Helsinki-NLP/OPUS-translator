@@ -13,6 +13,37 @@ function update_branch() {
     });
 }
 
+function formulate_datapath(datapath) {
+    $("#file-metadata").text("");
+    $("#file-content").text("");
+    datapath = datapath.replace(/-_-/g, "/");
+    datapath = datapath.replace(/-_DOT_-/g, ".");
+    datapath = datapath.replace("monolingual", "xml");
+    datapath = datapath.replace("parallel", "xml");
+    return "/" + $("#corpusname").text() + "/" + $("#branch").val() + "/" + datapath;
+}
+
+function showMetadata(datapath) {
+    let path = formulate_datapath(datapath);
+    $.getJSON("https://vm1617.kaj.pouta.csc.fi/get_metadata", {
+	path: path
+    }, function(data) {
+	for (i=0; i<data.metadataKeys.length; i++) {
+	    let key = data.metadataKeys[i];
+	    $("#file-metadata").append("<li><b>"+key+":</b> "+data.metadata[key]+"</li>");
+	}
+    });
+}
+
+function showFilecontent(datapath) {
+    let path = formulate_datapath(datapath);
+    $.getJSON("https://vm1617.kaj.pouta.csc.fi/get_filecontent", {
+	path: path
+    }, function(data) {
+	$("#file-content").text(data.content);
+    });
+}	     
+
 function subdir_to_list(directories, id_name){
     for (let i=0; i<directories.length; i++) {
 	let subdir = id_name+"-_-"+directories[i][0];
@@ -48,20 +79,58 @@ function open_subdir(subdir) {
 		$(document).on("click", "#"+subdir_id, function() {
 		    open_or_close(subdir_id);
 		});
-	    } else if (ptype == "fil") {
+	    } else if (ptype == "file") {
 		$(document).on("click", "#"+subdir_id, function() {
-		    $("#filedisplay-header-cell").css("display", "");
-		    $("#filedisplay-content-cell").css("display", "");
-		    $("#monolingual-header-cell").css("display", "none");
-		    $("#monolingual-tree-cell").css("display", "none");
-		    $("#parallel-header-cell").css("display", "none");
-		    $("#parallel-tree-cell").css("display", "none");
+		    $("#filename").text(subdirs[i][0]);
+		    showMetadata(subdir_id);
+		    $("#viewfile").text("view");
+		    $("#viewfile").attr("showing", "metadata");
+		    let subdirname = subdir.replace(/-_-.*/, ""); 
+		    if (subdirname == "uploads") {
+			showOrHideTrees("monolingual", "parallel", "uploads", "hide");
+		    } else if (subdirname == "monolingual") {
+			showOrHideTrees("uploads", "parallel", "monolingual", "hide");
+		    } else if (subdirname == "parallel") {
+			showOrHideTrees("uploads", "monolingual", "parallel", "hide");
+		    }
+		    $("#viewfile").off("click");
+		    $("#viewfile").on("click", function() {
+			switchMetadataAndContent(subdir_id);
+		    });
 		});
 	    }
 	}
 	subdir_list += "</ul></li>";
 	$("#"+subdir).after(subdir_list);
     });
+}
+
+function switchMetadataAndContent(subdir_id) {
+    if ($("#viewfile").attr("showing") == "metadata") {
+	showFilecontent(subdir_id);
+	$("#viewfile").text("metadata");
+	$("#viewfile").attr("showing", "content");
+    } else if ($("#viewfile").attr("showing") == "content") {
+	showMetadata(subdir_id);
+	$("#viewfile").text("view");
+	$("#viewfile").attr("showing", "metadata");
+    }
+}
+
+function showOrHideTrees(tree1, tree2, remain, status) {
+    if (status == "hide") {
+	var displayfile = "";
+	var displaytree = "none";
+	$("#filedisplay-header-cell").attr("tree", remain);
+    } else if (status == "show") {
+	var displayfile = "none";
+	var displaytree = "";
+    }
+    $(".filedisplay-cell").css("display", displayfile);
+    $("#"+tree1+"-column").css("display", displaytree);
+    $("."+tree1+"-cell").css("display", displaytree);
+    $("#"+tree2+"-column").css("display", displaytree);
+    $("."+tree2+"-cell").css("display", displaytree);
 }
 
 function open_or_close(subdir) {
@@ -88,6 +157,21 @@ $("#choose-branch").on("change", function() {
     update_branch();
 });
 
-$("#choose-branch").val(decodeURIComponent(window.location.search.substring(1)).split("&")[0].split("=")[1]);
+$("#filedisplay-close").on("click", function() {
+    let tree = $("#filedisplay-header-cell").attr("tree");
+    if (tree == "uploads") {
+	showOrHideTrees("monolingual", "parallel", "", "show");
+    } else if (tree == "monolingual") {
+	showOrHideTrees("parallel", "uploads", "", "show");
+    } else if (tree == "parallel") {
+	showOrHideTrees("uploads", "monolingual", "", "show");
+    }
+});
+
+let branch = decodeURIComponent(window.location.search.substring(1)).split("&")[0].split("=")[1];
+
+if (branch != undefined) {
+    $("#choose-branch").val(branch);
+}
 
 update_branch();

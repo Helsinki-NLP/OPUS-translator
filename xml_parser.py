@@ -52,7 +52,7 @@ class XmlParser:
                     corpora.append(m.group(1))
         return corpora
             
-    def branchesForCorpus(self, corpus):
+    def branchesForCorpus(self):
         branches = []
         for line in self.xmlData:
             self.parseLine(line)
@@ -80,24 +80,56 @@ class XmlParser:
                 dirs.append([self.chara, kind])
                 kind = ""
         return dirs
-    
+
+    def getMonolingualAndParallel(self):
+        monolingual_pre = []
+        parallel_pre = []
+        for line in self.xmlData:
+            self.parseLine(line)
+            if self.start == "langs":
+                monolingual_pre = self.chara.split(",")
+            elif self.start == "parallel-langs":
+                parallel_pre = self.chara.split(",")
+            if monolingual_pre != [] and parallel_pre != []:
+                break
+        monolingual = [[x, "dir"] for x in monolingual_pre]
+        parallel = [[x, "dir"] for x in parallel_pre]
+        return (monolingual, parallel)
+
+    def getMetadata(self):
+        metadata = {}
+        storeValues = False
+        for line in self.xmlData:
+            self.parseLine(line)
+            if self.end == "entry":
+                storeValues = False
+            if storeValues and self.start != "":
+                metadata[self.start] = self.chara
+            if self.start == "entry":
+                storeValues = True
+                if "path" in self.attrs.keys():
+                    metadata["path"] = self.attrs["path"]
+        return metadata
+
 '''
 xmlData = """
 <letsmt-ws version="56">
-  <list path="/group/">
-    <entry id="public" kind="group" owner="admin">
-      <user>mikkotest</user>
-      <user>admin</user>
-      <user>mikkotest5</user>
-      <user>mikkotest3</user>
+  <list path="">
+    <entry path="testcorpus/mikkotest/uploads/html/fi/1.html">
+      <description></description>
+      <gid>mikkotest</gid>
+      <import_runtime>3</import_runtime>
+      <imported_to>xml/fi/1.xml</imported_to>
+      <owner>mikkotest</owner>
+      <status>imported</status>
     </entry>
   </list>
-  <status code="0" location="/group/public" operation="GET" type="ok"></status>
+  <status code="0" location="/metadata/testcorpus/mikkotest/uploads/html/fi/1.html" operation="GET" type="ok">Found matching path ID. Listing all of its properties</status>
 </letsmt-ws>
 """
 
 parser = XmlParser(xmlData.split("\n"))
 
-print(parser.getUsers())
-'''
+print(parser.getMetadata())
 
+'''

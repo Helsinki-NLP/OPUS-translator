@@ -76,6 +76,7 @@ def frontpage():
     return render_template("frontpage.html", corpora=corpora, groups=groups)
 
 @app.route('/create_corpus', methods=["GET", "POST"])
+@login_required
 def create_corpus():
     if session:
         username = session['username']
@@ -115,6 +116,7 @@ def create_corpus():
     return render_template("create_corpus.html", groups=groups)
 
 @app.route('/create_group', methods=["GET", "POST"])
+@login_required
 def create_group():
     try:
         if session:
@@ -148,14 +150,18 @@ def create_group():
         traceback.print_exc()
 
 @app.route('/show_corpus/<corpusname>')
+@login_required
 def show_corpus(corpusname):
-    if session:
-        username = session['username']
-    command = letsmt_connect.split() + ["-X", "GET", letsmt_url + "/storage/" + corpusname + "?uid=" + username]
-    branchesXml = sp.Popen(command, stdout=sp.PIPE).stdout.read().decode("utf-8")
-    parser = xml_parser.XmlParser(branchesXml.split("\n"))
-    branches = parser.branchesForCorpus(corpusname)
-    branches.sort()
+    try:
+        if session:
+            username = session['username']
+        command = letsmt_connect.split() + ["-X", "GET", letsmt_url + "/storage/" + corpusname + "?uid=" + username]
+        branchesXml = sp.Popen(command, stdout=sp.PIPE).stdout.read().decode("utf-8")
+        parser = xml_parser.XmlParser(branchesXml.split("\n"))
+        branches = parser.branchesForCorpus()
+        branches.sort()
+    except:
+        traceback.print_exc()
     
     return render_template("show_corpus.html", name=corpusname, branches=branches)
 
@@ -178,6 +184,7 @@ def download(filename):
         traceback.print_exc()
 
 @app.route('/letsmtui', methods=['GET', 'POST'])
+@login_required
 def letsmtui():
     if request.method == 'POST':
         if 'file' not in request.files:
@@ -205,6 +212,7 @@ def letsmtui():
     return render_template("letsmt.html")
 
 @app.route('/letsmt')
+@login_required
 def letsmt():
     try:
         ret = ""
@@ -225,6 +233,7 @@ def letsmt():
 
 
 @app.route('/get_branch')
+@login_required
 def get_branch():
     try:
         uploads = []
@@ -242,20 +251,17 @@ def get_branch():
         parser = xml_parser.XmlParser(uploadsContents.split("\n"))
         uploads = parser.navigateDirectory()
 
-        apicommand = letsmt_connect.split() + ["-X", "GET", letsmt_url+"/storage/"+corpusname+"/"+branch+"/xml?uid=" + username]            
+        apicommand = letsmt_connect.split() + ["-X", "GET", letsmt_url+"/metadata/"+corpusname+"/"+branch+"?uid="+username]
         xmlContents = sp.Popen(apicommand, stdout=sp.PIPE).stdout.read().decode("utf-8")
         parser = xml_parser.XmlParser(xmlContents.split("\n"))
-        xml_files = parser.navigateDirectory()
-        for item in xml_files:
-            if "-" in item:
-                parallel.append(item)
-            else:
-                monolingual.append(item)
+        monolingual, parallel = parser.getMonolingualAndParallel()
+        
         return jsonify(uploads=uploads, parallel=parallel, monolingual=monolingual)
     except Exception:
         traceback.print_exc()
 
 @app.route('/get_subdirs')
+@login_required
 def get_subdirs():
     try:
         subdirs = []
@@ -282,6 +288,7 @@ def get_subdirs():
         traceback.print_exc()
 
 @app.route('/upload_file', methods=['GET', 'POST'])
+@login_required
 def upload_file():
     if request.method == 'POST':
         path = request.form['path']
@@ -317,9 +324,9 @@ def upload_file():
                     command = letsmt_connect.split() + ["-X", "PUT", letsmt_url + "/storage" + path + "?uid=" + username + "&action=import", "--form", "payload=@/var/www/uploads/"+timename]
                 else:
                     command = letsmt_connect.split() + ["-X", "PUT", letsmt_url + "/storage" + path + "?uid=" + username, "--form", "payload=@/var/www/uploads/"+timename]
-                
+                print(command)
                 ret = sp.Popen(command, stdout=sp.PIPE).stdout.read().decode("utf-8")
-                
+                print(ret)
                 command = letsmt_connect.split() + ["-X", "PUT", letsmt_url + "/metadata" + path + "?uid=" + username + "&description=" + description]
 
                 response = sp.Popen(command, stdout=sp.PIPE).stdout.read().decode("utf-8")
@@ -329,13 +336,46 @@ def upload_file():
                     
                 os.remove("/var/www/uploads/" + timename)
                 flash('Uploaded file "' + filename + '" to "' + path + '"')
-            
 
                 return redirect(url_for('show_corpus', corpusname=corpus, branch=branch))
             except:
                 traceback.print_exc()
 
     return render_template("upload_file.html", formats=["txt", "html", "pdf", "doc"], languages=["da", "en", "fi", "no", "sv"])
+
+@app.route('/get_metadata')
+@login_required
+def get_metadata():
+    try:
+        if session:
+            username = session['username']
+
+        path = request.args.get("path", "", type=str)
+
+        apicommand = letsmt_connect.split() + ["-X", "GET", letsmt_url + "/metadata" + path + "?uid=" + username]
+        metadataXml = sp.Popen(apicommand, stdout=sp.PIPE).stdout.read().decode("utf-8")
+        parser = xml_parser.XmlParser(metadataXml.split("\n"))
+        metadata = parser.getMetadata()
+        metadataKeys = list(metadata.keys()).copy()
+        metadataKeys.sort()
+
+        return jsonify(metadata = metadata, metadataKeys = metadataKeys)
+
+    except:
+        traceback.print_exc()
+
+@app.route('/get_filecontent')
+@login_required
+def get_filecontent():
+    if session:
+        username = session['username']
+
+    path = request.args.get("path", "", type=str)
+
+    apicommand = letsmt_connect.split() + ["-X", "GET", letsmt_url + "/storage" + path + "?uid=" + username + "&action=download&archive=0"]
+    content = sp.Popen(apicommand, stdout=sp.PIPE).stdout.read().decode("utf-8")
+    
+    return jsonify(content = content)
         
 @app.route('/translate')
 def translate():
