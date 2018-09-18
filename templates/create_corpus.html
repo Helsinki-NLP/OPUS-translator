@@ -10,11 +10,13 @@
       <td><input type="text" name="name" value="{{ name }}"></td>
     </tr>
     <tr>
-      <td align="right">user group:</td>
+      <td align="right">read access:</td>
       <td>
 	<select name="group" form="corpus_form">
 	  {% for group in groups %}
 	  {% if group == selectedgroup %}
+	  <option value="{{ group }}" selected>{{ group }}</option>
+	  {% elif group == "public" %}
 	  <option value="{{ group }}" selected>{{ group }}</option>
 	  {% else %}
 	  <option value="{{ group }}">{{ group }}</option>
@@ -31,6 +33,7 @@
       <td align="right">origin: </td>
       <td><input type="text" name="origin" value="{{ origin }}"></td>
     </tr>
+    <!--
     <tr>
       <td align="right">private: </td>
       {% if private %}
@@ -39,6 +42,7 @@
       <td><input type="checkbox" name="private"></td>
       {% endif %}
     </tr>
+    -->
     <tr>
       <td></td>
       <td><input type="submit" name="submit" value="Create"></td>

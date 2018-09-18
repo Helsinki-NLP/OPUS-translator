@@ -38,12 +38,12 @@
       </td>
     </tr>    
     <tr>
-      <td align="right">translation: </td>
-      {% if translation %}
-      <td><input id="translation" type="checkbox" name="translation" checked></td>
-      {% else %}
-      <td><input id="translation" type="checkbox" name="translation"></td>
-      {% endif %}
+      <td align="right">original:</td>
+      <td>
+	<input id="original" value="original" type="radio" name="direction">
+	translation:
+	<input id="translation" value="translation" type="radio" name="direction">
+      </td>
     </tr>
     <tr>
       <td align="right">automatic import:</td>

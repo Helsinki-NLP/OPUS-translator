@@ -15,8 +15,12 @@ from werkzeug.utils import secure_filename
 import time
 import xml_parser
 import re
+from urllib.parse import urlparse, urljoin
+import request_handler
 
 import traceback
+
+rh = request_handler.RequestHandler()
 
 UPLOAD_FOLDER = "/var/www/uploads"
 ALLOWED_EXTENSIONS = set(['txt', 'xml', 'html', 'tar'])
@@ -61,14 +65,12 @@ def frontpage():
     if session:
         username = session['username']
 
-    command = letsmt_connect.split() + ["-X", "GET", letsmt_url + "/metadata?uid=" + username + "&owner=" + username + "&resource-type=branch"]
-    corporaXml = sp.Popen(command, stdout=sp.PIPE).stdout.read().decode("utf-8")
+    corporaXml = rh.get("/metadata", {"uid": username, "owner": username, "resource-type": "branch"})
     parser = xml_parser.XmlParser(corporaXml.split("\n"))
     corpora = parser.corporaForUser()
     corpora.sort()
 
-    command = letsmt_connect.split() + ["-X", "GET", letsmt_url + "/group/" + username + "?uid=" + username + "&action=showinfo"]
-    groupsXml = sp.Popen(command, stdout=sp.PIPE).stdout.read().decode("utf-8")
+    groupsXml = rh.get("/group/"+username, {"uid": username, "action": "showinfo"})
     parser = xml_parser.XmlParser(groupsXml.split("\n"))
     groups = parser.groupsForUser()
     groups.sort()
@@ -81,8 +83,7 @@ def create_corpus():
     if session:
         username = session['username']
 
-    command = letsmt_connect.split() + ["-X", "GET", letsmt_url + "/group/" + username + "?uid=" + username + "&action=showinfo"]
-    groupsXml = sp.Popen(command, stdout=sp.PIPE).stdout.read().decode("utf-8")
+    groupsXml = rh.get("/group/"+username, {"uid": username, "action": "showinfo"})
     parser = xml_parser.XmlParser(groupsXml.split("\n"))
     groups = parser.groupsForUser()
     groups.sort()
@@ -95,21 +96,22 @@ def create_corpus():
                 private = True
             flash("Name must be ASCII only and must not contain spaces")
             return render_template("create_corpus.html", groups=groups, name=request.form['name'], domain=request.form['domain'], origin=request.form['origin'], description=request.form['description'], selectedgroup=request.form['group'], private=private)
-        
-        command = letsmt_connect.split() + ["-X", "PUT", letsmt_url + "/storage/" + corpusName + "/" + username + "?uid=" + username]
+
+        parameters = {"uid": username}
         if request.form["group"] != "public":
-            command[-1] = command[-1] + "&gid=" + request.form["group"]
+            parameters["gid"] = request.form["group"]
+        response = rh.put("/storage/"+corpusName+"/"+username, parameters)
 
-        response = sp.Popen(command, stdout=sp.PIPE).stdout.read().decode("utf-8")
+        try:
+            parameters = {"uid": username}
+            for key in request.form.keys():
+                if key in ["origin", "domain", "description"]:
+                    parameters[key] = request.form[key]
 
-        command = letsmt_connect.split() + ["-X", "PUT", letsmt_url + "/metadata/" + corpusName + "/" + username + "?uid=" + username]
-        
-        for key in request.form.keys():
-            if key in ["origin", "domain", "description"]:
-                command[-1] = command[-1] + "&" + key + "=" + request.form[key]
-
-        response = sp.Popen(command, stdout=sp.PIPE).stdout.read().decode("utf-8")
-                
+            response = rh.put("/metadata/"+corpusName+"/"+username, parameters)
+        except:
+            traceback.print_exc()
+            
         flash('Corpus "' + corpusName + '" created!')
         return redirect(url_for('frontpage'))
 
@@ -121,10 +123,13 @@ def create_group():
     try:
         if session:
             username = session['username']
-        command = letsmt_connect.split() + ["-X", "GET", letsmt_url + "/group/public?uid=" + username + "&action=showinfo"]
-        usersXml = sp.Popen(command, stdout=sp.PIPE).stdout.read().decode("utf-8")
+
+        usersXml = rh.get("/group/public", {"uid": username, "action": "showinfo"})
         parser = xml_parser.XmlParser(usersXml.split("\n"))
         users = parser.getUsers()
+        for user in users:
+            if user in ["admin", username]:
+                users.remove(user)
         users.sort()
 
         if request.method == "POST":
@@ -133,14 +138,12 @@ def create_group():
                 flash("Name must be ASCII only and must not contain spaces")
                 return render_template("create_group.html", name=request.form['name'], description=request.form['description'], users=users)
 
-            command = letsmt_connect.split() + ["-X", "POST", letsmt_url + "/group/" + groupName + "/" + username + "?uid=" + username]
-            response = sp.Popen(command, stdout=sp.PIPE).stdout.read().decode("utf-8")
-
+            response = rh.post("/group/"+groupName, {"uid": username})
+            
             members = request.form["members"].split(",")
+
             for i in range(len(members)-1):
-                command = letsmt_connect.split() + ["-X", "PUT", letsmt_url + "/group/" + groupName + "/" + members[i] + "?uid=" + username]
-                response = sp.Popen(command, stdout=sp.PIPE).stdout.read().decode("utf-8")
-                print(response)
+                response = rh.put("/group/"+groupName+"/"+members[i], {"uid": username})
 
             flash('Group "' + groupName + '" created!')
             return redirect(url_for('frontpage'))
@@ -155,8 +158,8 @@ def show_corpus(corpusname):
     try:
         if session:
             username = session['username']
-        command = letsmt_connect.split() + ["-X", "GET", letsmt_url + "/storage/" + corpusname + "?uid=" + username]
-        branchesXml = sp.Popen(command, stdout=sp.PIPE).stdout.read().decode("utf-8")
+
+        branchesXml = rh.get("/storage/"+corpusname, {"uid": username})
         parser = xml_parser.XmlParser(branchesXml.split("\n"))
         branches = parser.branchesForCorpus()
         branches.sort()
@@ -170,8 +173,8 @@ def download(filename):
     try:
         if session:
             username = session['username']
-        command = letsmt_connect.split() + ["-X", "GET", letsmt_url + "/storage/mikkoslot/mikkotest/xml/en/html/" + filename + "?uid=" + username + "&action=download&archive=0"]
-        ret = sp.Popen(command, stdout=sp.PIPE).stdout.read().decode("utf-8")
+
+        ret = rh.get("/storage/mikkoslot/xml/en/html/"+filename, {"uid": username, "action": "download", "archive": "0"})
         timename = str(time.time())+"###TIME###"+filename
         global previous_download
         if previous_download != "":
@@ -246,13 +249,11 @@ def get_branch():
         if session:
             username = session['username']
 
-        apicommand = letsmt_connect.split() + ["-X", "GET", letsmt_url+"/storage/"+corpusname+"/"+branch+"/uploads?uid=" + username]
-        uploadsContents = sp.Popen(apicommand, stdout=sp.PIPE).stdout.read().decode("utf-8")
+        uploadsContents = rh.get("/storage/"+corpusname+"/"+branch+"/uploads", {"uid": username})
         parser = xml_parser.XmlParser(uploadsContents.split("\n"))
         uploads = parser.navigateDirectory()
 
-        apicommand = letsmt_connect.split() + ["-X", "GET", letsmt_url+"/metadata/"+corpusname+"/"+branch+"?uid="+username]
-        xmlContents = sp.Popen(apicommand, stdout=sp.PIPE).stdout.read().decode("utf-8")
+        xmlContents = rh.get("/metadata/"+corpusname+"/"+branch, {"uid": username})
         parser = xml_parser.XmlParser(xmlContents.split("\n"))
         monolingual, parallel = parser.getMonolingualAndParallel()
         
@@ -277,9 +278,7 @@ def get_subdirs():
         subdir = subdir.replace("monolingual", "xml")
         subdir = subdir.replace("parallel", "xml")
 
-        apicommand = letsmt_connect.split() + ["-X", "GET", letsmt_url+"/storage/"+corpusname+"/"+branch+subdir+"?uid=" + username]
-        subdirContents = sp.Popen(apicommand, stdout=sp.PIPE).stdout.read().decode("utf-8")
-
+        subdirContents = rh.get("/storage/"+corpusname+"/"+branch+subdir, {"uid": username})
         parser = xml_parser.XmlParser(subdirContents.split("\n"))
         subdirs = parser.navigateDirectory()
 
@@ -290,59 +289,68 @@ def get_subdirs():
 @app.route('/upload_file', methods=['GET', 'POST'])
 @login_required
 def upload_file():
-    if request.method == 'POST':
-        path = request.form['path']
-        m = re.search("^\/(.*?)\/(.*?)\/", path)
-        corpus = m.group(1)
-        branch = m.group(2)
-        language = request.form['language']
-        fileformat = request.form['format']
-        description = request.form['description']
-        translation = "false"
-        autoimport = "false"
-        if "translation" in request.form.keys():
-            translation = "true"
-        if "autoimport" in request.form.keys():
-            autoimoprt = "true"
-        if 'file' not in request.files:
-            flash('No file part')
-            return redirect(url_for("upload_file", corpus=corpus, branch=branch, language=language, fileformat=fileformat, description=description, translation=translation, autoimport=autoimport))
-        file = request.files['file']
-        if file.filename == '':
-            flash('No selected file')
-            return redirect(url_for("upload_file", corpus=corpus, branch=branch, language=language, fileformat=fileformat, description=description, translation=translation, autoimport=autoimport))
-        if file and allowed_file(file.filename):
-            filename = secure_filename(file.filename)
-            timename = str(time.time())+"###TIME###"+filename
+    try:
+        if request.method == 'POST':
             path = request.form['path']
+            m = re.search("^\/(.*?)\/(.*?)\/", path)
+            corpus = m.group(1)
+            branch = m.group(2)
+            language = request.form['language']
+            fileformat = request.form['format']
             description = request.form['description']
-            file.save(os.path.join(app.config['UPLOAD_FOLDER'], timename))
-            if session:
-                username = session['username']
-            try:
+            direction = "unknown"
+            autoimport = "false"
+            if "direction" in request.form.keys():
+                direction = request.form["direction"]
+            if "autoimport" in request.form.keys():
+                autoimport = "true"
+            if 'file' not in request.files:
+                flash('No file part')
+                return redirect(url_for("upload_file", corpus=corpus, branch=branch, language=language, fileformat=fileformat, description=description, direction=direction, autoimport=autoimport))
+            file = request.files['file']
+            if file.filename == '':
+                flash('No selected file')
+                return redirect(url_for("upload_file", corpus=corpus, branch=branch, language=language, fileformat=fileformat, description=description, direction=direction, autoimport=autoimport))
+            if file and allowed_file(file.filename):
+                filename = secure_filename(file.filename)
+                timename = str(time.time())+"###TIME###"+filename
+                path = request.form['path']
+                description = request.form['description']
+                file.save(os.path.join(app.config['UPLOAD_FOLDER'], timename))
+                if session:
+                    username = session['username']
+
+                parameters = {"uid": username}
                 if "autoimport" in request.form.keys():
-                    command = letsmt_connect.split() + ["-X", "PUT", letsmt_url + "/storage" + path + "?uid=" + username + "&action=import", "--form", "payload=@/var/www/uploads/"+timename]
-                else:
-                    command = letsmt_connect.split() + ["-X", "PUT", letsmt_url + "/storage" + path + "?uid=" + username, "--form", "payload=@/var/www/uploads/"+timename]
+                    parameters["action"] = "import"
+                    #command = letsmt_connect.split() + ["-X", "PUT", letsmt_url + "/storage" + path + "?uid=" + username + "&action=import", "--form", "payload=@/var/www/uploads/"+timename]
+                #else:
+                    #command = letsmt_connect.split() + ["-X", "PUT", letsmt_url + "/storage" + path + "?uid=" + username, "--form", "payload=@/var/www/uploads/"+timename]
+                '''
                 print(command)
                 ret = sp.Popen(command, stdout=sp.PIPE).stdout.read().decode("utf-8")
+                '''
+                files = {"file": open("/var/www/uploads/"+timename, "rb")}
+                print(parameters)  
+                ret = rh.upload("/storage" + path, parameters, files)
                 print(ret)
-                command = letsmt_connect.split() + ["-X", "PUT", letsmt_url + "/metadata" + path + "?uid=" + username + "&description=" + description]
+                '''
+                command = letsmt_connect.split() + ["-X", "PUT", letsmt_url + "/metadata" + path + "?uid=" + username + "&description=" + description + "&direction=" + direction]
 
                 response = sp.Popen(command, stdout=sp.PIPE).stdout.read().decode("utf-8")
-
-
+                '''
+                response = rh.put("/metadata"+path, {"uid": username, "description": description, "direction": direction})
                 traceback.print_exc()
-                    
+
                 os.remove("/var/www/uploads/" + timename)
                 flash('Uploaded file "' + filename + '" to "' + path + '"')
 
                 return redirect(url_for('show_corpus', corpusname=corpus, branch=branch))
-            except:
-                traceback.print_exc()
 
-    return render_template("upload_file.html", formats=["txt", "html", "pdf", "doc"], languages=["da", "en", "fi", "no", "sv"])
-
+        return render_template("upload_file.html", formats=["txt", "html", "pdf", "doc", "tar"], languages=["da", "en", "fi", "no", "sv"])
+    except:
+        traceback.print_exc()
+        
 @app.route('/get_metadata')
 @login_required
 def get_metadata():
@@ -352,8 +360,7 @@ def get_metadata():
 
         path = request.args.get("path", "", type=str)
 
-        apicommand = letsmt_connect.split() + ["-X", "GET", letsmt_url + "/metadata" + path + "?uid=" + username]
-        metadataXml = sp.Popen(apicommand, stdout=sp.PIPE).stdout.read().decode("utf-8")
+        metadataXml = rh.get("/metadata"+path, {"uid": username})
         parser = xml_parser.XmlParser(metadataXml.split("\n"))
         metadata = parser.getMetadata()
         metadataKeys = list(metadata.keys()).copy()
@@ -371,9 +378,7 @@ def get_filecontent():
         username = session['username']
 
     path = request.args.get("path", "", type=str)
-
-    apicommand = letsmt_connect.split() + ["-X", "GET", letsmt_url + "/storage" + path + "?uid=" + username + "&action=download&archive=0"]
-    content = sp.Popen(apicommand, stdout=sp.PIPE).stdout.read().decode("utf-8")
+    content = rh.get("/storage"+path, {"uid": username, "action": "download", "archive": "0"})
     
     return jsonify(content = content)
         
@@ -539,6 +544,11 @@ def opusapi():
 
     return jsonify(corpora=ret)
 
+def is_safe_url(target):
+    ref_url = urlparse(request.host_url)
+    test_url = urlparse(urljoin(request.host_url, target))
+    return test_url.scheme in ('http', 'https') and ref_url.netloc == test_url.netloc
+
 @app.route('/login/', methods=["GET", "POST"])
 def login_page():
     error = ''
@@ -555,6 +565,12 @@ def login_page():
                 session['username'] = request.form['username']
                 
                 flash("You are now logged in")
+
+                next_url = request.args.get('next')
+
+                if not is_safe_url(next_url):
+                    return flask.abort(400)
+
                 return redirect(url_for("index"))
             
             else:
