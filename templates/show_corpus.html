@@ -1,6 +1,9 @@
 {% extends "base.html" %}
 {% block content %}
 
+<ul id="messages">
+</ul>
+
 <div>
   <div style="margin: 20px; float: left">
     <b>My corpora</b>
@@ -40,6 +43,8 @@
     <td id="filedisplay-header-cell" class="filedisplay-cell" style="text-align: center; display: none; height: 33px">
       <span id="filename" style="padding-left: 10px"></span>
       <button id="viewfile" showing="metadata">view</button>
+      <button id="importfile" style="display: none">import</button>
+      <button id="deletefile" style="color: red">delete</button>
       <button id="filedisplay-close">close</button>
     </td>
   </tr>
@@ -58,7 +63,7 @@
     </td>
     <td id="filedisplay-content-cell" class="filedisplay-cell" style="vertical-align: top; display: none; height: 500px">
       <ul id="file-metadata" style="padding-left: 20px; list-style-type: none"></ul>
-      <pre id="file-content" style="padding-left: 20px"></pre>
+      <span id="file-content" style="padding-left: 20px; white-space: pre-wrap;"></span>
     </td>
   </tr>
   <tr>

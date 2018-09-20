@@ -295,7 +295,9 @@ def upload_file():
             m = re.search("^\/(.*?)\/(.*?)\/", path)
             corpus = m.group(1)
             branch = m.group(2)
-            language = request.form['language']
+            language = ""
+            if "language" in request.form.keys():
+                language = request.form['language']
             fileformat = request.form['format']
             description = request.form['description']
             direction = "unknown"
@@ -320,27 +322,12 @@ def upload_file():
                 if session:
                     username = session['username']
 
-                parameters = {"uid": username}
-                if "autoimport" in request.form.keys():
-                    parameters["action"] = "import"
-                    #command = letsmt_connect.split() + ["-X", "PUT", letsmt_url + "/storage" + path + "?uid=" + username + "&action=import", "--form", "payload=@/var/www/uploads/"+timename]
-                #else:
-                    #command = letsmt_connect.split() + ["-X", "PUT", letsmt_url + "/storage" + path + "?uid=" + username, "--form", "payload=@/var/www/uploads/"+timename]
-                '''
-                print(command)
-                ret = sp.Popen(command, stdout=sp.PIPE).stdout.read().decode("utf-8")
-                '''
-                files = {"file": open("/var/www/uploads/"+timename, "rb")}
-                print(parameters)  
-                ret = rh.upload("/storage" + path, parameters, files)
-                print(ret)
-                '''
-                command = letsmt_connect.split() + ["-X", "PUT", letsmt_url + "/metadata" + path + "?uid=" + username + "&description=" + description + "&direction=" + direction]
+                ret = rh.upload("/storage" + path, {"uid": username}, "/var/www/uploads/"+timename)
 
-                response = sp.Popen(command, stdout=sp.PIPE).stdout.read().decode("utf-8")
-                '''
+                if "autoimport" in request.form.keys():
+                    response = rh.put("/job"+path, {"uid": username, "run": "import"})
+
                 response = rh.put("/metadata"+path, {"uid": username, "description": description, "direction": direction})
-                traceback.print_exc()
 
                 os.remove("/var/www/uploads/" + timename)
                 flash('Uploaded file "' + filename + '" to "' + path + '"')
@@ -366,7 +353,7 @@ def get_metadata():
         metadataKeys = list(metadata.keys()).copy()
         metadataKeys.sort()
 
-        return jsonify(metadata = metadata, metadataKeys = metadataKeys)
+        return jsonify(metadata = metadata, metadataKeys = metadataKeys, username = username)
 
     except:
         traceback.print_exc()
@@ -381,6 +368,28 @@ def get_filecontent():
     content = rh.get("/storage"+path, {"uid": username, "action": "download", "archive": "0"})
     
     return jsonify(content = content)
+
+@app.route('/import_file')
+@login_required
+def import_file():
+    if session:
+        username = session['username']
+
+    path = request.args.get("path", "", type=str)
+    response = rh.put("/job"+path, {"uid": username, "run": "import"})
+    
+    return jsonify(content = response)
+
+@app.route('/delete_file')
+@login_required
+def delete_file():
+    if session:
+        username = session['username']
+
+    path = request.args.get("path", "", type=str)
+    response = rh.delete("/storage"+path, {"uid": username})
+
+    return jsonify(content = response)
         
 @app.route('/translate')
 def translate():
@@ -613,7 +622,8 @@ def register_page():
             else:
                 c.execute("INSERT INTO users (username, password, email, tracking) VALUES (%s, %s, %s, %s)",
                          (thwart(username), thwart(password), thwart(email), thwart("translate")))
-
+                response = rh.post("/group/"+thwart(username), {"uid": thwart(username)})
+                print(response)
                 conn.commit()
                 flash("Thanks for registering!")
                 c.close()

@@ -23,12 +23,13 @@ class RequestHandler:
         r = self.s.post(self.root_url+url, params=params)
         return r.text
 
-    def upload(self, url, params, files):
-        r = self.s.post(self.root_url+url, params=params, files=files)
-        print(r)
-        for i in dir(r):
-            if i[0] != "_":
-                print(i+":", getattr(r, i))
+    def upload(self, url, params, filename):
+        with open(filename, "rb") as f:
+            r = self.s.post(self.root_url+url, params=params, data=f)
+        return r.text
+
+    def delete(self, url, params):
+        r = self.s.delete(self.root_url+url, params=params)
         return r.text
 '''
 rh = RequestHandler()
