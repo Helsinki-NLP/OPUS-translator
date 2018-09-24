@@ -84,6 +84,20 @@ function deleteFile(datapath, subdirname) {
     }    
 }
 
+function downloadFile(datapath, filename) {
+    let path = formulate_datapath(datapath);
+    window.location.href = "https://vm1617.kaj.pouta.csc.fi/download_file?path="+path+"&filename="+filename;
+    /*
+    console.log(path, filename);
+    $.getJSON("https://vm1617.kaj.pouta.csc.fi/download_file", {
+	path: path,
+	filename: filename
+    }, function(data) {
+	console.log(data);
+    });
+    */
+}
+
 function subdir_to_list(directories, id_name){
     for (let i=0; i<directories.length; i++) {
 	let subdir = id_name+"-_-"+directories[i][0];
@@ -99,6 +113,19 @@ function subdir_to_list(directories, id_name){
 	}
     }
 }
+
+$("#searchcorpus").on("keyup", function() {
+    if ($("#searchcorpus").val() != "") {
+	$.getJSON("https://vm1617.kaj.pouta.csc.fi/search", {
+	    corpusname: $("#searchcorpus").val()
+	}, function(data) {
+	    $("#searchresult")[0].innerHTML = "";
+	    for (let i=0; i<data.result.length; i++) {
+		$("#searchresult").append("<li>"+data.result[i]+"</li>");
+	    }
+	});
+    }
+});
 
 function open_subdir(subdir) {
     $.getJSON("https://vm1617.kaj.pouta.csc.fi/get_subdirs", {
@@ -121,12 +148,13 @@ function open_subdir(subdir) {
 		processFile(subdirs[i][0], subdir_id, subdir);
 	    }
 	}
-	subdir_list += "</ul></li>";
-	/*
+	
 	if (subdirs.length == 0) {
-	    subdir_list = '<ul id="'+subdir+'_list2" style="padding-left: 20px; list-style-type: none"><li>---</li></ul>' + subdir_list;
+	    subdir_list += "<li>---</li>";
 	}
-	*/
+	
+	subdir_list += "</ul></li>";
+
 	$("#"+subdir).after(subdir_list);
     });
 }
@@ -156,6 +184,10 @@ function processFile(filename, path, root) {
 	$("#deletefile").off("click");
 	$("#deletefile").on("click", function() {
 	    deleteFile(path, subdirname);
+	});
+	$("#downloadfile").off("click");
+	$("#downloadfile").on("click", function() {
+	    downloadFile(path, filename);
 	});
     });
 }

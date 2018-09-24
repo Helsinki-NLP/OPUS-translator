@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, jsonify, redirect, url_for, flash, session, send_file
+from flask import Flask, render_template, request, jsonify, redirect, url_for, flash, session, send_file, send_from_directory
 from wtforms import Form, BooleanField, TextField, PasswordField, validators
 from passlib.hash import sha256_crypt
 from pymysql import escape_string as thwart
@@ -183,6 +183,48 @@ def download(filename):
         with open("/var/www/downloads/"+timename, "w") as f:
             f.write(ret)
         return send_file("/var/www/downloads/"+timename, attachment_filename=filename)
+    except:
+        traceback.print_exc()
+
+@app.route('/download_file')
+@login_required
+def download_file():
+    try:
+        if session:
+            username = session['username']
+
+        path = request.args.get("path", "", type=str)
+        filename = request.args.get("filename", "", type=str)
+
+        ret = rh.get("/storage"+path, {"uid": username, "action": "download", "archive": "0"})
+
+        timename = str(time.time())+"###TIME###"+filename
+        global previous_download
+        if previous_download != "":
+            os.remove("/var/www/downloads/"+previous_download)
+        previous_download = timename
+        with open("/var/www/downloads/"+timename, "w") as f:
+            f.write(ret)
+        return send_from_directory("/var/www/downloads/", timename, as_attachment=True, attachment_filename=filename)
+    except:
+        traceback.print_exc()
+
+@app.route('/search')
+@login_required
+def search():
+    try:
+        if session:
+            username = session['username']
+
+        corpusname = request.args.get("corpusname", "", type=str)
+
+        corporaXml = rh.get("/metadata", {"uid": username, "resource-type": "branch", "STARTS_WITH_slot": corpusname})
+        print(corporaXml)
+        parser = xml_parser.XmlParser(corporaXml.split("\n"))
+        corpora = parser.corporaForUser()
+        corpora.sort()
+
+        return jsonify(result=corpora)
     except:
         traceback.print_exc()
 
