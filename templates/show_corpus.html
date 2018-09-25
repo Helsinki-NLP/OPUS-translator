@@ -16,10 +16,15 @@
 	<option value="{{ branch }}">{{ branch }}</option>
 	{% endfor %}
       </select>
-      <button style="margin-left: 20px">settings</button>
+      {% if clone %}
+      <button id="clonebranch" style="margin-left: 20px">clone</button>
+      {% endif %}
+      <button id="settings" style="margin-left: 20px">settings</button>
     </div>
   </div>
-  <div style="padding: 20px; float: right">Search corpus: <input id="searchcorpus"></div>
+  <div style="padding: 20px; float: right">Search corpus: <input id="searchcorpus">
+    <ul id="searchresult"></ul>
+  </div>
 </div>
 
 <table class="borders" style="clear: left; margin: auto; width: 90%">
@@ -30,9 +35,9 @@
     <col id="file-column" span="1" style="width: 66.66%">
   </colgroup>
   <tr>
-    <td id="uploads-header-cell" class="uploads-cell" style="text-align: center; height: 33px">
-      <span style="padding-right: 25%; padding-left:25%">uploads</span>
-      <form style="display: inline" action="/upload_file">
+    <td id="uploads-header-cell" class="uploads-cell" style="text-align: center; height: 33px;">
+      <span style="position: relative; top: 5px">uploads</span>
+      <form id="uploadfiles" style="display: inline; float: right; position: relative; right: 10px" action="/upload_file">
 	<input type="text" name="corpus" value="{{ name }}" style="display: none">
 	<input id="branch" type="text" name="branch" value="{{ branch }}" style="display: none">
 	<input type="submit" value="+">
@@ -41,12 +46,16 @@
     <td id="monolingual-header-cell" class="monolingual-cell" style="text-align: center; height: 33px">monolingual</td>
     <td id="parallel-header-cell" class="parallel-cell" style="text-align: center; height: 33px">parallel</td>
     <td id="filedisplay-header-cell" class="filedisplay-cell" style="text-align: center; display: none; height: 33px">
-      <span id="filename" style="padding-left: 10px"></span>
-      <button id="viewfile" showing="metadata">view</button>
-      <button id="importfile" style="display: none">import</button>
-      <button id="downloadfile">download</button>
-      <button id="deletefile" style="color: red">delete</button>
-      <button id="filedisplay-close">close</button>
+
+      <button id="editmetadata" style="float: left; position: relative; left: 10px">edit metadata</button>
+      <span id="filename" style="position: relative; top: 5px; max-width: 228px; word-wrap: break-word; display: inline-block"></span>
+      <div style="display: inline; float: right; position: relative; right: 10px">
+	<button id="viewfile" showing="metadata">view</button>
+	<button id="importfile" style="display: none">import</button>
+	<button id="downloadfile" style="display: none">download</button>
+	<button id="deletefile" style="color: red">delete</button>
+	<button id="filedisplay-close">close</button>
+      </div>
     </td>
   </tr>
   <tr>

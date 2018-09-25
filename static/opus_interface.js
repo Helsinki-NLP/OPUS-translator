@@ -27,6 +27,7 @@ function formulate_datapath(datapath) {
 function showMetadata(datapath) {
     $("#importfile").css("display", "none");
     $("#importfile").text("import");
+    $("#downloadfile").css("display", "none");
     let path = formulate_datapath(datapath);
     let inUploads = path.startsWith("/" + $("#corpusname").text() + "/" + $("#branch").val() + "/uploads/");
     $.getJSON("https://vm1617.kaj.pouta.csc.fi/get_metadata", {
@@ -38,6 +39,8 @@ function showMetadata(datapath) {
 		$("#importfile").css("display", "inline");
 	    } else if (key == "status" && data.metadata[key] == "imported" && inUploads) {
 		$("#importfile").text("import again");
+	    } else if (!inUploads) {
+		$("#downloadfile").css("display", "inline");
 	    }
 	    $("#file-metadata").append("<li><b>"+key+":</b> "+data.metadata[key]+"</li>");
 	}
@@ -121,10 +124,26 @@ $("#searchcorpus").on("keyup", function() {
 	}, function(data) {
 	    $("#searchresult")[0].innerHTML = "";
 	    for (let i=0; i<data.result.length; i++) {
-		$("#searchresult").append("<li>"+data.result[i]+"</li>");
+		$("#searchresult").append('<li><a href="/show_corpus/'+data.result[i]+'">'+data.result[i]+'</a></li>');
 	    }
 	});
+    } else {
+	$("#searchresult")[0].innerHTML = "";
     }
+});
+
+$("#clonebranch").on("click", function() {
+    let corpusname = $("#corpusname").text();
+    let branchclone = $("#choose-branch").val();
+    let username = $("#username").text();
+    window.location.href = "https://vm1617.kaj.pouta.csc.fi/clone_branch?branch="+username+"&corpusname="+corpusname+"&branchclone="+branchclone;
+    /*
+    $.getJSON("https://vm1617.kaj.pouta.csc.fi/clone_branch", {
+	path: path
+    }, function(data) {
+	console.log(data);
+    });
+    */
 });
 
 function open_subdir(subdir) {
@@ -256,7 +275,7 @@ $("#filedisplay-close").on("click", function() {
 });
 
 let branch = decodeURIComponent(window.location.search.substring(1)).split("&")[0].split("=")[1];
-
+console.log(branch);
 if (branch != undefined) {
     $("#choose-branch").val(branch);
 }

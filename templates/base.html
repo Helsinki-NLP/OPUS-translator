@@ -12,7 +12,7 @@
     <li id="left"><a id="navlia" class="active" href="/">Home</a></li>
     {% if session.logged_in %}
     <li id="right"><a id="navlia" href="/logout">Logout</a></li>
-    <li id="right"><a id="navlia">{{ session.username }}</a></li>
+    <li id="right"><a id="navlia"><span id="username">{{ session.username }}</span></a></li>
     {% else %}
     <li id="right"><a id="navlia" href="/login">Login</a></li>
     <li id="right"><a id="navlia" href="/register">Register</a></li>

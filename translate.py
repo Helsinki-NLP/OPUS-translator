@@ -163,10 +163,14 @@ def show_corpus(corpusname):
         parser = xml_parser.XmlParser(branchesXml.split("\n"))
         branches = parser.branchesForCorpus()
         branches.sort()
+        
+        clone = False
+        if username not in branches:
+            clone = True
     except:
         traceback.print_exc()
     
-    return render_template("show_corpus.html", name=corpusname, branches=branches)
+    return render_template("show_corpus.html", name=corpusname, branches=branches, clone=clone)
 
 @app.route('/download/<filename>')
 def download(filename):
@@ -208,7 +212,31 @@ def download_file():
         return send_from_directory("/var/www/downloads/", timename, as_attachment=True, attachment_filename=filename)
     except:
         traceback.print_exc()
+        
+@app.route('/clone_branch')
+@login_required
+def clone_branch():
+    if session:
+        username = session['username']
+    corpusname = request.args.get("corpusname", "", type=str)
+    branch = request.args.get("branchclone", "", type=str)
+    path = corpusname + "/" + branch
+    
+    ret = rh.post("/storage/"+path, {"uid": username, "action": "copy", "dest": username})
 
+    branchesXml = rh.get("/storage/"+corpusname, {"uid": username})
+    parser = xml_parser.XmlParser(branchesXml.split("\n"))
+    branches = parser.branchesForCorpus()
+    branches.sort()
+        
+    clone = False
+    if username not in branches:
+        clone = True
+
+    flash('Copied branch "'+path+'" to "'+corpusname+"/"+username+'"')
+    
+    return render_template("show_corpus.html", name=corpusname, branches=branches, clone=clone)
+    
 @app.route('/search')
 @login_required
 def search():
@@ -218,11 +246,23 @@ def search():
 
         corpusname = request.args.get("corpusname", "", type=str)
 
-        corporaXml = rh.get("/metadata", {"uid": username, "resource-type": "branch", "STARTS_WITH_slot": corpusname})
-        print(corporaXml)
+        corporaXml = rh.get("/metadata", {"uid": username, "resource-type": "branch", "INCLUDES_slot": corpusname})
+        
         parser = xml_parser.XmlParser(corporaXml.split("\n"))
-        corpora = parser.corporaForUser()
-        corpora.sort()
+        unsorted = parser.corporaForUser()
+        
+        starts = []
+        contains = []
+        for corpus in unsorted:
+            if corpus.startswith(corpusname):
+                starts.append(corpus)
+            else:
+                contains.append(corpus)
+                
+        starts.sort()
+        contains.sort()
+        
+        corpora = starts + contains
 
         return jsonify(result=corpora)
     except:
