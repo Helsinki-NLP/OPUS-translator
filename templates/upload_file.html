@@ -1,6 +1,9 @@
 {% extends "base.html" %}
 {% block content %}
 
+<ul id="messages">
+</ul>
+
 <h3>Upload file</h3>
 
 <form id="upload_form" method="post" enctype="multipart/form-data" style="padding: 20px">
@@ -59,7 +62,7 @@
     </tr>
     <tr>
       <td></td>
-      <td><input type="submit" name="submit" value="Upload"></td>
+      <td><input id="uploadbutton" type="submit" name="submit" value="Upload"></td>
     </tr>
   </table>
   <span style="float: left; padding-right: 10px">description:</span>

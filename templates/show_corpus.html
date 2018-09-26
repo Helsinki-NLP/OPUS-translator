@@ -47,7 +47,7 @@
     <td id="parallel-header-cell" class="parallel-cell" style="text-align: center; height: 33px">parallel</td>
     <td id="filedisplay-header-cell" class="filedisplay-cell" style="text-align: center; display: none; height: 33px">
 
-      <button id="editmetadata" style="float: left; position: relative; left: 10px">edit metadata</button>
+      <button id="editmetadata" edit="false" style="float: left; position: relative; left: 10px">edit metadata</button>
       <span id="filename" style="position: relative; top: 5px; max-width: 228px; word-wrap: break-word; display: inline-block"></span>
       <div style="display: inline; float: right; position: relative; right: 10px">
 	<button id="viewfile" showing="metadata">view</button>
@@ -72,7 +72,7 @@
       </ul>
     </td>
     <td id="filedisplay-content-cell" class="filedisplay-cell" style="vertical-align: top; display: none; height: 500px">
-      <ul id="file-metadata" style="padding-left: 20px; list-style-type: none"></ul>
+	<table id="file-metadata" style="padding: 20px"></table>
       <span id="file-content" style="padding-left: 20px; white-space: pre-wrap;"></span>
     </td>
   </tr>

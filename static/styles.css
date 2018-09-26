@@ -30,3 +30,16 @@ table.borders, table.borders tr, table.borders td {
 table.borders td {
     width: 30%;
 }
+
+@keyframes uploading {
+    from {color: black;}
+    to {color: red;}
+}
+
+#uploadstatus {
+    animation-name: uploading;
+    animation-duration: 2s;
+    animation-iteration-count: infinite;
+    animation-direction: alternate;
+}
+

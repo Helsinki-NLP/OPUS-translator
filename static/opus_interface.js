@@ -15,8 +15,6 @@ function update_branch() {
 }
 
 function formulate_datapath(datapath) {
-    $("#file-metadata").text("");
-    $("#file-content").text("");
     datapath = datapath.replace(/-_-/g, "/");
     datapath = datapath.replace(/-_DOT_-/g, ".");
     datapath = datapath.replace("monolingual", "xml");
@@ -24,10 +22,17 @@ function formulate_datapath(datapath) {
     return "/" + $("#corpusname").text() + "/" + $("#branch").val() + "/" + datapath;
 }
 
+var changedMetadata = {}
+var mdvn = 0
+
 function showMetadata(datapath) {
     $("#importfile").css("display", "none");
     $("#importfile").text("import");
     $("#downloadfile").css("display", "none");
+    $("#file-metadata").text("");
+    $("#file-content").text("");
+    $("#editmetadata").css("display", "inline");
+    $("#editmetadata").attr("edit", "false");
     let path = formulate_datapath(datapath);
     let inUploads = path.startsWith("/" + $("#corpusname").text() + "/" + $("#branch").val() + "/uploads/");
     $.getJSON("https://vm1617.kaj.pouta.csc.fi/get_metadata", {
@@ -42,12 +47,47 @@ function showMetadata(datapath) {
 	    } else if (!inUploads) {
 		$("#downloadfile").css("display", "inline");
 	    }
-	    $("#file-metadata").append("<li><b>"+key+":</b> "+data.metadata[key]+"</li>");
+	    let metadataid = "metadatainputid"+mdvn
+	    $("#file-metadata").append('<tr><td align="right" style="border: none; width: 1%; white-space: nowrap"><b>'+key+':</b></td><td style="border: none"><span class="metadatatext">'+data.metadata[key]+'</span><input id="'+metadataid+'" class="metadatainput" style="display: none" name="'+key+'" value="'+data.metadata[key]+'"></td></tr>');
+
+	    $(document).on("change", "#"+metadataid, function() {
+		changedMetadata[key] = $("#"+metadataid).val();
+	    });
+	    mdvn += 1;
 	}
     });
 }
 
+function editMetadata(datapath) {
+    let path = formulate_datapath(datapath);
+    if ($("#editmetadata").attr("edit") == "false") {
+	$("#editmetadata").attr("edit", "true");
+	$(".metadatatext").css("display", "none");
+	$(".metadatainput").css("display", "inline");
+	$("#file-metadata").append('<tr id="savemetadatarow"><td style="border: none; width: 1%"></td><td style="border: none;"><button id="savemetadatabutton">save changes</button></td></tr>');
+	$("#savemetadatabutton").off("click");
+	$("#savemetadatabutton").on("click", function() {
+	    $.getJSON("https://vm1617.kaj.pouta.csc.fi/update_metadata", {
+		changes: JSON.stringify(changedMetadata),
+		path: path
+	    }, function(data) {
+		$("#messages")[0].innerHTML = "";
+		$("#messages").append('<li>Updated metadata for file "' + path + "'</li>");
+		showMetadata(datapath);
+	    });
+	});
+    } else {
+	$("#editmetadata").attr("edit", "false");
+	$(".metadatatext").css("display", "inline");
+	$(".metadatainput").css("display", "none");
+	$("#savemetadatarow").remove();
+    }
+}
+
 function showFilecontent(datapath) {
+    $("#file-metadata").text("");
+    $("#file-content").text("");
+    $("#editmetadata").css("display", "none");
     let path = formulate_datapath(datapath);
     $.getJSON("https://vm1617.kaj.pouta.csc.fi/get_filecontent", {
 	path: path
@@ -62,7 +102,7 @@ function importFile(datapath) {
 	path: path
     }, function(data) {
 	$("#messages")[0].innerHTML = "";
-	$("#messages").append('<li>File "' + path + "' imported</li>");
+	$("#messages").append('<li>Started importing file "' + path + "'</li>");
     });
     update_branch();
     showOrHideTrees("monolingual", "parallel", "", "show");
@@ -70,21 +110,22 @@ function importFile(datapath) {
 
 function deleteFile(datapath, subdirname) {
     let path = formulate_datapath(datapath);
-    
-    $.getJSON("https://vm1617.kaj.pouta.csc.fi/delete_file", {
-	path: path
-    }, function(data) {
-	$("#messages")[0].innerHTML = "";
-	$("#messages").append('<li>File "' + path + "' deleted</li>");
-    });
-    update_branch();
-    if (subdirname == "uploads") {
-	showOrHideTrees("monolingual", "parallel", "", "show");
-    } else if (subdirname == "monolingual") {
-	showOrHideTrees("uploads", "parallel", "", "show");
-    } else if (subdirname == "parallel") {
-	showOrHideTrees("uploads", "monolingual", "", "show");
-    }    
+    if (confirm('Are you sure you want to delete "' + path + '"?')) {
+	$.getJSON("https://vm1617.kaj.pouta.csc.fi/delete_file", {
+	    path: path
+	}, function(data) {
+	    $("#messages")[0].innerHTML = "";
+	    $("#messages").append('<li>File "' + path + "' deleted</li>");
+	});
+	update_branch();
+	if (subdirname == "uploads") {
+	    showOrHideTrees("monolingual", "parallel", "", "show");
+	} else if (subdirname == "monolingual") {
+	    showOrHideTrees("uploads", "parallel", "", "show");
+	} else if (subdirname == "parallel") {
+	    showOrHideTrees("uploads", "monolingual", "", "show");
+	}
+    }
 }
 
 function downloadFile(datapath, filename) {
@@ -208,6 +249,10 @@ function processFile(filename, path, root) {
 	$("#downloadfile").on("click", function() {
 	    downloadFile(path, filename);
 	});
+	$("#editmetadata").off("click");
+	$("#editmetadata").on("click", function() {
+	    editMetadata(path);
+	});
     });
 }
 
@@ -275,7 +320,7 @@ $("#filedisplay-close").on("click", function() {
 });
 
 let branch = decodeURIComponent(window.location.search.substring(1)).split("&")[0].split("=")[1];
-console.log(branch);
+
 if (branch != undefined) {
     $("#choose-branch").val(branch);
 }

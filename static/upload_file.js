@@ -47,4 +47,8 @@ for (i=0; i<url.length; i++) {
     }
 }
 
+$("#uploadbutton").on("click", function() {
+    $("#messages").append('<li id="uploadstatus">Uploading, please wait...</li>');
+});
+
 updatePath();

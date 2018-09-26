@@ -17,6 +17,7 @@ import xml_parser
 import re
 from urllib.parse import urlparse, urljoin
 import request_handler
+import json
 
 import traceback
 
@@ -250,7 +251,7 @@ def search():
         
         parser = xml_parser.XmlParser(corporaXml.split("\n"))
         unsorted = parser.corporaForUser()
-        
+
         starts = []
         contains = []
         for corpus in unsorted:
@@ -268,6 +269,23 @@ def search():
     except:
         traceback.print_exc()
 
+@app.route('/update_metadata')
+@login_required
+def update_metadata():
+    try:
+        if session:
+            username = session['username']
+        path = request.args.get("path", "", type=str)
+        metadata = request.args.get("changes", "", type=str)
+        metadata = json.loads(metadata)
+        metadata["uid"] = username
+        response = rh.post("/metadata"+path, metadata)
+
+        return jsonify(response=response)
+    except:
+        traceback.print_exc()
+        
+        
 @app.route('/letsmtui', methods=['GET', 'POST'])
 @login_required
 def letsmtui():
@@ -458,7 +476,7 @@ def import_file():
         username = session['username']
 
     path = request.args.get("path", "", type=str)
-    response = rh.put("/job"+path, {"uid": username, "run": "import"})
+    response = rh.put("/job"+path, {"uid": username, "run": "reimport"})
     
     return jsonify(content = response)
 
