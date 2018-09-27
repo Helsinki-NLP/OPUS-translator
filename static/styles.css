@@ -43,3 +43,43 @@ table.borders td {
     animation-direction: alternate;
 }
 
+#editmetadata {
+    float: left;
+    position: relative;
+    left: 10px;
+    display: none;
+}
+
+#filename {
+    position: relative;
+    top: 5px;
+    max-width: 228px;
+    word-wrap: break-word;
+    display: inline-block;
+}
+
+#uploadfiles {
+    display: inline;
+    float: right;
+    position: relative;
+    right: 10px;
+}
+
+.header-cell {
+    text-align: center;
+    height: 33px;
+}
+
+.content-cell {
+    vertical-align: top;
+    height: 500px;
+}
+
+.tree-list {
+    padding-left: 20px;
+    list-style-type: none;
+}
+
+.bottom-cell {
+    height: 33px;
+}

@@ -35,20 +35,20 @@
     <col id="file-column" span="1" style="width: 66.66%">
   </colgroup>
   <tr>
-    <td id="uploads-header-cell" class="uploads-cell" style="text-align: center; height: 33px;">
+    <td id="uploads-header-cell" class="uploads-cell header-cell">
       <span style="position: relative; top: 5px">uploads</span>
-      <form id="uploadfiles" style="display: inline; float: right; position: relative; right: 10px" action="/upload_file">
+      <form id="uploadfiles" action="/upload_file">
 	<input type="text" name="corpus" value="{{ name }}" style="display: none">
 	<input id="branch" type="text" name="branch" value="{{ branch }}" style="display: none">
 	<input type="submit" value="+">
       </form>
     </td>
-    <td id="monolingual-header-cell" class="monolingual-cell" style="text-align: center; height: 33px">monolingual</td>
-    <td id="parallel-header-cell" class="parallel-cell" style="text-align: center; height: 33px">parallel</td>
-    <td id="filedisplay-header-cell" class="filedisplay-cell" style="text-align: center; display: none; height: 33px">
+    <td id="monolingual-header-cell" class="monolingual-cell header-cell">monolingual</td>
+    <td id="parallel-header-cell" class="parallel-cell header-cell">parallel</td>
+    <td id="filedisplay-header-cell" class="filedisplay-cell header-cell" style="display: none">
 
-      <button id="editmetadata" edit="false" style="float: left; position: relative; left: 10px">edit metadata</button>
-      <span id="filename" style="position: relative; top: 5px; max-width: 228px; word-wrap: break-word; display: inline-block"></span>
+      <button id="editmetadata" edit="false">edit metadata</button>
+      <span id="filename"></span>
       <div style="display: inline; float: right; position: relative; right: 10px">
 	<button id="viewfile" showing="metadata">view</button>
 	<button id="importfile" style="display: none">import</button>
@@ -59,28 +59,28 @@
     </td>
   </tr>
   <tr>
-    <td id="uploads-tree-cell" class="uploads-cell" style="vertical-align: top; height: 500px">
-      <ul id="uploads" style="padding-left: 20px; list-style-type: none">
+    <td id="uploads-tree-cell" class="uploads-cell content-cell">
+      <ul id="uploads" class="tree-list">
       </ul>
     </td>
-    <td id="monolingual-tree-cell" class="monolingual-cell" style="vertical-align: top; height: 500px">
-      <ul id="monolingual" style="padding-left: 20px; list-style-type: none">
+    <td id="monolingual-tree-cell" class="monolingual-cell content-cell">
+      <ul id="monolingual" class="tree-list">
       </ul>
     </td>
-    <td id="parallel-tree-cell" class="parallel-cell" style="vertical-align: top; height: 500px">
-      <ul id="parallel" style="padding-left: 20px; list-style-type: none">
+    <td id="parallel-tree-cell" class="parallel-cell content-cell">
+      <ul id="parallel" class="tree-list">
       </ul>
     </td>
-    <td id="filedisplay-content-cell" class="filedisplay-cell" style="vertical-align: top; display: none; height: 500px">
+    <td id="filedisplay-content-cell" class="filedisplay-cell content-cell" style="display: none">
 	<table id="file-metadata" style="padding: 20px"></table>
       <span id="file-content" style="padding-left: 20px; white-space: pre-wrap;"></span>
     </td>
   </tr>
   <tr>
-    <td id="uploads-bottom-cell" class="uploads-cell" style="height: 33px"></td>
-    <td id="monolingual-bottom-cell" class="monolingual-cell" style="height: 33px"></td>
-    <td id="parallel-bottom-cell" class="parallel-cell" style="height: 33px"></td>
-    <td id="filedisplay-bottom-cell" class="filedisplay-cell" style="display:none; height: 33px"></td>
+    <td id="uploads-bottom-cell" class="uploads-cell bottom-cell"></td>
+    <td id="monolingual-bottom-cell" class="monolingual-cell bottom-cell"></td>
+    <td id="parallel-bottom-cell" class="parallel-cell bottom-cell"></td>
+    <td id="filedisplay-bottom-cell" class="filedisplay-cell bottom-cell" style="display:none"></td>
   </tr>
 </table>
 

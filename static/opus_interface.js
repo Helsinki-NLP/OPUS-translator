@@ -22,8 +22,8 @@ function formulate_datapath(datapath) {
     return "/" + $("#corpusname").text() + "/" + $("#branch").val() + "/" + datapath;
 }
 
-var changedMetadata = {}
-var mdvn = 0
+var changedMetadata = {};
+var mdvn = 0;
 
 function showMetadata(datapath) {
     $("#importfile").css("display", "none");
@@ -31,14 +31,15 @@ function showMetadata(datapath) {
     $("#downloadfile").css("display", "none");
     $("#file-metadata").text("");
     $("#file-content").text("");
-    $("#editmetadata").css("display", "inline");
-    $("#editmetadata").attr("edit", "false");
+    $("#editmetadata").css("display", "none");
     let path = formulate_datapath(datapath);
     let inUploads = path.startsWith("/" + $("#corpusname").text() + "/" + $("#branch").val() + "/uploads/");
     $.getJSON("https://vm1617.kaj.pouta.csc.fi/get_metadata", {
 	path: path
     }, function(data) {
 	for (i=0; i<data.metadataKeys.length; i++) {
+	    $("#editmetadata").css("display", "inline");
+	    $("#editmetadata").attr("edit", "false");
 	    let key = data.metadataKeys[i];
 	    if (key == "owner" && data.metadata[key] == data.username && inUploads) {
 		$("#importfile").css("display", "inline");
@@ -58,15 +59,33 @@ function showMetadata(datapath) {
     });
 }
 
+var inputmn = 0;
+
 function editMetadata(datapath) {
     let path = formulate_datapath(datapath);
     if ($("#editmetadata").attr("edit") == "false") {
 	$("#editmetadata").attr("edit", "true");
 	$(".metadatatext").css("display", "none");
 	$(".metadatainput").css("display", "inline");
+	$("#file-metadata").append('<tr id="addfieldrow"><td align="right" style="border: none; width: 1%"><button id="addfieldbutton">add field</button></td><td style="border: none;"></td></tr>');
+	$("#addfieldbutton").off("click");
+	$("#addfieldbutton").on("click", function() {
+	    $('<tr><td style="border: none; width: 1%"><input id="addedfieldkey'+inputmn+'" class="metadatainput" style="text-align: right" placeholder="key"></td><td style="border: none;"><input id="addedfieldvalue'+inputmn+'" class="metadatainput" placeholder="value"></td></tr>').insertBefore("#addfieldrow");
+	    inputmn += 1;
+	});
 	$("#file-metadata").append('<tr id="savemetadatarow"><td style="border: none; width: 1%"></td><td style="border: none;"><button id="savemetadatabutton">save changes</button></td></tr>');
 	$("#savemetadatabutton").off("click");
 	$("#savemetadatabutton").on("click", function() {
+	    $(".metadatainput").attr("disabled", "");
+	    $("#addfieldbutton").css("display", "none");
+	    for (i=0; i<inputmn; i++) {
+		let key = $("#addedfieldkey"+i).val();
+		let  value = $("#addedfieldvalue"+i).val();
+		if (key != "" && value != "") {
+		    changedMetadata[key] = value;
+		}
+	    }
+	    inputmn = 0;
 	    $.getJSON("https://vm1617.kaj.pouta.csc.fi/update_metadata", {
 		changes: JSON.stringify(changedMetadata),
 		path: path
@@ -81,6 +100,7 @@ function editMetadata(datapath) {
 	$(".metadatatext").css("display", "inline");
 	$(".metadatainput").css("display", "none");
 	$("#savemetadatarow").remove();
+	$("#addfieldrow").remove();
     }
 }
 
