@@ -37,9 +37,9 @@ function showMetadata(datapath) {
     $.getJSON("https://vm1617.kaj.pouta.csc.fi/get_metadata", {
 	path: path
     }, function(data) {
+	$("#editmetadata").css("display", "inline");
+	$("#editmetadata").attr("edit", "false");
 	for (i=0; i<data.metadataKeys.length; i++) {
-	    $("#editmetadata").css("display", "inline");
-	    $("#editmetadata").attr("edit", "false");
 	    let key = data.metadataKeys[i];
 	    if (key == "owner" && data.metadata[key] == data.username && inUploads) {
 		$("#importfile").css("display", "inline");
@@ -67,7 +67,7 @@ function editMetadata(datapath) {
 	$("#editmetadata").attr("edit", "true");
 	$(".metadatatext").css("display", "none");
 	$(".metadatainput").css("display", "inline");
-	$("#file-metadata").append('<tr id="addfieldrow"><td align="right" style="border: none; width: 1%"><button id="addfieldbutton">add field</button></td><td style="border: none;"></td></tr>');
+	$("#file-metadata").append('<tr id="addfieldrow"><td align="right" style="border: none; width: 1%"></td><td style="border: none;"><button id="addfieldbutton">add field</button></td></tr>');
 	$("#addfieldbutton").off("click");
 	$("#addfieldbutton").on("click", function() {
 	    $('<tr><td style="border: none; width: 1%"><input id="addedfieldkey'+inputmn+'" class="metadatainput" style="text-align: right" placeholder="key"></td><td style="border: none;"><input id="addedfieldvalue'+inputmn+'" class="metadatainput" placeholder="value"></td></tr>').insertBefore("#addfieldrow");
@@ -80,7 +80,7 @@ function editMetadata(datapath) {
 	    $("#addfieldbutton").css("display", "none");
 	    for (i=0; i<inputmn; i++) {
 		let key = $("#addedfieldkey"+i).val();
-		let  value = $("#addedfieldvalue"+i).val();
+		let value = $("#addedfieldvalue"+i).val();
 		if (key != "" && value != "") {
 		    changedMetadata[key] = value;
 		}
@@ -91,7 +91,7 @@ function editMetadata(datapath) {
 		path: path
 	    }, function(data) {
 		$("#messages")[0].innerHTML = "";
-		$("#messages").append('<li>Updated metadata for file "' + path + "'</li>");
+		$("#messages").append('<li>Updated metadata for file "' + path + '"</li>');
 		showMetadata(datapath);
 	    });
 	});
@@ -241,6 +241,7 @@ function open_subdir(subdir) {
 
 function processFile(filename, path, root) {
     $(document).on("click", "#"+path, function() {
+	$("#editalignment").css("display", "none");
 	$("#filename").text(filename);
 	showMetadata(path);
 	$("#viewfile").text("view");
@@ -256,6 +257,7 @@ function processFile(filename, path, root) {
 	    showOrHideTrees("uploads", "parallel", "monolingual", "hide");
 	} else if (subdirname == "parallel") {
 	    showOrHideTrees("uploads", "monolingual", "parallel", "hide");
+	    $("#editalignment").css("display", "inline");
 	}
 	$("#viewfile").off("click");
 	$("#viewfile").on("click", function() {
@@ -273,6 +275,19 @@ function processFile(filename, path, root) {
 	$("#editmetadata").on("click", function() {
 	    editMetadata(path);
 	});
+	$("#editalignment").off("click");
+	$("#editalignment").on("click", function() {
+	    editAlignment(path);
+	});
+    });
+}
+
+function editAlignment(path) {
+    $.getJSON("https://vm1617.kaj.pouta.csc.fi/edit_alignment", {
+	path: formulate_datapath(path)
+    }, async function(data) {
+	await new Promise(resolve => setTimeout(resolve, 2000));
+	window.location.href = "http://vm1637.kaj.pouta.csc.fi/html/isa/"+data.username+"/"+$("#corpusname").text()+"/index.php";
     });
 }
 

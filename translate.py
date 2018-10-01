@@ -285,7 +285,19 @@ def update_metadata():
     except:
         traceback.print_exc()
         
-        
+@app.route('/edit_alignment')
+@login_required
+def edit_alignment():
+    try:
+        if session:
+            username = session['username']
+        path = request.args.get("path", "", type=str)
+        response = rh.put("/job"+path, {"uid": username, "run": "setup_isa"})
+
+        return jsonify(response=response, username=username)
+    except:
+        traceback.print_exc()
+           
 @app.route('/letsmtui', methods=['GET', 'POST'])
 @login_required
 def letsmtui():
@@ -356,6 +368,8 @@ def get_branch():
         xmlContents = rh.get("/metadata/"+corpusname+"/"+branch, {"uid": username})
         parser = xml_parser.XmlParser(xmlContents.split("\n"))
         monolingual, parallel = parser.getMonolingualAndParallel()
+        monolingual.sort()
+        parallel.sort()
         
         return jsonify(uploads=uploads, parallel=parallel, monolingual=monolingual)
     except Exception:
@@ -381,7 +395,8 @@ def get_subdirs():
         subdirContents = rh.get("/storage/"+corpusname+"/"+branch+subdir, {"uid": username})
         parser = xml_parser.XmlParser(subdirContents.split("\n"))
         subdirs = parser.navigateDirectory()
-
+        subdirs.sort()
+        
         return jsonify(subdirs=subdirs)
     except Exception:
         traceback.print_exc()
