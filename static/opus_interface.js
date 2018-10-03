@@ -286,6 +286,8 @@ function editAlignment(path) {
     $.getJSON("https://vm1617.kaj.pouta.csc.fi/edit_alignment", {
 	path: formulate_datapath(path)
     }, async function(data) {
+	$("#messages")[0].innerHTML = "";
+	$("#messages").append('<li>Preparing Interactive Sentence Alignment...</li>');
 	await new Promise(resolve => setTimeout(resolve, 2000));
 	window.location.href = "http://vm1637.kaj.pouta.csc.fi/html/isa/"+data.username+"/"+$("#corpusname").text()+"/index.php";
     });
