@@ -1,19 +1,16 @@
 function translate() {
     $("#asksuggestion").css("display", "none");
     $("#source").text("");
-    $("#suggestionmessage").text("");
-    $("#reportmessage").text("");
-    $("#suggestion").val("");
-    $("#trash-div").css("display", "none");
-    $("#suggestionbutton").css("display", "none");
-    $("#reportbutton").css("display", "none");
 
+    $("#suggestion").val("");
+
+    $("#trash-div").css("display", "none");
     var sentence = $("#sentence").val();
-    let direction = $("#direction").val();
+    var direction = $("#direction").val();
     if ($.trim(sentence) != "") {
 	$("#translation").css("font-style", "italic");
 	$("#translation").text("Translating...");
-	$.getJSON("https://vm1617.kaj.pouta.csc.fi/translate", {
+	$.getJSON("https://translate.ling.helsinki.fi/translate", {
 	    sent: sentence,
 	    direction: direction
 	}, function(data) {
@@ -24,10 +21,15 @@ function translate() {
 	    $("#status").text("");
 	    $("#translation").css("font-style", "normal");
 	    $("#translation").text(data.result);
+	    $("#suggestion").val(data.result);
+	    $("#submissionmessage").text("");
 	});
 	return false;
     } else {
 	$("#translation").text("");
+	$("#suggestionbutton").css("display", "none");
+	$("#reportbutton").css("display", "none");
+	$("#submissionmessage").text("");
     }
 }
 
@@ -46,7 +48,7 @@ $("#direction").on('change', function() {
 });
 
 function suggest() {
-    $.getJSON("https://vm1617.kaj.pouta.csc.fi/suggest", {
+    $.getJSON("https://translate.ling.helsinki.fi/suggest", {
 	direction: $("#sourcedirection").text(),
 	source: $("#source").val(),
 	suggestion: $("#suggestion").val()
@@ -67,34 +69,27 @@ $("#suggestion").keyup(function(ev) {
 });
 
 $("#suggestionbutton").on("click", function() {
-    if ($("#suggestionmessage").text()=="") {
-	$("#trash-div").css("display", "none");
-	$("#asksuggestion").css("display", "block");
-	$("#suggestion").val($("#translation").val());
-    }
+    $("#trash-div").css("display", "none");
+    $("#asksuggestion").css("display", "block");
 });
 
 $("#reportbutton").on("click", function() {
-    if ($("#reportmessage").text()=="") {
-	$("#asksuggestion").css("display", "none");
-	$("#trash-div").css("display", "block");
-	trash();
-    }
+    $("#asksuggestion").css("display", "none");
+    $("#trash-div").css("display", "block");
+    trash();
 });
 
 $("#report").on("click", function() {
-    let sentence = coloredToBracketed();
-    $.getJSON("https://vm1617.kaj.pouta.csc.fi/report", {
+    var sentence = coloredToBracketed();    
+    $.getJSON("https://translate.ling.helsinki.fi/suggest", {
 	direction: $("#sourcedirection").text(),
-	source: $("#source").val(),
 	sentence: sentence
     });
     $("#trash-div").css("display", "none");
-    $("#reportmessage").text("Bad sentence reported!");
-    $("#reportbutton").css("display", "none");
+    $("#submissionmessage").text("Bad sentence reported!");
 });
     
-let isDown = false;
+var isDown = false;
 $(document).mousedown(function() {
     isDown = true;
 })
@@ -104,11 +99,21 @@ $(document).mouseup(function() {
 
 function trash() {
     $("#words").html("");
-    let buttons = 0;
-    words = $("#translation").text().split(" ");
-    $.each(words, function(i, val) {
+    var buttons = 0;
+    let words = [];
+    let lines = $("#translation").val().split("\n");
+    for (let i=0;i<lines.length;i++) {
+	for (let j=0;j<lines[i].split(" ").length;j++) {
+	    words.push(lines[i].split(" ")[j]);
+	}
+    }		 
 
-	let valid = "word" + buttons.toString();
+    $.each(words, function(i, val) {
+	if (val == ""){
+	    $("#words").append('<br><br>');
+	}
+	
+	var valid = "word" + buttons.toString();
 	buttons += 1;
 
 	createButton(val, valid);
@@ -124,20 +129,11 @@ function trash() {
 }
 
 function createButton(word, wordid) {
-    let color = $("body").css("background-color");
-    word = word.split("\n");
-    if (word[word.length-1] != "") {
-	for (let i=0; i<word.length; i++) {
-	    if (word[i] == "") {
-		$("#words").append("<br>");
-	    }
-	}
-	$("#words").append('<button id="'+wordid+'-word" class="word-button" style="border: none; padding: 0; margin: 0px 3px; font-size: 20px; background-color: '+color+';">'+word[word.length-1]+'</button>');
-    }
+    $("#words").append('<button id="'+wordid+'-word" class="word-button" style="border: none; padding: 0; font-size: 20px;">'+word+'</button> ');
 }
 
 function changeColor(word) {
-    let color = $("#"+word+"-word").css("color")
+    color = $("#"+word+"-word").css("color")
     if (color == "rgb(255, 0, 0)") {
 	$("#"+word+"-word").css("color", "black");
     } else {
@@ -146,22 +142,20 @@ function changeColor(word) {
 }
 
 $("#trash-sentence").on("click", function() {
-    let color = "black";
-    $(".word-button").each(function(index) {
-	if ($(this).css("color") != "rgb(255, 0, 0)") {
-	    color = "red";
-	}
-    });
+    var color = "red";
+    if ($("#word0-word").css("color") == "rgb(255, 0, 0)") {
+	color = "black";
+    }
     $(".word-button").each(function(index) {
 	$(this).css("color", color);
     });
 });
 
 function coloredToBracketed() {
-    let sentence = "";
-    let prevRed = false;
+    var sentence = "";
+    var prevRed = false;
     $(".word-button").each(function(index) {
-	let color = $(this).css("color");
+	var color = $(this).css("color");
 	if (color == "rgb(255, 0, 0)") {
 	    if (!prevRed) {
 		sentence += "<rubbish>";
@@ -179,6 +173,7 @@ function coloredToBracketed() {
 	    sentence = sentence.substring(0, sentence.length-1) + "</rubbish>";
 	}
     });
+    console.log(sentence.trim());
     return sentence.trim();
 }
 

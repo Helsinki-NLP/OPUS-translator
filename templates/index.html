@@ -1,36 +1,36 @@
 {% extends "base.html" %}
 {% block content %}
-  <div class="container">
-    
-    <h4>Translate</h4>
-    
-    <select id="direction">
+<div class="container">
 
-      <!--
+  <h4>Translate</h4>
+
+  <select id="direction">
+
+          <!--
       <option value="en-de">en-de</option>
       <option value="en-fr">en-fr</option>
       <option value="da-fi">da-fi</option>
       <option value="no-fi">no-fi</option>
       -->
-      <option value="sv-fi">da/no/sv-fi</option>
-      <option value="fi-da">fi-da</option>
-      <option value="fi-no">fi-no</option>
-      <option value="fi-sv">fi-sv</option>
-    </select>
-    <button id="translate">Translate</button>
-    <br><br>
-    <div overflow="none">
-      <div style="float: left;">
-	<textarea id="sentence" maxlength="500" rows="4" cols="30" style="font-size: 20px" autofocus></textarea>
-      </div>
-      <div style="margin-left: 450px;">
-	<textarea id="translation" rows="4" cols="30" style="font-size: 20px;" readonly></textarea>
-      </div>
+	  <option value="sv-fi">da/no/sv-fi</option>
+	  <option value="fi-da">fi-da</option>
+	  <option value="fi-no">fi-no</option>
+	  <option value="fi-sv">fi-sv</option>
+  </select>
+  <button id="translate">Translate</button>
+  <br><br>
+  <div overflow="none">
+    <div style="float: left;">
+      <textarea id="sentence" maxlength="500" rows="4" cols="30" style="font-size: 20px" autofocus></textarea>
     </div>
-    <br><br>
-    <button id="suggestionbutton" style="display: none">Suggest a better translation</button>
-    <button id="reportbutton" style="display: none">Report a bad translation</button>
-    <p style="color: green"><span id="suggestionmessage"></span> <span id="reportmessage"></span><p>
+    <div style="margin-left: 450px;">
+      <textarea id="translation" rows="4" cols="30" style="font-size: 20px;" readonly></textarea>
+    </div>
+  </div>
+  <br><br>
+  <button id="suggestionbutton" style="display: none">Suggest a better translation</button>
+  <button id="reportbutton" style="display: none">Report a bad translation</button>
+  <p style="color: green"><span id="suggestionmessage"></span> <span id="reportmessage"></span><p>
     <div id="asksuggestion" style="display: none;" overflow="none">
       <div style="float: left;">
 	<span>Source text:</span>
@@ -42,19 +42,19 @@
 	<br>
 	<textarea id="suggestion" maxlength="500" rows="4" cols="30" style="font-size: 20px;"></textarea>
       </div>
-    <br>
-    <button id="suggest">Submit</button>
-    <span style="display: none" id="sourcedirection"></span>
+      <br>
+      <button id="suggest">Submit</button>
+      <span style="display: none" id="sourcedirection"></span>
     </div>
-  </div>
-  <div style="display: none" id="trash-div">
-    Mark the words that are rubbish or 
-    <button id="trash-sentence">Mark the whole text</button> :
-    <br><br>
-    <div id="words"></div>
-    <br><br>
-    <button id="report">Submit</button>
-  </div>
+</div>
+<div style="display: none" id="trash-div">
+  Mark the words that are rubbish or
+  <button id="trash-sentence">Mark the whole text</button> :
+  <br><br>
+  <div id="words"></div>
+  <br><br>
+  <button id="report">Submit</button>
+</div>
 
 <script src="static/jquery-3.3.1.min.js"> </script>
 <script type="text/javascript" src="{{ url_for('static', filename='functionality.js') }}"> </script>
