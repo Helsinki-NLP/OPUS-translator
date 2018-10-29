@@ -15,7 +15,7 @@
     display: block;
     color: black;
     text-align: center;
-    padding: 14px 16px;
+    padding: 25px 16px;
     text-decoration: none;
 }
 #navlia:hover {
@@ -29,6 +29,16 @@ table.borders, table.borders tr, table.borders td {
 }
 table.borders td {
     width: 30%;
+}
+
+.translation-cell-content {
+    padding: 4px;
+    border: 1px solid black;
+    cursor: pointer;
+}
+
+.translation-cell-content:hover {
+    background-color: #D8D8D8;
 }
 
 @keyframes uploading {

@@ -5,9 +5,16 @@ function translate() {
     $("#suggestion").val("");
 
     $("#trash-div").css("display", "none");
-    var sentence = $("#sentence").val();
-    var direction = $("#direction").val();
-    if ($.trim(sentence) != "") {
+    
+    let sentence = $("#sentence").val();
+    
+    let source_lan = $("#selected-source").attr("language");
+    let target_lan = $("#selected-target").attr("language");
+    var direction = source_lan + "-" + target_lan;
+
+    if ($.inArray(direction, ["fi-fi", "sv-sv", "sv-no", "sv-da"]) != -1) {
+	$("#translation").text(sentence);
+    } else if ($.trim(sentence) != "") {
 	$("#translation").css("font-style", "italic");
 	$("#translation").text("Translating...");
 	$.getJSON("https://translate.ling.helsinki.fi/translate", {
@@ -177,18 +184,16 @@ function coloredToBracketed() {
     return sentence.trim();
 }
 
+$(".source-languages").on("click", function() {
+    $(".source-languages").css("background-color", "");
+    $(".source-languages").attr("id", "");
+    $(this).css("background-color", "#D8D8D8");
+    $(this).attr("id", "selected-source");
+});
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+$(".target-languages").on("click", function() {
+    $(".target-languages").css("background-color", "");
+    $(".target-languages").attr("id", "");
+    $(this).css("background-color", "#D8D8D8");
+    $(this).attr("id", "selected-target");
+});

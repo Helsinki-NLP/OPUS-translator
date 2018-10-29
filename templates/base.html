@@ -9,7 +9,7 @@
 <body>
   
   <ul id="navul">
-    <li id="left"><a id="navlia" class="active" href="/">Home</a></li>
+    <li id="left"><a href="/"><img id="navlia"  src="{{ url_for('static', filename='logo-fiskmo-black.png') }}" style="height: 69px; padding: 0px 0px"></a></li>
     {% if session.logged_in %}
     <li id="right"><a id="navlia" href="/logout">Logout</a></li>
     <li id="right"><a id="navlia"><span id="username">{{ session.username }}</span></a></li>

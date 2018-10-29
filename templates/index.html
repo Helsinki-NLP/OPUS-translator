@@ -1,21 +1,86 @@
 {% extends "base.html" %}
 {% block content %}
+
+
+<table class="translation-table" style="margin: 50px">
+  <tr>
+    <td>
+      <span id="selected-source" class="translation-cell-content source-languages" style="background-color: #D8D8D8" language="fi">Finnish</span>
+      <span class="translation-cell-content source-languages" language="sv">Swedish / Norwegian / Danish</span>
+      <span class="translation-cell-content">detect language</span>
+    </td>
+    <td style="width: 40px"></td>
+    <td>
+      <span class="translation-cell-content target-languages" language="fi">Finnish</span>
+      <span id="selected-target" class="translation-cell-content target-languages" style="background-color: #D8D8D8" language="sv">Swedish</span>
+      <span class="translation-cell-content target-languages" language="no">Norwegian</span>
+      <span class="translation-cell-content target-languages" language="da">Danish</span>
+      <span id="translate" class="translation-cell-content" style="margin-left: 10%">translate</span>
+    </td>
+  </tr>
+  <tr>
+    <td style="height: 40px" colspan="3"></td>
+  </tr>
+  <tr style="height: 200px">
+    <td style="width: 475px"><textarea id="sentence" maxlength="500" style="width: 100%; height: 200px; resize: none; font-size: 20px" autofocus></textarea></td>
+    <td style="width: 40px"></td>
+    <td style="width: 475px"><textarea id="translation" style="width: 100%; height: 200px; resize: none; font-size: 20px" readonly></textarea></td>
+  </tr>
+  <tr>
+    <td style="height: 40px" colspan="3"></td>
+  </tr>
+  <tr>
+    <td>Support the project:</td>
+    <td></td>
+    <td></td>
+  </tr>
+  <tr>
+    <td style="height: 20px" colspan="3"></td>
+  </tr>
+  <tr>
+    <td>upload translation memory</td>
+    <td></td>
+    <td>upload translated documents</td>
+  </tr>
+  <tr>
+    <td rowspan="2" valign="top">
+      <table>
+	<tr>
+	  <td><input type="file"></td>
+	</tr>
+	<tr>
+	  <td><button>upload</button></td>
+	</tr>
+      </table>
+    </td>
+    <td></td>
+    <td rowspan="3">
+      <table>
+	<tr>
+	  <td>original:</td>
+	  <td><input type="file"></td>
+	</tr>
+	<tr>
+	  <td>translation:</td>
+	  <td><input type="file">
+	</tr>
+	<tr>
+	  <td></td>
+	  <td><button>upload</button></td>
+	</tr>
+      </table>
+  </tr>
+</table>
+
+<!--
 <div class="container">
-
-  <h4>Translate</h4>
-
+    
   <select id="direction">
-
-          <!--
-      <option value="en-de">en-de</option>
-      <option value="en-fr">en-fr</option>
-      <option value="da-fi">da-fi</option>
-      <option value="no-fi">no-fi</option>
-      -->
-	  <option value="sv-fi">da/no/sv-fi</option>
-	  <option value="fi-da">fi-da</option>
-	  <option value="fi-no">fi-no</option>
-	  <option value="fi-sv">fi-sv</option>
+   
+    <option value="sv-fi">da/no/sv-fi</option>
+    <option value="fi-da">fi-da</option>
+    <option value="fi-no">fi-no</option>
+    <option value="fi-sv">fi-sv</option>
   </select>
   <button id="translate">Translate</button>
   <br><br>
@@ -55,6 +120,7 @@
   <br><br>
   <button id="report">Submit</button>
 </div>
+-->
 
 <script src="static/jquery-3.3.1.min.js"> </script>
 <script type="text/javascript" src="{{ url_for('static', filename='functionality.js') }}"> </script>

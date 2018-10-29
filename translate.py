@@ -13,10 +13,8 @@ import subprocess as sp
 import os
 from werkzeug.utils import secure_filename
 import time
-import xml_parser
 import re
 from urllib.parse import urlparse, urljoin
-import request_handler
 import json
 
 import traceback
@@ -274,8 +272,6 @@ def register_page():
             else:
                 c.execute("INSERT INTO users (username, password, email, tracking) VALUES (%s, %s, %s, %s)",
                          (thwart(username), thwart(password), thwart(email), thwart("translate")))
-                response = rh.post("/group/"+thwart(username), {"uid": thwart(username)})
-                print(response)
                 conn.commit()
                 flash("Thanks for registering!")
                 c.close()
