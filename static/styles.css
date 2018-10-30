@@ -93,3 +93,7 @@ table.borders td {
 .bottom-cell {
     height: 33px;
 }
+
+.error {
+    color: red;
+}
