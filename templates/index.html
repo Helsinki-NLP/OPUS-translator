@@ -7,7 +7,7 @@
     <td>
       <span id="selected-source" class="translation-cell-content source-languages" style="background-color: #D8D8D8" language="fi">Finnish</span>
       <span class="translation-cell-content source-languages" language="sv">Swedish / Norwegian / Danish</span>
-      <span class="translation-cell-content">detect language</span>
+      <span class="translation-cell-content source-languages" language="DL">detect language</span>
     </td>
     <td style="width: 40px"></td>
     <td>
@@ -47,10 +47,10 @@
       <form id="upload-tm-form" method="post" enctype="multipart/form-data">
 	<table>
 	  <tr>
-	    <td><input id="tm-file" type="file" name="tm-file"><input id="upload-tm-button" type="submit" name="upload-tm-button" value="upload"></td>
+	    <td><input id="tm-file" type="file" name="tm-file"></td>
 	  </tr>
 	  <tr>
-	    <td></td>
+	    <td><input id="upload-tm-button" type="submit" name="upload-tm-button" value="upload"></td>
 	  </tr>
 	</table>
       </form>
@@ -65,11 +65,11 @@
 	  </tr>
 	  <tr>
 	    <td>translation:</td>
-	    <td><input id="translation-doc" type="file" name="translation-doc"><input id="upload-files-button" type="submit" name="upload-files-button" value="upload"></td>
+	    <td><input id="translation-doc" type="file" name="translation-doc"></td>
 	  </tr>
 	  <tr>
 	    <td></td>
-	    <td></td>
+	    <td><input id="upload-files-button" type="submit" name="upload-files-button" value="upload"></td>
 	  </tr>
 	</table>
       </form>

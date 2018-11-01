@@ -18,6 +18,7 @@ from urllib.parse import urlparse, urljoin
 import json
 import datetime
 import request_handler
+import pycld2
 
 rh = request_handler.RequestHandler()
 
@@ -115,12 +116,20 @@ def translate():
 
     direction = request.args.get('direction', 'empty', type=str)
 
+    if direction[:2] == "DL":
+        sourcelan = pycld2.detect(text)[2][0][1]
+        if sourcelan != "fi":
+            sourcelan = "sv"
+        direction = sourcelan + direction[2:]
+
     if direction in ["da-fi", "no-fi", "sv-fi"]:
         ws = create_connection("ws://localhost:{}/translate".format(5003))
         preprocess = "preprocess_danosv.sh"
     elif direction in ["fi-da", "fi-no", "fi-sv"]:
         ws = create_connection("ws://localhost:{}/translate".format(5004))
         preprocess = "preprocess_fi.sh"
+    else:
+        return jsonify(result=text)
 
     sourcelan = direction[:2]
     targetlan = direction[-2:]
