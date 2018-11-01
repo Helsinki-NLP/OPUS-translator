@@ -19,12 +19,33 @@ import json
 import datetime
 import request_handler
 import pycld2
+from flask_mail import Mail, Message
+import string
+from random import *
 
 rh = request_handler.RequestHandler()
 
 import traceback
 
 app = Flask(__name__)
+
+with open("secrets/euser") as f:
+    euser = f.read()[:-1]
+
+with open("secrets/epass") as f:
+    epass = f.read()[:-1]
+    
+mail_settings = {
+        "MAIL_SERVER": 'smtp.gmail.com',
+        "MAIL_PORT": 465,
+        "MAIL_USER_TLS": False,
+        "MAIL_USE_SSL": True,
+        "MAIL_USERNAME": euser,
+        "MAIL_PASSWORD": epass
+    }
+
+app.config.update(mail_settings)
+mail = Mail(app)
 
 UPLOAD_FOLDER = "/var/www/uploads"
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
@@ -92,7 +113,7 @@ def index():
 
         return render_template("index.html")
     except:
-        traceback.print_exc()
+        traceback.print_exc()    
 
 def login_required(f):
     @wraps(f)
@@ -105,6 +126,76 @@ def login_required(f):
         
     return wrap
 
+@app.route("/userpage", methods=["GET", "POST"])
+@login_required
+def user_page():
+    try:
+        if session:
+            username = session["username"]
+
+        if request.method == "POST":
+            c, conn = connection()
+            data = c.execute("SELECT * FROM users WHERE username = (%s)", username)
+            
+            data = c.fetchone()['password']
+            
+            if sha256_crypt.verify(request.form['current_pass'], data):
+                password = sha256_crypt.encrypt((str(request.form["new_pass"])))
+                c.execute("UPDATE users SET password = (%s) WHERE username = (%s)", (password, username))
+                conn.commit()
+
+                flash("Password changed")
+            else:
+                flash("Wrong password")
+
+            c.close()
+            gc.collect()
+            return redirect(url_for("user_page"))
+
+        return render_template("userpage.html", username=username)
+    except:
+        traceback.print_exc()
+
+@app.route("/forgot_password", methods=["GET", "POST"])
+def forgot_password():
+    try:
+        if request.method == "POST":
+            username = thwart(request.form["username"])
+            c, conn = connection()
+            
+            data = c.execute("SELECT * FROM users WHERE username = (%s)", username)
+
+            if data == 0:
+                c.close()
+                gc.collect()
+                flash('Password has been changed for "' + username + '". Check you email.')
+                return redirect(url_for("forgot_password"))
+            
+            email = c.fetchone()['email']
+
+            allchar = string.ascii_letters + string.punctuation + string.digits
+            password = "".join(choice(allchar) for x in range(12))
+            encrypted_password = sha256_crypt.encrypt(password)
+            
+            c.execute("UPDATE users SET password = (%s) WHERE username = (%s)", (encrypted_password, username))
+            conn.commit()
+
+            c.close()
+            gc.collect()
+
+            with app.app_context():
+                msg = Message(subject="Password reset",
+                        sender=app.config.get("MAIL_USERNAME"),
+                        recipients=[email],
+                        body='Your new password is:\n\n'+password+'\n\nPlease change it as soon as possible.')
+                mail.send(msg)
+            flash('Password has been changed for "' + username + '". Check you email.')
+            return redirect(url_for("login_page"))
+
+        return render_template("forgot_password.html")
+    except:
+        traceback.print_exc()
+  
 @app.route('/translate')
 def translate():
     text = request.args.get('sent', 'empty', type=str)

@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h1>{{ username }}</h1>
+
+<form id="change_password" method="post">
+  <table>
+    <tr>
+      <td><h4>Change password</h4></td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>Current password:</td>
+      <td><input type="password" name="current_pass"></td>
+    </tr>
+    <tr>
+      <td>New password:</td>
+      <td><input type="password" name="new_pass"></td>
+    </tr>
+    <tr>
+      <td></td>
+      <td><input type="submit" name="submit" value="Change password"></td>
+    </tr>
+  </table>
+</form>
+
+{% endblock %}
