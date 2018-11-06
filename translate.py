@@ -21,7 +21,7 @@ import request_handler
 import pycld2
 from flask_mail import Mail, Message
 import string
-from random import *
+from random import choice
 
 rh = request_handler.RequestHandler()
 
@@ -149,6 +149,7 @@ def user_page():
                 flash("Wrong password")
 
             c.close()
+            conn.close()
             gc.collect()
             return redirect(url_for("user_page"))
 
@@ -168,31 +169,82 @@ def forgot_password():
             if data == 0:
                 c.close()
                 gc.collect()
-                flash('Password has been changed for "' + username + '". Check your email.')
-                return redirect(url_for("forgot_password"))
+                flash('See your email for further instructions.')
+                return redirect(url_for("login_page"))
             
             email = c.fetchone()['email']
 
-            allchar = string.ascii_letters + string.punctuation + string.digits
-            password = "".join(choice(allchar) for x in range(12))
-            encrypted_password = sha256_crypt.encrypt(password)
+            allchar = string.ascii_letters + string.digits
+            token = "".join(choice(allchar) for x in range(18))
             
-            c.execute("UPDATE users SET password = (%s) WHERE username = (%s)", (encrypted_password, username))
+            c.execute("INSERT INTO tokens (username, token) VALUES ((%s), (%s))", (username, token))
             conn.commit()
-
+            
             c.close()
+            conn.close()
             gc.collect()
 
             with app.app_context():
-                msg = Message(subject="Password reset",
+                msg = Message(subject="Account management",
                         sender=app.config.get("MAIL_USERNAME"),
                         recipients=[email],
-                        body='Your new password is:\n\n'+password+'\n\nPlease change it as soon as possible.')
+                        body='Follow this link to reset your Fiskmö account password:\n\nhttps://translate.ling.helsinki.fi/reset_password/'+token+'\n\nThe link will expire in 60 minutes.')
                 mail.send(msg)
-            flash('Password has been changed for "' + username + '". Check your email.')
+            flash('See your email for further instructions.')
             return redirect(url_for("login_page"))
 
         return render_template("forgot_password.html")
+    except:
+        traceback.print_exc()
+
+@app.route("/reset_password/<token>", methods=["GET", "POST"])
+def reset_password(token):
+    try:
+        c, conn = connection()
+            
+        data = c.execute("SELECT * FROM tokens WHERE token = (%s)", token)
+
+        if data == 0:
+            flash("Invalid password reset link")
+            return redirect(url_for("index"))
+
+        values = c.fetchone()
+        date = values['timestamp']
+        
+        if datetime.datetime.now().timestamp()-date.timestamp() > 3600:
+            c.execute("DELETE FROM tokens WHERE token =(%s)", token)
+            conn.commit()
+            c.close()
+            conn.close()
+            gc.collect()
+            flash("Invalid password reset link")
+            return redirect(url_for("index"))
+
+        username = values['username']
+
+        if request.method == "POST":
+            if request.form["password"] != request.form["confirm_password"]:
+                flash("The passwords must match")
+                return redirect(url_for("reset_password", token=token))
+            elif request.form["password"] == "":
+                flash("The password cannot be empty")
+                return redirect(url_for("reset_password", token=token))
+            else:
+                password = sha256_crypt.encrypt((request.form["password"]))
+                c.execute("UPDATE users SET password = (%s) WHERE username = (%s)", (password, username))
+                c.execute("DELETE FROM tokens WHERE token =(%s)", token)
+                conn.commit()
+                c.close()
+                conn.close()
+                gc.collect()
+                flash("Password updated successfully!")
+                return redirect(url_for("login_page"))
+        
+        c.close()
+        conn.close()
+        gc.collect()
+        return render_template("reset_password.html")
+
     except:
         traceback.print_exc()
   
