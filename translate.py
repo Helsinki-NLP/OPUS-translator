@@ -168,7 +168,7 @@ def forgot_password():
             if data == 0:
                 c.close()
                 gc.collect()
-                flash('Password has been changed for "' + username + '". Check you email.')
+                flash('Password has been changed for "' + username + '". Check your email.')
                 return redirect(url_for("forgot_password"))
             
             email = c.fetchone()['email']
@@ -189,7 +189,7 @@ def forgot_password():
                         recipients=[email],
                         body='Your new password is:\n\n'+password+'\n\nPlease change it as soon as possible.')
                 mail.send(msg)
-            flash('Password has been changed for "' + username + '". Check you email.')
+            flash('Password has been changed for "' + username + '". Check your email.')
             return redirect(url_for("login_page"))
 
         return render_template("forgot_password.html")
@@ -212,6 +212,10 @@ def translate():
         if sourcelan != "fi":
             sourcelan = "sv"
         direction = sourcelan + direction[2:]
+        if direction == "fi-fi":
+            direction = "fi-sv"
+        elif direction in ["sv-sv", "sv-no", "sv-da"]:
+            direction = "sv-fi"
 
     if direction in ["da-fi", "no-fi", "sv-fi"]:
         ws = create_connection("ws://localhost:{}/translate".format(5003))
@@ -220,7 +224,7 @@ def translate():
         ws = create_connection("ws://localhost:{}/translate".format(5004))
         preprocess = "preprocess_fi.sh"
     else:
-        return jsonify(result=text)
+        return jsonify(result="translation direction not found")
 
     sourcelan = direction[:2]
     targetlan = direction[-2:]
@@ -253,7 +257,7 @@ def translate():
 
     translation = translation[:-1]
 
-    return jsonify(result=translation)
+    return jsonify(result=translation, source=sourcelan, target=targetlan)
 
 @app.route('/suggest/')
 def suggest():

@@ -30,6 +30,7 @@ function translate() {
 	    $("#translation").text(data.result);
 	    $("#suggestion").val(data.result);
 	    $("#submissionmessage").text("");
+	    $("#target-language-cell").find("[language="+data.target+"]").click()
 	});
 	return false;
     } else {
@@ -189,6 +190,13 @@ $(".source-languages").on("click", function() {
     $(".source-languages").attr("id", "");
     $(this).css("background-color", "#D8D8D8");
     $(this).attr("id", "selected-source");
+    let sourcelang = $(this).attr("language");
+    let targetlang = $("#selected-target").attr("language");
+    if (sourcelang == "fi" && targetlang == "fi" ) {
+	$("#target-language-cell").find("[language=sv]").click()
+    } else if (sourcelang == "sv" && $.inArray(targetlang, ["no", "sv", "da"]) != -1) {
+	$("#target-language-cell").find("[language=fi]").click()
+    }
 });
 
 $(".target-languages").on("click", function() {
@@ -196,4 +204,11 @@ $(".target-languages").on("click", function() {
     $(".target-languages").attr("id", "");
     $(this).css("background-color", "#D8D8D8");
     $(this).attr("id", "selected-target");
+    let sourcelang = $("#selected-source").attr("language");
+    let targetlang = $(this).attr("language");
+    if (sourcelang == "fi" && targetlang == "fi" ) {
+	$("#source-language-cell").find("[language=sv]").click()
+    } else if (sourcelang == "sv" && $.inArray(targetlang, ["no", "sv", "da"]) != -1) {
+	$("#source-language-cell").find("[language=fi]").click()	
+    }    
 });
