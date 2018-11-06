@@ -50,9 +50,13 @@ mail = Mail(app)
 UPLOAD_FOLDER = "/var/www/uploads"
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
-ALLOWED_EXTENSIONS = set(['txt', 'xml', 'html', 'tmx'])
-def allowed_file(filename):
-    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+ALLOWED_EXTENSIONS_tm = set(['txt'])
+ALLOWED_EXTENSIONS_td = set(['xml', 'html', 'tmx'])
+def allowed_file(filename, ftype):
+    if ftype == "tm":
+        return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS_tm
+    elif ftype == "td":
+        return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS_td        
 
 with open("secrets/secretkey") as f:
     key = f.read()[:-1].encode("utf-8")
@@ -73,7 +77,7 @@ def index():
                 if tm_file.filename == "":
                     flash("No file selected", "error")
                     return redirect(url_for("index"))
-                if tm_file and allowed_file(tm_file.filename):
+                if tm_file and allowed_file(tm_file.filename, "tm"):
                     tm_filename = secure_filename(tm_file.filename)
                     extension = re.search("(\..*)$", tm_filename).group(1)
                     tm_timename = datetime.datetime.today().strftime('%Y%m%d-%H%M%S')
@@ -83,13 +87,15 @@ def index():
                     response = rh.put("/metadata/" + path, {"uid": username, "original_name": tm_filename})
                     os.remove(UPLOAD_FOLDER+"/"+tm_timename+extension)
                     flash('File "' + tm_file.filename + '" uploaded')
+                else:
+                    flash("Invalid file extension", "error")
             if "original-doc" in request.files and "translation-doc" in request.files:
                 original_doc = request.files["original-doc"]
                 translation_doc = request.files["translation-doc"]
-                if original_doc.filename == "" or translation_doc == "":
+                if original_doc.filename == "" or translation_doc.filename == "":
                     flash("No file selected", "error")
                     return redirect(url_for("index"))
-                if original_doc and translation_doc and allowed_file(original_doc.filename) and allowed_file(translation_doc.filename):
+                if original_doc and translation_doc and allowed_file(original_doc.filename, "td") and allowed_file(translation_doc.filename, "td"):
                     datename = datetime.datetime.today().strftime('%Y%m%d-%H%M%S')
                     original_docname = secure_filename(original_doc.filename)
                     extension = re.search("(\..*)$", original_docname).group(1)
@@ -108,6 +114,8 @@ def index():
                     os.remove(UPLOAD_FOLDER+"/tra"+datename+extension)
                     
                     flash('Files "' + original_doc.filename + '" and "' + translation_doc.filename + '" uploaded')
+                else:
+                    flash("Invalid file extension", "error")
 
             return redirect(url_for("index"))
 
