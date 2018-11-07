@@ -31,6 +31,7 @@ function translate() {
 	    $("#suggestion").val(data.result);
 	    $("#submissionmessage").text("");
 	    $("#target-language-cell").find("[language="+data.target+"]").click()
+	    highlight_detected(data.source);
 	});
 	return false;
     } else {
@@ -38,6 +39,14 @@ function translate() {
 	$("#suggestionbutton").css("display", "none");
 	$("#reportbutton").css("display", "none");
 	$("#submissionmessage").text("");
+    }
+}
+
+function highlight_detected(source) {
+    if ($("#selected-source").attr("language") == "DL") {
+	$("#source-language-cell").find("[language=fi]").css({"border": "1px solid black", "background-color": ""});
+	$("#source-language-cell").find("[language=sv]").css({"border": "1px solid black", "background-color": ""});
+	$("#source-language-cell").find("[language="+source+"]").css({"border": "2px dashed black", "background-color": "#D8D8D8"});
     }
 }
 
@@ -186,7 +195,7 @@ function coloredToBracketed() {
 }
 
 $(".source-languages").on("click", function() {
-    $(".source-languages").css("background-color", "");
+    $(".source-languages").css({"background-color": "", "border": "1px solid black"});
     $(".source-languages").attr("id", "");
     $(this).css("background-color", "#D8D8D8");
     $(this).attr("id", "selected-source");
