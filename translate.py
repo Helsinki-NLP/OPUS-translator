@@ -50,8 +50,10 @@ mail = Mail(app)
 UPLOAD_FOLDER = "/var/www/uploads"
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
-ALLOWED_EXTENSIONS_tm = set(['txt'])
-ALLOWED_EXTENSIONS_td = set(['xml', 'html', 'tmx'])
+tm_extensions = ['tmx', 'xliff']
+td_extensions = ['xml', 'html', 'txt', 'pdf', 'doc']
+ALLOWED_EXTENSIONS_tm = set(tm_extensions)
+ALLOWED_EXTENSIONS_td = set(td_extensions)
 def allowed_file(filename, ftype):
     if ftype == "tm":
         return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS_tm
@@ -72,6 +74,7 @@ def index():
                 username = session["username"]
             else:
                 username = "anonymous"
+            email_address = request.form["emailaddress"]
             if "tm-file" in request.files:
                 tm_file = request.files["tm-file"]
                 if tm_file.filename == "":
@@ -84,11 +87,11 @@ def index():
                     tm_file.save(os.path.join(app.config['UPLOAD_FOLDER'], tm_timename+extension))
                     path = username + "/" + username + "/uploads/tm/" + tm_timename + extension
                     response = rh.upload("/storage/" + path, {"uid": username}, UPLOAD_FOLDER+"/"+tm_timename+extension)
-                    response = rh.put("/metadata/" + path, {"uid": username, "original_name": tm_filename})
+                    response = rh.put("/metadata/" + path, {"uid": username, "original_name": tm_filename, "email": email_address})
                     os.remove(UPLOAD_FOLDER+"/"+tm_timename+extension)
                     flash('File "' + tm_file.filename + '" uploaded')
                 else:
-                    flash("Invalid file extension", "error")
+                    flash("Invalid file format", "error")
             if "original-doc" in request.files and "translation-doc" in request.files:
                 original_doc = request.files["original-doc"]
                 translation_doc = request.files["translation-doc"]
@@ -96,30 +99,37 @@ def index():
                     flash("No file selected", "error")
                     return redirect(url_for("index"))
                 if original_doc and translation_doc and allowed_file(original_doc.filename, "td") and allowed_file(translation_doc.filename, "td"):
-                    datename = datetime.datetime.today().strftime('%Y%m%d-%H%M%S')
                     original_docname = secure_filename(original_doc.filename)
-                    extension = re.search("(\..*)$", original_docname).group(1)
-                    original_doc.save(os.path.join(app.config['UPLOAD_FOLDER'], "org"+datename+extension))
-                    path = username + "/" + username + "/uploads/original/" + datename + extension
-                    response = rh.upload("/storage/" + path, {"uid": username}, UPLOAD_FOLDER+"/org"+datename+extension)
-                    response = rh.put("/metadata/" + path, {"uid": username, "original_name": original_docname})
-                    os.remove(UPLOAD_FOLDER+"/org"+datename+extension)
-                    
                     translation_docname = secure_filename(translation_doc.filename)
-                    extension = re.search("(\..*)$", translation_docname).group(1)
-                    translation_doc.save(os.path.join(app.config['UPLOAD_FOLDER'], "tra"+datename+extension))
-                    path = username + "/" + username + "/uploads/translation/" + datename + extension
-                    response = rh.upload("/storage/" + path, {"uid": username}, UPLOAD_FOLDER+"/tra"+datename+extension)
-                    response = rh.put("/metadata/" + path, {"uid": username, "original_name": translation_docname})
-                    os.remove(UPLOAD_FOLDER+"/tra"+datename+extension)
+                    
+                    original_extension = re.search("(\..*)$", original_docname).group(1)
+                    translation_extension = re.search("(\..*)$", translation_docname).group(1)
+
+                    if original_extension != translation_extension:
+                        flash("The file formats have to match ("+original_extension+" vs "+translation_extension+")", "error")
+                        return redirect(url_for("index"))
+                    
+                    datename = datetime.datetime.today().strftime('%Y%m%d-%H%M%S')
+
+                    original_doc.save(os.path.join(app.config['UPLOAD_FOLDER'], "org"+datename+original_extension))
+                    path = username + "/" + username + "/uploads/original/" + datename + original_extension
+                    response = rh.upload("/storage/" + path, {"uid": username}, UPLOAD_FOLDER+"/org"+datename+original_extension)
+                    response = rh.put("/metadata/" + path, {"uid": username, "original_name": original_docname, "email": email_address})
+                    os.remove(UPLOAD_FOLDER+"/org"+datename+original_extension)
+                    
+                    translation_doc.save(os.path.join(app.config['UPLOAD_FOLDER'], "tra"+datename+translation_extension))
+                    path = username + "/" + username + "/uploads/translation/" + datename + translation_extension
+                    response = rh.upload("/storage/" + path, {"uid": username}, UPLOAD_FOLDER+"/tra"+datename+translation_extension)
+                    response = rh.put("/metadata/" + path, {"uid": username, "original_name": translation_docname, "email": email_address})
+                    os.remove(UPLOAD_FOLDER+"/tra"+datename+translation_extension)
                     
                     flash('Files "' + original_doc.filename + '" and "' + translation_doc.filename + '" uploaded')
                 else:
-                    flash("Invalid file extension", "error")
+                    flash("Invalid file format", "error")
 
             return redirect(url_for("index"))
 
-        return render_template("index.html")
+        return render_template("index.html", tds = ", .".join(td_extensions), tms = ", .".join(tm_extensions))
     except:
         traceback.print_exc()    
 

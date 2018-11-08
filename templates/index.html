@@ -38,18 +38,23 @@
     <td style="height: 20px" colspan="3"></td>
   </tr>
   <tr>
-    <td>upload translation memory (.tmx)</td>
+    <td>upload translation memory (.{{ tms }})</td>
     <td></td>
-    <td>upload translated documents (.txt, .html, .xml)</td>
+    <td>upload translated documents (.{{ tds }})</td>
   </tr>
   <tr>
     <td rowspan="2" valign="top">
       <form id="upload-tm-form" method="post" enctype="multipart/form-data">
 	<table>
 	  <tr>
+	    <td>translation memory:</td>
 	    <td><input id="tm-file" type="file" name="tm-file"></td>
 	  </tr>
 	  <tr>
+	    <td>your email (optional):</td>
+	    <td><input type="text" name="emailaddress"></td>
+	  <tr>
+	    <td></td>
 	    <td><input id="upload-tm-button" type="submit" name="upload-tm-button" value="upload"></td>
 	  </tr>
 	</table>
@@ -67,6 +72,9 @@
 	    <td>translation:</td>
 	    <td><input id="translation-doc" type="file" name="translation-doc"></td>
 	  </tr>
+	  <tr>
+	    <td>your email (optional):</td>
+	    <td><input type="text" name="emailaddress"></td>
 	  <tr>
 	    <td></td>
 	    <td><input id="upload-files-button" type="submit" name="upload-files-button" value="upload"></td>

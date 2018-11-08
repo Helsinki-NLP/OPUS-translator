@@ -32,13 +32,3 @@ class RequestHandler:
         r = self.s.delete(self.root_url+url, params=params)
         return r.text
 
-'''
-rh = RequestHandler()
-
-print(rh.upload(
-    "/storage/corpustest2/mikkotest/uploads/html/fi/2.html",
-    {"uid": "mikkotest", "action": "import"},
-    "2.html"
-    )
-)
-'''
