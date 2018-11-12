@@ -88,6 +88,7 @@ def index():
                     path = username + "/" + username + "/uploads/tm/" + tm_timename + extension
                     response = rh.upload("/storage/" + path, {"uid": username}, UPLOAD_FOLDER+"/"+tm_timename+extension)
                     response = rh.put("/metadata/" + path, {"uid": username, "original_name": tm_filename, "email": email_address})
+                    response = rh.put("/job/"+path, {"uid": username, "run": "import"})
                     os.remove(UPLOAD_FOLDER+"/"+tm_timename+extension)
                     flash('File "' + tm_file.filename + '" uploaded')
                 else:
@@ -115,12 +116,14 @@ def index():
                     path = username + "/" + username + "/uploads/original/" + datename + original_extension
                     response = rh.upload("/storage/" + path, {"uid": username}, UPLOAD_FOLDER+"/org"+datename+original_extension)
                     response = rh.put("/metadata/" + path, {"uid": username, "original_name": original_docname, "email": email_address})
+                    response = rh.put("/job/"+path, {"uid": username, "run": "import"})
                     os.remove(UPLOAD_FOLDER+"/org"+datename+original_extension)
                     
                     translation_doc.save(os.path.join(app.config['UPLOAD_FOLDER'], "tra"+datename+translation_extension))
                     path = username + "/" + username + "/uploads/translation/" + datename + translation_extension
                     response = rh.upload("/storage/" + path, {"uid": username}, UPLOAD_FOLDER+"/tra"+datename+translation_extension)
                     response = rh.put("/metadata/" + path, {"uid": username, "original_name": translation_docname, "email": email_address})
+                    response = rh.put("/job/"+path, {"uid": username, "run": "import"})
                     os.remove(UPLOAD_FOLDER+"/tra"+datename+translation_extension)
                     
                     flash('Files "' + original_doc.filename + '" and "' + translation_doc.filename + '" uploaded')
