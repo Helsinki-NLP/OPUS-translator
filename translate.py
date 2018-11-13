@@ -62,6 +62,15 @@ app.secret_key = key
 
 opusapi_connection = create_engine('sqlite:///opusdata.db')
 
+def process_and_upload(document, datename, extension, username, docname, email_address, directory):
+    document.save(os.path.join(app.config['UPLOAD_FOLDER'], "org"+datename+extension))
+    path = username + "/" + username + "/uploads/" + directory + "/" + datename + extension
+    response = rh.upload("/storage/" + path, {"uid": username}, UPLOAD_FOLDER+"/org"+datename+extension)
+    response = rh.put("/metadata/" + path, {"uid": username, "original_name": docname, "email": email_address})
+    response = rh.put("/job/"+path, {"uid": username, "run": "import"})
+    os.remove(UPLOAD_FOLDER+"/org"+datename+extension)
+
+
 @app.route('/', methods=["GET", "POST"])
 def index():
     if request.method == "POST":
@@ -74,7 +83,7 @@ def index():
         if "tm-file" in request.files:
             tm_file = request.files["tm-file"]
 
-            if tm_file.filename == "":
+            if tm_file.filename == "" and (original_doc.filename == "" or translation_doc.filename == ""):
                 flash("No file selected", "error")
                 return redirect(url_for("index"))
 
@@ -82,12 +91,8 @@ def index():
                 tm_filename = secure_filename(tm_file.filename)
                 extension = re.search("(\..*)$", tm_filename).group(1)
                 tm_timename = datetime.datetime.today().strftime('%Y%m%d-%H%M%S')
-                tm_file.save(os.path.join(app.config['UPLOAD_FOLDER'], tm_timename+extension))
-                path = username + "/" + username + "/uploads/tm/" + tm_timename + extension
-                response = rh.upload("/storage/" + path, {"uid": username}, UPLOAD_FOLDER+"/"+tm_timename+extension)
-                response = rh.put("/metadata/" + path, {"uid": username, "original_name": tm_filename, "email": email_address})
-                response = rh.put("/job/"+path, {"uid": username, "run": "import"})
-                os.remove(UPLOAD_FOLDER+"/"+tm_timename+extension)
+                
+                process_and_upload(tm_file, tm_timename, extension, username, tm_filename, email_address, "tm")
                 flash('File "' + tm_file.filename + '" uploaded')
             else:
                 flash("Invalid file format", "error")
@@ -95,10 +100,6 @@ def index():
         if "original-doc" in request.files and "translation-doc" in request.files:
             original_doc = request.files["original-doc"]
             translation_doc = request.files["translation-doc"]
-
-            if original_doc.filename == "" or translation_doc.filename == "":
-                flash("No file selected", "error")
-                return redirect(url_for("index"))
 
             if original_doc and translation_doc and allowed_file(original_doc.filename, "td") and allowed_file(translation_doc.filename, "td"):
                 original_docname = secure_filename(original_doc.filename)
@@ -113,20 +114,9 @@ def index():
                 
                 datename = datetime.datetime.today().strftime('%Y%m%d-%H%M%S')
 
-                original_doc.save(os.path.join(app.config['UPLOAD_FOLDER'], "org"+datename+original_extension))
-                path = username + "/" + username + "/uploads/original/" + datename + original_extension
-                response = rh.upload("/storage/" + path, {"uid": username}, UPLOAD_FOLDER+"/org"+datename+original_extension)
-                response = rh.put("/metadata/" + path, {"uid": username, "original_name": original_docname, "email": email_address})
-                response = rh.put("/job/"+path, {"uid": username, "run": "import"})
-                os.remove(UPLOAD_FOLDER+"/org"+datename+original_extension)
-                
-                translation_doc.save(os.path.join(app.config['UPLOAD_FOLDER'], "tra"+datename+translation_extension))
-                path = username + "/" + username + "/uploads/translation/" + datename + translation_extension
-                response = rh.upload("/storage/" + path, {"uid": username}, UPLOAD_FOLDER+"/tra"+datename+translation_extension)
-                response = rh.put("/metadata/" + path, {"uid": username, "original_name": translation_docname, "email": email_address})
-                response = rh.put("/job/"+path, {"uid": username, "run": "import"})
-                os.remove(UPLOAD_FOLDER+"/tra"+datename+translation_extension)
-                
+                process_and_upload(original_doc, datename, original_extension, username, original_docname, email_address, "original")
+                process_and_upload(translation_doc, datename, translation_extension, username, translation_docname, email_address, "translation")
+
                 flash('Files "' + original_doc.filename + '" and "' + translation_doc.filename + '" uploaded')
             else:
                 flash("Invalid file format", "error")
