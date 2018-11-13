@@ -1,3 +1,5 @@
+let baseurl = window.location.protocol + "//" + window.location.host
+
 function translate() {
     $("#asksuggestion").css("display", "none");
     $("#source").text("");
@@ -17,7 +19,7 @@ function translate() {
     } else if ($.trim(sentence) != "") {
 	$("#translation").css("font-style", "italic");
 	$("#translation").text("Translating...");
-	$.getJSON("https://translate.ling.helsinki.fi/translate", {
+	$.getJSON(baseurl+"/translate", {
 	    sent: sentence,
 	    direction: direction
 	}, function(data) {
@@ -65,7 +67,7 @@ $("#direction").on('change', function() {
 });
 
 function suggest() {
-    $.getJSON("https://translate.ling.helsinki.fi/suggest", {
+    $.getJSON(baseurl+"/suggest", {
 	direction: $("#sourcedirection").text(),
 	source: $("#source").val(),
 	suggestion: $("#suggestion").val()
@@ -98,7 +100,7 @@ $("#reportbutton").on("click", function() {
 
 $("#report").on("click", function() {
     var sentence = coloredToBracketed();    
-    $.getJSON("https://translate.ling.helsinki.fi/suggest", {
+    $.getJSON(baseurl+"/suggest", {
 	direction: $("#sourcedirection").text(),
 	sentence: sentence
     });

@@ -25,15 +25,10 @@ from random import choice
 
 rh = request_handler.RequestHandler()
 
-import traceback
-
 app = Flask(__name__)
 
-with open("secrets/euser") as f:
-    euser = f.read()[:-1]
-
-with open("secrets/epass") as f:
-    epass = f.read()[:-1]
+euser = os.environ["EMAILUSER"]
+epass = os.environ["EMAILPASSWORD"]
     
 mail_settings = {
         "MAIL_SERVER": 'smtp.gmail.com',
@@ -52,89 +47,93 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 tm_extensions = ['tmx', 'xliff']
 td_extensions = ['xml', 'html', 'txt', 'pdf', 'doc']
+
 ALLOWED_EXTENSIONS_tm = set(tm_extensions)
 ALLOWED_EXTENSIONS_td = set(td_extensions)
+
 def allowed_file(filename, ftype):
     if ftype == "tm":
         return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS_tm
     elif ftype == "td":
         return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS_td        
 
-with open("secrets/secretkey") as f:
-    key = f.read()[:-1].encode("utf-8")
+key = os.environ["SECRETKEY"]
 app.secret_key = key
 
 opusapi_connection = create_engine('sqlite:///opusdata.db')
 
 @app.route('/', methods=["GET", "POST"])
 def index():
-    try:
-        if request.method == "POST":
-            if session:
-                username = session["username"]
+    if request.method == "POST":
+        if session:
+            username = session["username"]
+        else:
+            username = "anonymous"
+
+        email_address = request.form["emailaddress"]
+        if "tm-file" in request.files:
+            tm_file = request.files["tm-file"]
+
+            if tm_file.filename == "":
+                flash("No file selected", "error")
+                return redirect(url_for("index"))
+
+            if tm_file and allowed_file(tm_file.filename, "tm"):
+                tm_filename = secure_filename(tm_file.filename)
+                extension = re.search("(\..*)$", tm_filename).group(1)
+                tm_timename = datetime.datetime.today().strftime('%Y%m%d-%H%M%S')
+                tm_file.save(os.path.join(app.config['UPLOAD_FOLDER'], tm_timename+extension))
+                path = username + "/" + username + "/uploads/tm/" + tm_timename + extension
+                response = rh.upload("/storage/" + path, {"uid": username}, UPLOAD_FOLDER+"/"+tm_timename+extension)
+                response = rh.put("/metadata/" + path, {"uid": username, "original_name": tm_filename, "email": email_address})
+                response = rh.put("/job/"+path, {"uid": username, "run": "import"})
+                os.remove(UPLOAD_FOLDER+"/"+tm_timename+extension)
+                flash('File "' + tm_file.filename + '" uploaded')
             else:
-                username = "anonymous"
-            email_address = request.form["emailaddress"]
-            if "tm-file" in request.files:
-                tm_file = request.files["tm-file"]
-                if tm_file.filename == "":
-                    flash("No file selected", "error")
+                flash("Invalid file format", "error")
+
+        if "original-doc" in request.files and "translation-doc" in request.files:
+            original_doc = request.files["original-doc"]
+            translation_doc = request.files["translation-doc"]
+
+            if original_doc.filename == "" or translation_doc.filename == "":
+                flash("No file selected", "error")
+                return redirect(url_for("index"))
+
+            if original_doc and translation_doc and allowed_file(original_doc.filename, "td") and allowed_file(translation_doc.filename, "td"):
+                original_docname = secure_filename(original_doc.filename)
+                translation_docname = secure_filename(translation_doc.filename)
+                
+                original_extension = re.search("(\..*)$", original_docname).group(1)
+                translation_extension = re.search("(\..*)$", translation_docname).group(1)
+
+                if original_extension != translation_extension:
+                    flash("The file formats have to match ("+original_extension+" vs "+translation_extension+")", "error")
                     return redirect(url_for("index"))
-                if tm_file and allowed_file(tm_file.filename, "tm"):
-                    tm_filename = secure_filename(tm_file.filename)
-                    extension = re.search("(\..*)$", tm_filename).group(1)
-                    tm_timename = datetime.datetime.today().strftime('%Y%m%d-%H%M%S')
-                    tm_file.save(os.path.join(app.config['UPLOAD_FOLDER'], tm_timename+extension))
-                    path = username + "/" + username + "/uploads/tm/" + tm_timename + extension
-                    response = rh.upload("/storage/" + path, {"uid": username}, UPLOAD_FOLDER+"/"+tm_timename+extension)
-                    response = rh.put("/metadata/" + path, {"uid": username, "original_name": tm_filename, "email": email_address})
-                    response = rh.put("/job/"+path, {"uid": username, "run": "import"})
-                    os.remove(UPLOAD_FOLDER+"/"+tm_timename+extension)
-                    flash('File "' + tm_file.filename + '" uploaded')
-                else:
-                    flash("Invalid file format", "error")
-            if "original-doc" in request.files and "translation-doc" in request.files:
-                original_doc = request.files["original-doc"]
-                translation_doc = request.files["translation-doc"]
-                if original_doc.filename == "" or translation_doc.filename == "":
-                    flash("No file selected", "error")
-                    return redirect(url_for("index"))
-                if original_doc and translation_doc and allowed_file(original_doc.filename, "td") and allowed_file(translation_doc.filename, "td"):
-                    original_docname = secure_filename(original_doc.filename)
-                    translation_docname = secure_filename(translation_doc.filename)
-                    
-                    original_extension = re.search("(\..*)$", original_docname).group(1)
-                    translation_extension = re.search("(\..*)$", translation_docname).group(1)
+                
+                datename = datetime.datetime.today().strftime('%Y%m%d-%H%M%S')
 
-                    if original_extension != translation_extension:
-                        flash("The file formats have to match ("+original_extension+" vs "+translation_extension+")", "error")
-                        return redirect(url_for("index"))
-                    
-                    datename = datetime.datetime.today().strftime('%Y%m%d-%H%M%S')
+                original_doc.save(os.path.join(app.config['UPLOAD_FOLDER'], "org"+datename+original_extension))
+                path = username + "/" + username + "/uploads/original/" + datename + original_extension
+                response = rh.upload("/storage/" + path, {"uid": username}, UPLOAD_FOLDER+"/org"+datename+original_extension)
+                response = rh.put("/metadata/" + path, {"uid": username, "original_name": original_docname, "email": email_address})
+                response = rh.put("/job/"+path, {"uid": username, "run": "import"})
+                os.remove(UPLOAD_FOLDER+"/org"+datename+original_extension)
+                
+                translation_doc.save(os.path.join(app.config['UPLOAD_FOLDER'], "tra"+datename+translation_extension))
+                path = username + "/" + username + "/uploads/translation/" + datename + translation_extension
+                response = rh.upload("/storage/" + path, {"uid": username}, UPLOAD_FOLDER+"/tra"+datename+translation_extension)
+                response = rh.put("/metadata/" + path, {"uid": username, "original_name": translation_docname, "email": email_address})
+                response = rh.put("/job/"+path, {"uid": username, "run": "import"})
+                os.remove(UPLOAD_FOLDER+"/tra"+datename+translation_extension)
+                
+                flash('Files "' + original_doc.filename + '" and "' + translation_doc.filename + '" uploaded')
+            else:
+                flash("Invalid file format", "error")
 
-                    original_doc.save(os.path.join(app.config['UPLOAD_FOLDER'], "org"+datename+original_extension))
-                    path = username + "/" + username + "/uploads/original/" + datename + original_extension
-                    response = rh.upload("/storage/" + path, {"uid": username}, UPLOAD_FOLDER+"/org"+datename+original_extension)
-                    response = rh.put("/metadata/" + path, {"uid": username, "original_name": original_docname, "email": email_address})
-                    response = rh.put("/job/"+path, {"uid": username, "run": "import"})
-                    os.remove(UPLOAD_FOLDER+"/org"+datename+original_extension)
-                    
-                    translation_doc.save(os.path.join(app.config['UPLOAD_FOLDER'], "tra"+datename+translation_extension))
-                    path = username + "/" + username + "/uploads/translation/" + datename + translation_extension
-                    response = rh.upload("/storage/" + path, {"uid": username}, UPLOAD_FOLDER+"/tra"+datename+translation_extension)
-                    response = rh.put("/metadata/" + path, {"uid": username, "original_name": translation_docname, "email": email_address})
-                    response = rh.put("/job/"+path, {"uid": username, "run": "import"})
-                    os.remove(UPLOAD_FOLDER+"/tra"+datename+translation_extension)
-                    
-                    flash('Files "' + original_doc.filename + '" and "' + translation_doc.filename + '" uploaded')
-                else:
-                    flash("Invalid file format", "error")
+        return redirect(url_for("index"))
 
-            return redirect(url_for("index"))
-
-        return render_template("index.html", tds = ", .".join(td_extensions), tms = ", .".join(tm_extensions))
-    except:
-        traceback.print_exc()    
+    return render_template("index.html", tds = ", .".join(td_extensions), tms = ", .".join(tm_extensions))
 
 def login_required(f):
     @wraps(f)
@@ -150,124 +149,114 @@ def login_required(f):
 @app.route("/userpage", methods=["GET", "POST"])
 @login_required
 def user_page():
-    try:
-        if session:
-            username = session["username"]
+    if session:
+        username = session["username"]
 
-        if request.method == "POST":
-            c, conn = connection()
-            data = c.execute("SELECT * FROM users WHERE username = (%s)", username)
-            
-            data = c.fetchone()['password']
-            
-            if sha256_crypt.verify(request.form['current_pass'], data):
-                password = sha256_crypt.encrypt((str(request.form["new_pass"])))
-                c.execute("UPDATE users SET password = (%s) WHERE username = (%s)", (password, username))
-                conn.commit()
+    if request.method == "POST":
+        c, conn = connection()
+        data = c.execute("SELECT * FROM users WHERE username = (%s)", username)
+        
+        data = c.fetchone()['password']
+        
+        if sha256_crypt.verify(request.form['current_pass'], data):
+            password = sha256_crypt.encrypt((str(request.form["new_pass"])))
+            c.execute("UPDATE users SET password = (%s) WHERE username = (%s)", (password, username))
+            conn.commit()
 
-                flash("Password changed")
-            else:
-                flash("Wrong password")
+            flash("Password changed")
+        else:
+            flash("Wrong password")
 
-            c.close()
-            conn.close()
-            gc.collect()
-            return redirect(url_for("user_page"))
+        c.close()
+        conn.close()
+        gc.collect()
+        return redirect(url_for("user_page"))
 
-        return render_template("userpage.html", username=username)
-    except:
-        traceback.print_exc()
+    return render_template("userpage.html", username=username)
 
 @app.route("/forgot_password", methods=["GET", "POST"])
 def forgot_password():
-    try:
-        if request.method == "POST":
-            username = thwart(request.form["username"])
-            c, conn = connection()
-            
-            data = c.execute("SELECT * FROM users WHERE username = (%s)", username)
+    if request.method == "POST":
+        username = thwart(request.form["username"])
+        c, conn = connection()
+        
+        data = c.execute("SELECT * FROM users WHERE username = (%s)", username)
 
-            if data == 0:
-                c.close()
-                gc.collect()
-                flash('See your email for further instructions.')
-                return redirect(url_for("login_page"))
-            
-            email = c.fetchone()['email']
-
-            allchar = string.ascii_letters + string.digits
-            token = "".join(choice(allchar) for x in range(18))
-            
-            c.execute("INSERT INTO tokens (username, token) VALUES ((%s), (%s))", (username, token))
-            conn.commit()
-            
+        if data == 0:
             c.close()
-            conn.close()
             gc.collect()
-
-            with app.app_context():
-                msg = Message(subject="Account management",
-                        sender=app.config.get("MAIL_USERNAME"),
-                        recipients=[email],
-                        body='Follow this link to reset your Fiskmö account password:\n\nhttps://translate.ling.helsinki.fi/reset_password/'+token+'\n\nThe link will expire in 60 minutes.')
-                mail.send(msg)
             flash('See your email for further instructions.')
             return redirect(url_for("login_page"))
+        
+        email = c.fetchone()['email']
 
-        return render_template("forgot_password.html")
-    except:
-        traceback.print_exc()
+        allchar = string.ascii_letters + string.digits
+        token = "".join(choice(allchar) for x in range(18))
+        
+        c.execute("INSERT INTO tokens (username, token) VALUES ((%s), (%s))", (username, token))
+        conn.commit()
+        
+        c.close()
+        conn.close()
+        gc.collect()
+
+        with app.app_context():
+            msg = Message(subject="Account management",
+                    sender=app.config.get("MAIL_USERNAME"),
+                    recipients=[email],
+                    body='Follow this link to reset your Fiskmö account password:\n\nhttps://translate.ling.helsinki.fi/reset_password/'+token+'\n\nThe link will expire in 60 minutes.')
+            mail.send(msg)
+        flash('See your email for further instructions.')
+        return redirect(url_for("login_page"))
+
+    return render_template("forgot_password.html")
 
 @app.route("/reset_password/<token>", methods=["GET", "POST"])
 def reset_password(token):
-    try:
-        c, conn = connection()
-            
-        data = c.execute("SELECT * FROM tokens WHERE token = (%s)", token)
-
-        if data == 0:
-            flash("Invalid password reset link")
-            return redirect(url_for("index"))
-
-        values = c.fetchone()
-        date = values['timestamp']
+    c, conn = connection()
         
-        if datetime.datetime.now().timestamp()-date.timestamp() > 3600:
+    data = c.execute("SELECT * FROM tokens WHERE token = (%s)", token)
+
+    if data == 0:
+        flash("Invalid password reset link")
+        return redirect(url_for("index"))
+
+    values = c.fetchone()
+    date = values['timestamp']
+    
+    if datetime.datetime.now().timestamp()-date.timestamp() > 3600:
+        c.execute("DELETE FROM tokens WHERE token =(%s)", token)
+        conn.commit()
+        c.close()
+        conn.close()
+        gc.collect()
+        flash("Invalid password reset link")
+        return redirect(url_for("index"))
+
+    username = values['username']
+
+    if request.method == "POST":
+        if request.form["password"] != request.form["confirm_password"]:
+            flash("The passwords must match")
+            return redirect(url_for("reset_password", token=token))
+        elif request.form["password"] == "":
+            flash("The password cannot be empty")
+            return redirect(url_for("reset_password", token=token))
+        else:
+            password = sha256_crypt.encrypt((request.form["password"]))
+            c.execute("UPDATE users SET password = (%s) WHERE username = (%s)", (password, username))
             c.execute("DELETE FROM tokens WHERE token =(%s)", token)
             conn.commit()
             c.close()
             conn.close()
             gc.collect()
-            flash("Invalid password reset link")
-            return redirect(url_for("index"))
-
-        username = values['username']
-
-        if request.method == "POST":
-            if request.form["password"] != request.form["confirm_password"]:
-                flash("The passwords must match")
-                return redirect(url_for("reset_password", token=token))
-            elif request.form["password"] == "":
-                flash("The password cannot be empty")
-                return redirect(url_for("reset_password", token=token))
-            else:
-                password = sha256_crypt.encrypt((request.form["password"]))
-                c.execute("UPDATE users SET password = (%s) WHERE username = (%s)", (password, username))
-                c.execute("DELETE FROM tokens WHERE token =(%s)", token)
-                conn.commit()
-                c.close()
-                conn.close()
-                gc.collect()
-                flash("Password updated successfully!")
-                return redirect(url_for("login_page"))
-        
-        c.close()
-        conn.close()
-        gc.collect()
-        return render_template("reset_password.html")
-
-    except:
-        traceback.print_exc()
+            flash("Password updated successfully!")
+            return redirect(url_for("login_page"))
+    
+    c.close()
+    conn.close()
+    gc.collect()
+    return render_template("reset_password.html")
   
 @app.route('/translate')
 def translate():
@@ -311,17 +300,17 @@ def translate():
             translation += "\n"
             continue
 
-        sentences = sp.Popen(["./scripts/split.sh", paragraph], stdout=sp.PIPE).stdout.read().decode("utf-8")
+        sentences = sp.Popen(["/var/www/scripts/split.sh", paragraph], stdout=sp.PIPE).stdout.read().decode("utf-8")
         sentences = sentences[:-1].split("\n")
     
         for sentence in sentences:
-            sentence = sp.Popen(["./scripts/"+preprocess, sentence, sourcelan], stdout=sp.PIPE).stdout.read().decode("utf-8").strip()
+            sentence = sp.Popen(["/var/www/scripts/"+preprocess, sentence, sourcelan], stdout=sp.PIPE).stdout.read().decode("utf-8").strip()
             if sourcelan == "fi" and targetlan in ["da", "no", "sv"]:
                 sentence = ">>"+targetlan+"<< "+sentence
 
             ws.send(sentence)
             translation_temp = ws.recv().strip()
-            translation_temp = sp.Popen(["./scripts/postprocess.sh", translation_temp], stdout=sp.PIPE).stdout.read().decode("utf-8").strip()
+            translation_temp = sp.Popen(["/var/www/scripts/postprocess.sh", translation_temp], stdout=sp.PIPE).stdout.read().decode("utf-8").strip()
 
             translation = translation + translation_temp + " "
         translation = translation[:-1] + "\n"
