@@ -14,11 +14,11 @@
       <span class="translation-cell-content target-languages" language="fi">Finnish</span>
       <span id="selected-target" class="translation-cell-content target-languages" style="background-color: #D8D8D8" language="sv">Swedish</span>
       <span class="translation-cell-content target-languages" language="no">Norwegian</span>
-      <span class="translation-cell-content target-languages" language="da" style="margin-right: 10%">Danish</span>
-      <span id="translate" class="translation-cell-content">translate</span>
+      <span class="translation-cell-content target-languages" language="da">Danish</span>
+      <div style="float: right"><b id="translate">translate</b></div>
     </td>
   </tr>
-  <tr>
+  <tr style="clear: both">
     <td style="height: 40px" colspan="3"></td>
   </tr>
   <tr style="height: 200px">
@@ -45,41 +45,42 @@
   <tr>
     <td rowspan="2" valign="top">
       <form id="upload-tm-form" method="post" enctype="multipart/form-data">
-	<table>
-	  <tr>
-	    <td>translation memory:</td>
-	    <td><input id="tm-file" type="file" name="tm-file"></td>
-	  </tr>
-	  <tr>
-	    <td>your email (optional):</td>
-	    <td><input type="text" name="emailaddress"></td>
-	  <tr>
-	    <td></td>
-	    <td><input id="upload-tm-button" type="submit" name="upload-tm-button" value="upload"></td>
-	  </tr>
-	</table>
+	    <table>
+	      <tr>
+	        <td>translation memory:</td>
+	        <td><input id="tm-file" type="file" name="tm-file"></td>
+	      </tr>
+	      <tr>
+	        <td>your email (optional):</td>
+	        <td><input type="text" name="emailaddress"></td>
+          </tr>
+	      <tr>
+	        <td></td>
+	        <td><input id="upload-tm-button" type="submit" name="upload-tm-button" value="upload"></td>
+	      </tr>
+	    </table>
       </form>
     </td>
     <td></td>
     <td rowspan="3">
       <form id="upload-tm-form" method="post" enctype="multipart/form-data">
-	<table>
-	  <tr>
-	    <td>original:</td>
-	    <td><input id="original-doc" type="file" name="original-doc"></td>
-	  </tr>
-	  <tr>
-	    <td>translation:</td>
-	    <td><input id="translation-doc" type="file" name="translation-doc"></td>
-	  </tr>
-	  <tr>
-	    <td>your email (optional):</td>
-	    <td><input type="text" name="emailaddress"></td>
-	  <tr>
-	    <td></td>
-	    <td><input id="upload-files-button" type="submit" name="upload-files-button" value="upload"></td>
-	  </tr>
-	</table>
+        <table>
+          <tr>
+            <td>original:</td>
+            <td><input id="original-doc" type="file" name="original-doc"></td>
+          </tr>
+          <tr>
+            <td>translation:</td>
+            <td><input id="translation-doc" type="file" name="translation-doc"></td>
+          </tr>
+          <tr>
+            <td>your email (optional):</td>
+            <td><input type="text" name="emailaddress"></td>
+          <tr>
+            <td></td>
+            <td><input id="upload-files-button" type="submit" name="upload-files-button" value="upload"></td>
+          </tr>
+        </table>
       </form>
   </tr>
 </table>

@@ -37,7 +37,17 @@ table.borders td {
     cursor: pointer;
 }
 
+#translate {
+    padding: 6px;
+    border: 2px solid black;
+    cursor: pointer;
+}
+
 .translation-cell-content:hover {
+    background-color: #D8D8D8;
+}
+
+#translate:hover {
     background-color: #D8D8D8;
 }
 
