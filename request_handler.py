@@ -1,19 +1,21 @@
 import requests
+import html
+import os
 
 class RequestHandler:
 
     def __init__(self):
         self.s = requests.Session()
         self.s.cert = (
-            "/var/www/cert/vm1637.kaj.pouta.csc.fi/user/certificates/developers@localhost.crt",
-            "/var/www/cert/vm1637.kaj.pouta.csc.fi/user/keys/developers@localhost.key"
+            os.environ["BACKENDCERT"],
+            os.environ["BACKENDKEY"]
         )
-        self.s.verify = "/var/www/cert/vm1637.kaj.pouta.csc.fi/ca.crt"
-        self.root_url = "https://vm1637.kaj.pouta.csc.fi:443/ws"
+        self.s.verify = os.environ["BACKENDCA"]
+        self.root_url = os.environ["BACKENDURL"]
 
     def get(self, url, params):
         r = self.s.get(self.root_url+url, params=params)
-        return r.text
+        return html.unescape(r.text)
 
     def put(self, url, params):
         r = self.s.put(self.root_url+url, params=params)

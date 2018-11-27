@@ -46,7 +46,7 @@ UPLOAD_FOLDER = "/var/www/uploads"
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 tm_extensions = ['tmx', 'xliff']
-td_extensions = ['xml', 'html', 'txt', 'pdf', 'doc']
+td_extensions = ['xml', 'html', 'txt', 'pdf', 'doc', 'srt', 'rtf', 'epub']
 
 ALLOWED_EXTENSIONS_tm = set(tm_extensions)
 ALLOWED_EXTENSIONS_td = set(td_extensions)
