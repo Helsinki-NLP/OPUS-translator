@@ -60,7 +60,7 @@ def allowed_file(filename, ftype):
 key = os.environ["SECRETKEY"]
 app.secret_key = key
 
-opusapi_connection = create_engine('sqlite:///opusdata.db')
+opusapi_connection = create_engine('sqlite:////var/www/opusdata.db')
 
 def process_and_upload(document, datename, extension, username, docname, email_address, directory):
     document.save(os.path.join(app.config['UPLOAD_FOLDER'], "org"+datename+extension))
@@ -378,7 +378,7 @@ def make_sql_command(parameters, direction):
     sql_command = " ".join(sql_command[:-1])
 
     if direction and parameters[3][1] not in ["dic", "moses", "smt", "xml", "tmx", "wordalign"]:
-        sql_command += " UNION SELECT url, size, source, target, corpus, preprocessing, version FROM opusfile WHERE source='"+so+"' AND target='"+ta+"' AND "        
+        sql_command += " UNION SELECT * FROM opusfile WHERE source='"+so+"' AND target='"+ta+"' AND "        
         for i in parameters:
             if i[0] == "preprocessing":
                 sql_command += "preprocessing='xml' AND "
@@ -387,9 +387,12 @@ def make_sql_command(parameters, direction):
         sql_command = sql_command.strip().split(" ")
         sql_command = " ".join(sql_command[:-1])
 
-        
-    print(sql_command)
     return sql_command
+    
+def opusEntry(keys, values):
+    entry = dict(zip(tuple(keys), values))
+    entry["url"] = "https://object.pouta.csc.fi/OPUS-"+entry["url"]
+    return entry
     
 @app.route('/opusapi/')
 def opusapi():
@@ -411,13 +414,13 @@ def opusapi():
                   ("preprocessing", thwart(preprocessing)), ("version", thwart(version))]
 
     sql_command = make_sql_command(parameters, direction)
-    #if sql_command == "SELECT url FROM opusfile":
-    #    sql_command = sql_command + " LIMIT 10"
+    if sql_command == "SELECT url FROM opusfile":
+        sql_command = sql_command + " LIMIT 10"
 
     conn = opusapi_connection.connect()
     query = conn.execute(sql_command)
 
-    ret = [dict(zip(tuple(query.keys()), i)) for i in query.cursor]
+    ret = [opusEntry(query.keys(), i) for i in query.cursor]
 
     return jsonify(corpora=ret)
 
