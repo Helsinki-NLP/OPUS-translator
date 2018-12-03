@@ -30,7 +30,7 @@
     <td style="height: 40px" colspan="3"></td>
   </tr>
   <tr>
-    <td>Support the project:</td>
+    <td><b>Support the project:</b></td>
     <td></td>
     <td></td>
   </tr>
@@ -38,13 +38,13 @@
     <td style="height: 20px" colspan="3"></td>
   </tr>
   <tr>
-    <td>upload translation memory (.{{ tms }})</td>
+    <td class="show-form-button" id="show-tm-form">upload translation memory (.{{ tms }})</td>
     <td></td>
-    <td>upload translated documents (.{{ tds }})</td>
+    <td class="show-form-button" id="show-td-form">upload translated documents (.{{ tds }})</td>
   </tr>
   <tr>
     <td rowspan="2" valign="top">
-      <form id="upload-tm-form" method="post" enctype="multipart/form-data">
+      <form id="upload-tm-form" method="post" enctype="multipart/form-data" style="display: none">
 	    <table>
 	      <tr>
 	        <td>translation memory:</td>
@@ -63,7 +63,7 @@
     </td>
     <td></td>
     <td rowspan="3">
-      <form id="upload-tm-form" method="post" enctype="multipart/form-data">
+      <form id="upload-td-form" method="post" enctype="multipart/form-data" style="display: none">
         <table>
           <tr>
             <td>original:</td>

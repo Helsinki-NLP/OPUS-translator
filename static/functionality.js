@@ -223,3 +223,12 @@ $(".target-languages").on("click", function() {
 	$("#source-language-cell").find("[language=fi]").click()	
     }    
 });
+
+$("#show-tm-form").on("click", function() {
+    if ($("#upload-tm-form").css("display") == "none") {
+        $("#upload-tm-form").css("display", "");
+    } else {
+        $("#upload-tm-form").css("display", "none");
+    }
+});
+

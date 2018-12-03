@@ -107,3 +107,15 @@ table.borders td {
 .error {
     color: red;
 }
+
+.show-form-button {
+    padding: 5px;
+    border-radius: 5px;
+    cursor: pointer;
+    border: 1px solid #D8D8D8;
+}
+
+.show-form-button:hover {
+    background-color: #D8D8D8;
+    border: 1px solid black;
+}
