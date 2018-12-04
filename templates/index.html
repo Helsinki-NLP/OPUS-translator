@@ -2,7 +2,7 @@
 {% block content %}
 
 
-<table class="translation-table" style="margin: 50px">
+<table class="translation-table" style="margin: auto; margin-top: 50px">
   <tr>
     <td id="source-language-cell" style="line-height: 210%">
       <span id="selected-source" class="translation-cell-content source-languages" style="background-color: #D8D8D8" language="fi">Finnish</span>
@@ -22,9 +22,9 @@
     <td style="height: 40px" colspan="3"></td>
   </tr>
   <tr style="height: 200px">
-    <td style="width: 475px"><textarea id="sentence" maxlength="500" style="width: 100%; height: 200px; resize: none; font-size: 20px" autofocus></textarea></td>
+    <td style="width: 550px"><textarea id="sentence" maxlength="500" style="width: 100%; height: 200px; resize: none; font-size: 20px" autofocus></textarea></td>
     <td style="width: 40px"></td>
-    <td style="width: 475px"><textarea id="translation" style="width: 100%; height: 200px; resize: none; font-size: 20px" readonly></textarea></td>
+    <td style="width: 550px"><textarea id="translation" style="width: 100%; height: 200px; resize: none; font-size: 20px" readonly></textarea></td>
   </tr>
   <tr>
     <td style="height: 40px" colspan="3"></td>
@@ -40,11 +40,8 @@
   <tr>
     <td class="show-form-button" id="show-tm-form">upload translation memory (.{{ tms }})</td>
     <td></td>
-    <td class="show-form-button" id="show-td-form">upload translated documents (.{{ tds }})</td>
-  </tr>
-  <tr>
-    <td rowspan="2" valign="top">
-      <form id="upload-tm-form" method="post" enctype="multipart/form-data" style="display: none">
+    <td rowspan="3" valign="top">
+      <form class="upload-form" id="upload-tm-form" method="post" enctype="multipart/form-data" style="display: none">
 	    <table>
 	      <tr>
 	        <td>translation memory:</td>
@@ -60,10 +57,7 @@
 	      </tr>
 	    </table>
       </form>
-    </td>
-    <td></td>
-    <td rowspan="3">
-      <form id="upload-td-form" method="post" enctype="multipart/form-data" style="display: none">
+      <form class="upload-form" id="upload-td-form" method="post" enctype="multipart/form-data" style="display: none">
         <table>
           <tr>
             <td>original:</td>
@@ -81,7 +75,36 @@
             <td><input id="upload-files-button" type="submit" name="upload-files-button" value="upload"></td>
           </tr>
         </table>
+      <!--
       </form>
+      <form class="upload-form" id="upload-url-form" method="post" enctype="multipart/form-data" style="display: none">
+        <table>
+          <tr>
+            <td>url:</td>
+            <td><input id="webpage-url" type="text" name="webpage-url"></td>
+          </tr>
+          <tr>
+            <td>your email (optional):</td>
+            <td><input type="text" name="emailaddress"></td>
+          <tr>
+            <td></td>
+            <td><input id="upload-url-button" type="submit" name="upload-url-button" value="upload"></td>
+          </tr>
+        </table>
+      </form>
+      -->
+    </td>
+  </tr>
+  <tr>
+    <td class="show-form-button" id="show-td-form">upload translated documents (.{{ tds }})</td>
+    <td></td>
+    <td></td>
+  </tr>
+  <tr>
+    <!-- <td class="show-form-button" id="show-url-form">upload a web page</td> -->
+    <td></td>
+    <td></td>
+    <td></td>
   </tr>
 </table>
 

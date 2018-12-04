@@ -15,40 +15,40 @@ function translate() {
     var direction = source_lan + "-" + target_lan;
 
     if ($.inArray(direction, ["fi-fi", "sv-sv", "sv-no", "sv-da"]) != -1) {
-	$("#translation").text(sentence);
+        $("#translation").text(sentence);
     } else if ($.trim(sentence) != "") {
-	$("#translation").css("font-style", "italic");
-	$("#translation").text("Translating...");
-	$.getJSON(baseurl+"/translate", {
-	    sent: sentence,
-	    direction: direction
-	}, function(data) {
-	    $("#suggestionbutton").css("display", "block");
-	    $("#reportbutton").css("display", "block");
-	    $("#source").val(sentence);
-	    $("#sourcedirection").text(direction);
-	    $("#status").text("");
-	    $("#translation").css("font-style", "normal");
-	    $("#translation").text(data.result);
-	    $("#suggestion").val(data.result);
-	    $("#submissionmessage").text("");
-	    $("#target-language-cell").find("[language="+data.target+"]").click()
-	    highlight_detected(data.source);
-	});
-	return false;
+        $("#translation").css("font-style", "italic");
+        $("#translation").text("Translating...");
+        $.getJSON(baseurl+"/translate", {
+            sent: sentence,
+            direction: direction
+        }, function(data) {
+            $("#suggestionbutton").css("display", "block");
+            $("#reportbutton").css("display", "block");
+            $("#source").val(sentence);
+            $("#sourcedirection").text(direction);
+            $("#status").text("");
+            $("#translation").css("font-style", "normal");
+            $("#translation").text(data.result);
+            $("#suggestion").val(data.result);
+            $("#submissionmessage").text("");
+            $("#target-language-cell").find("[language="+data.target+"]").click()
+            highlight_detected(data.source);
+        });
+        return false;
     } else {
-	$("#translation").text("");
-	$("#suggestionbutton").css("display", "none");
-	$("#reportbutton").css("display", "none");
-	$("#submissionmessage").text("");
+        $("#translation").text("");
+        $("#suggestionbutton").css("display", "none");
+        $("#reportbutton").css("display", "none");
+        $("#submissionmessage").text("");
     }
 }
 
 function highlight_detected(source) {
     if ($("#selected-source").attr("language") == "DL") {
-	$("#source-language-cell").find("[language=fi]").css({"border": "1px solid black", "background-color": ""});
-	$("#source-language-cell").find("[language=sv]").css({"border": "1px solid black", "background-color": ""});
-	$("#source-language-cell").find("[language="+source+"]").css({"border": "2px dashed black", "background-color": "#D8D8D8"});
+        $("#source-language-cell").find("[language=fi]").css({"border": "1px solid black", "background-color": ""});
+        $("#source-language-cell").find("[language=sv]").css({"border": "1px solid black", "background-color": ""});
+        $("#source-language-cell").find("[language="+source+"]").css({"border": "2px dashed black", "background-color": "#D8D8D8"});
     }
 }
 
@@ -58,7 +58,7 @@ $("#translate").on("click", function() {
 
 $("#sentence").keyup(function(ev) {
     if (ev.ctrlKey && ev.which === 13) {
-	translate();
+        translate();
     }
 });
 
@@ -68,9 +68,9 @@ $("#direction").on('change', function() {
 
 function suggest() {
     $.getJSON(baseurl+"/suggest", {
-	direction: $("#sourcedirection").text(),
-	source: $("#source").val(),
-	suggestion: $("#suggestion").val()
+        direction: $("#sourcedirection").text(),
+        source: $("#source").val(),
+        suggestion: $("#suggestion").val()
     });
     $("#suggestionmessage").text("Translation added!");
     $("#asksuggestion").css("display", "none");
@@ -83,7 +83,7 @@ $("#suggest").on("click", function() {
 
 $("#suggestion").keyup(function(ev) {
     if (ev.which === 13) {
-	suggest();
+        suggest();
     }
 });
 
@@ -101,8 +101,8 @@ $("#reportbutton").on("click", function() {
 $("#report").on("click", function() {
     var sentence = coloredToBracketed();    
     $.getJSON(baseurl+"/suggest", {
-	direction: $("#sourcedirection").text(),
-	sentence: sentence
+        direction: $("#sourcedirection").text(),
+        sentence: sentence
     });
     $("#trash-div").css("display", "none");
     $("#submissionmessage").text("Bad sentence reported!");
@@ -122,28 +122,28 @@ function trash() {
     let words = [];
     let lines = $("#translation").val().split("\n");
     for (let i=0;i<lines.length;i++) {
-	for (let j=0;j<lines[i].split(" ").length;j++) {
-	    words.push(lines[i].split(" ")[j]);
-	}
-    }		 
+        for (let j=0;j<lines[i].split(" ").length;j++) {
+            words.push(lines[i].split(" ")[j]);
+        }
+    }         
 
     $.each(words, function(i, val) {
-	if (val == ""){
-	    $("#words").append('<br><br>');
-	}
-	
-	var valid = "word" + buttons.toString();
-	buttons += 1;
+    if (val == ""){
+        $("#words").append('<br><br>');
+    }
+    
+    var valid = "word" + buttons.toString();
+    buttons += 1;
 
-	createButton(val, valid);
-	$("#"+valid+"-word").mouseover(function() {
-	    if (isDown) {
-		changeColor(valid);
-	    }
-	});
-	$("#"+valid+"-word").mousedown(function() {
-	    changeColor(valid);
-	});
+    createButton(val, valid);
+    $("#"+valid+"-word").mouseover(function() {
+        if (isDown) {
+            changeColor(valid);
+        }
+    });
+    $("#"+valid+"-word").mousedown(function() {
+        changeColor(valid);
+    });
     });
 }
 
@@ -154,19 +154,19 @@ function createButton(word, wordid) {
 function changeColor(word) {
     color = $("#"+word+"-word").css("color")
     if (color == "rgb(255, 0, 0)") {
-	$("#"+word+"-word").css("color", "black");
+        $("#"+word+"-word").css("color", "black");
     } else {
-	$("#"+word+"-word").css("color", "red");
+        $("#"+word+"-word").css("color", "red");
     }
 }
 
 $("#trash-sentence").on("click", function() {
     var color = "red";
     if ($("#word0-word").css("color") == "rgb(255, 0, 0)") {
-	color = "black";
+        color = "black";
     }
     $(".word-button").each(function(index) {
-	$(this).css("color", color);
+        $(this).css("color", color);
     });
 });
 
@@ -174,23 +174,23 @@ function coloredToBracketed() {
     var sentence = "";
     var prevRed = false;
     $(".word-button").each(function(index) {
-	var color = $(this).css("color");
-	if (color == "rgb(255, 0, 0)") {
-	    if (!prevRed) {
-		sentence += "<rubbish>";
-	    }
-	    prevRed = true;
-	}
-	if (color != "rgb(255, 0, 0)") {
-	    if (prevRed) {
-		sentence = sentence.substring(0, sentence.length-1) + "</rubbish> ";
-	    }
-	    prevRed = false;
-	}
-	sentence = sentence + $(this).text() + " ";
-	if (color == "rgb(255, 0, 0)" && index == $(".word-button").length-1) {
-	    sentence = sentence.substring(0, sentence.length-1) + "</rubbish>";
-	}
+        var color = $(this).css("color");
+        if (color == "rgb(255, 0, 0)") {
+            if (!prevRed) {
+                sentence += "<rubbish>";
+            }
+            prevRed = true;
+        }
+        if (color != "rgb(255, 0, 0)") {
+            if (prevRed) {
+                sentence = sentence.substring(0, sentence.length-1) + "</rubbish> ";
+            }
+            prevRed = false;
+        }
+        sentence = sentence + $(this).text() + " ";
+        if (color == "rgb(255, 0, 0)" && index == $(".word-button").length-1) {
+            sentence = sentence.substring(0, sentence.length-1) + "</rubbish>";
+        }
     });
     console.log(sentence.trim());
     return sentence.trim();
@@ -204,9 +204,9 @@ $(".source-languages").on("click", function() {
     let sourcelang = $(this).attr("language");
     let targetlang = $("#selected-target").attr("language");
     if (sourcelang == "fi" && targetlang == "fi" ) {
-	$("#target-language-cell").find("[language=sv]").click()
+        $("#target-language-cell").find("[language=sv]").click()
     } else if (sourcelang == "sv" && $.inArray(targetlang, ["no", "sv", "da"]) != -1) {
-	$("#target-language-cell").find("[language=fi]").click()
+        $("#target-language-cell").find("[language=fi]").click()
     }
 });
 
@@ -218,17 +218,33 @@ $(".target-languages").on("click", function() {
     let sourcelang = $("#selected-source").attr("language");
     let targetlang = $(this).attr("language");
     if (sourcelang == "fi" && targetlang == "fi" ) {
-	$("#source-language-cell").find("[language=sv]").click()
+        $("#source-language-cell").find("[language=sv]").click()
     } else if (sourcelang == "sv" && $.inArray(targetlang, ["no", "sv", "da"]) != -1) {
-	$("#source-language-cell").find("[language=fi]").click()	
+        $("#source-language-cell").find("[language=fi]").click()    
     }    
 });
 
-$("#show-tm-form").on("click", function() {
-    if ($("#upload-tm-form").css("display") == "none") {
-        $("#upload-tm-form").css("display", "");
-    } else {
-        $("#upload-tm-form").css("display", "none");
+function hideOrShowForm(formid, buttonid) {
+    let formstyle = "none";
+    let buttonstyle = {"background-color": "", "border": ""};
+    if ($("#"+formid).css("display") == "none") {
+        formstyle = "";
+        buttonstyle = {"background-color": "#D8D8D8", "border": "1px solid black"};
     }
+    $(".upload-form").css("display", "none");
+    $(".show-form-button").css({"background-color": "", "border": ""});
+    $("#"+formid).css("display", formstyle);
+    $("#"+buttonid).css(buttonstyle);
+}
+
+$("#show-tm-form").on("click", function() {
+    hideOrShowForm("upload-tm-form", "show-tm-form");
 });
 
+$("#show-td-form").on("click", function() {
+    hideOrShowForm("upload-td-form", "show-td-form");
+});
+
+$("#show-url-form").on("click", function() {
+    hideOrShowForm("upload-url-form", "show-url-form");
+});

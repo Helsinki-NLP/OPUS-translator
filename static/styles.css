@@ -109,6 +109,7 @@ table.borders td {
 }
 
 .show-form-button {
+    height: 50px;
     padding: 5px;
     border-radius: 5px;
     cursor: pointer;
@@ -117,5 +118,4 @@ table.borders td {
 
 .show-form-button:hover {
     background-color: #D8D8D8;
-    border: 1px solid black;
 }

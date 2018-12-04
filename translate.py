@@ -74,6 +74,7 @@ def process_and_upload(document, datename, extension, username, docname, email_a
 @app.route('/', methods=["GET", "POST"])
 def index():
     if request.method == "POST":
+        print(request.form)
         if session:
             username = session["username"]
         else:
