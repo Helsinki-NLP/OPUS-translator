@@ -74,17 +74,25 @@ def process_and_upload(document, datename, extension, username, docname, email_a
 @app.route('/', methods=["GET", "POST"])
 def index():
     if request.method == "POST":
-        print(request.form)
         if session:
             username = session["username"]
         else:
             username = "anonymous"
 
         email_address = request.form["emailaddress"]
-        if "tm-file" in request.files:
+
+        if "webpage-url" in request.form.keys():
+            webpage = request.form["webpage-url"]
+            response = rh.put("/job/"+username+"/"+username, {"uid": username, "action": "import", "url": webpage, "run": "download"})
+            if webpage == "" or 'type="error"' in response:
+                flash("Upload failed", "error")
+            else:
+                flash("Webpage uploaded!")
+
+        elif "tm-file" in request.files:
             tm_file = request.files["tm-file"]
 
-            if tm_file.filename == "" and (original_doc.filename == "" or translation_doc.filename == ""):
+            if tm_file.filename == "" or (original_doc.filename == "" or translation_doc.filename == ""):
                 flash("No file selected", "error")
                 return redirect(url_for("index"))
 
@@ -98,7 +106,7 @@ def index():
             else:
                 flash("Invalid file format", "error")
 
-        if "original-doc" in request.files and "translation-doc" in request.files:
+        elif "original-doc" in request.files and "translation-doc" in request.files:
             original_doc = request.files["original-doc"]
             translation_doc = request.files["translation-doc"]
 
@@ -121,6 +129,9 @@ def index():
                 flash('Files "' + original_doc.filename + '" and "' + translation_doc.filename + '" uploaded')
             else:
                 flash("Invalid file format", "error")
+
+        else:
+            flash("No file selected", "error")
 
         return redirect(url_for("index"))
 
