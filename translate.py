@@ -66,7 +66,7 @@ def process_and_upload(document, datename, extension, username, docname, email_a
     document.save(os.path.join(app.config['UPLOAD_FOLDER'], "org"+datename+extension))
     path = username + "/" + username + "/uploads/" + directory + "/" + datename + extension
     response = rh.upload("/storage/" + path, {"uid": username}, UPLOAD_FOLDER+"/org"+datename+extension)
-    response = rh.put("/metadata/" + path, {"uid": username, "original_name": docname, "email": email_address})
+    response = rh.post("/metadata/" + path, {"uid": username, "original_name": docname, "email": email_address})
     response = rh.put("/job/"+path, {"uid": username, "run": "import"})
     os.remove(UPLOAD_FOLDER+"/org"+datename+extension)
 
@@ -80,19 +80,27 @@ def index():
             username = "anonymous"
 
         email_address = request.form["emailaddress"]
+        datename = datetime.datetime.today().strftime('%Y%m%d-%H%M%S')
 
-        if "webpage-url" in request.form.keys():
-            webpage = request.form["webpage-url"]
-            response = rh.put("/job/"+username+"/"+username, {"uid": username, "action": "import", "url": webpage, "run": "download"})
-            if webpage == "" or 'type="error"' in response:
-                flash("Upload failed", "error")
+        if "webpage-url-original" in request.form.keys():
+            webpage_original = request.form["webpage-url-original"]
+            webpage_translation = request.form["webpage-url-translation"]
+            if webpage_original == "" or webpage_translation == "":
+                flash("No webpage selected", "error")
             else:
-                flash("Webpage uploaded!")
+                response_original = rh.put("/job/"+username+"/"+username+"/uploads/url/original/"+datename, {"uid": username, "action": "import", "url": webpage_original, "run": "download"})
+                rh.post("/metadata/"+username+"/"+username+"/uploads/url/original/"+datename, {"uid": username, "original_url": webpage_original, "email": email_address})
+                response_translation = rh.put("/job/"+username+"/"+username+"/uploads/url/translation/"+datename, {"uid": username, "action": "import", "url": webpage_translation, "run": "download"})
+                rh.post("/metadata/"+username+"/"+username+"/uploads/url/translation/"+datename, {"uid": username, "original_url": webpage_translation, "email": email_address})
+                if 'type="error"' in response_original or 'type="error"' in response_translation:
+                    flash("Upload failed", "error")
+                else:
+                    flash("Webpage uploaded!")
 
         elif "tm-file" in request.files:
             tm_file = request.files["tm-file"]
 
-            if tm_file.filename == "" or (original_doc.filename == "" or translation_doc.filename == ""):
+            if tm_file.filename == "":
                 flash("No file selected", "error")
                 return redirect(url_for("index"))
 
@@ -109,6 +117,10 @@ def index():
         elif "original-doc" in request.files and "translation-doc" in request.files:
             original_doc = request.files["original-doc"]
             translation_doc = request.files["translation-doc"]
+            
+            if original_doc.filename == "" or translation_doc.filename == "":
+                flash("No file selected", "error")
+                return redirect(url_for("index"))
 
             if original_doc and translation_doc and allowed_file(original_doc.filename, "td") and allowed_file(translation_doc.filename, "td"):
                 original_docname = secure_filename(original_doc.filename)
@@ -121,8 +133,6 @@ def index():
                     flash("The file formats have to match ("+original_extension+" vs "+translation_extension+")", "error")
                     return redirect(url_for("index"))
                 
-                datename = datetime.datetime.today().strftime('%Y%m%d-%H%M%S')
-
                 process_and_upload(original_doc, datename, original_extension, username, original_docname, email_address, "original")
                 process_and_upload(translation_doc, datename, translation_extension, username, translation_docname, email_address, "translation")
 
