@@ -104,7 +104,7 @@ table.borders td {
     height: 33px;
 }
 
-.error {
+.error, .uploaderror {
     color: red;
 }
 

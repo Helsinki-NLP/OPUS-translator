@@ -1,7 +1,6 @@
 {% extends "base.html" %}
 {% block content %}
 
-
 <table class="translation-table" style="margin: auto; margin-top: 50px">
   <tr>
     <td id="source-language-cell" style="line-height: 210%">
@@ -30,7 +29,7 @@
     <td style="height: 40px" colspan="3"></td>
   </tr>
   <tr>
-    <td><b>Support the project:</b></td>
+    <td><b>Support the project by providing additional training data:</b></td>
     <td></td>
     <td></td>
   </tr>
@@ -41,6 +40,19 @@
     <td class="show-form-button" id="show-tm-form">upload translation memory (.{{ tms }})</td>
     <td></td>
     <td rowspan="3" valign="top">
+ 
+      {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+      <ul class="flashes">
+        {% for category, message in messages %}
+        {% if category in ["upload", "uploaderror"] %}
+          <li class="{{ category }}">{{ message }}</li>
+        {% endif %}
+        {% endfor %}
+      </ul>
+      {% endif %}
+      {% endwith %}
+
       <form class="upload-form" id="upload-tm-form" method="post" enctype="multipart/form-data" style="display: none">
 	    <table>
 	      <tr>
@@ -49,7 +61,7 @@
 	      </tr>
 	      <tr>
 	        <td>your email (optional):</td>
-	        <td><input type="text" name="emailaddress"></td>
+	        <td><input type="text" name="emailaddress" placeholder="your@email.com"></td>
           </tr>
 	      <tr>
 	        <td></td>
@@ -68,8 +80,8 @@
             <td><input id="translation-doc" type="file" name="translation-doc"></td>
           </tr>
           <tr>
-            <td>your email (optional):</td>
-            <td><input type="text" name="emailaddress"></td>
+            <td><!--send TMX to-->your email (optional):</td>
+            <td><input type="text" name="emailaddress" placeholder="your@email.com"></td>
           <tr>
             <td></td>
             <td><input id="upload-files-button" type="submit" name="upload-files-button" value="upload"></td>
@@ -87,8 +99,8 @@
             <td><input id="webpage-url-translation" type="text" name="webpage-url-translation"></td>
           </tr>
           <tr>
-            <td>your email (optional):</td>
-            <td><input type="text" name="emailaddress"></td>
+            <td><!--send TMX to-->your email (optional):</td>
+            <td><input type="text" name="emailaddress" placeholder="your@email.com"></td>
           <tr>
             <td></td>
             <td><input id="upload-url-button" type="submit" name="upload-url-button" value="upload"></td>

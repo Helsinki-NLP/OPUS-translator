@@ -23,7 +23,9 @@
   {% if messages %}
   <ul class="flashes">
     {% for category, message in messages %}
+    {% if category not in ["upload", "uploaderror"] %}
     <li class="{{ category }}">{{ message }}</li>
+    {% endif %}
     {% endfor %}
   </ul>
   {% endif %}

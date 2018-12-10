@@ -86,22 +86,23 @@ def index():
             webpage_original = request.form["webpage-url-original"]
             webpage_translation = request.form["webpage-url-translation"]
             if webpage_original == "" or webpage_translation == "":
-                flash("No webpage selected", "error")
+                flash("No webpage selected", "uploaderror")
             else:
+                datename = datename + ".html"
                 response_original = rh.put("/job/"+username+"/"+username+"/uploads/url/original/"+datename, {"uid": username, "action": "import", "url": webpage_original, "run": "download"})
                 rh.post("/metadata/"+username+"/"+username+"/uploads/url/original/"+datename, {"uid": username, "original_url": webpage_original, "email": email_address})
                 response_translation = rh.put("/job/"+username+"/"+username+"/uploads/url/translation/"+datename, {"uid": username, "action": "import", "url": webpage_translation, "run": "download"})
                 rh.post("/metadata/"+username+"/"+username+"/uploads/url/translation/"+datename, {"uid": username, "original_url": webpage_translation, "email": email_address})
                 if 'type="error"' in response_original or 'type="error"' in response_translation:
-                    flash("Upload failed", "error")
+                    flash("Upload failed", "uploaderror")
                 else:
-                    flash("Webpage uploaded!")
+                    flash("Webpage uploaded!", "upload")
 
         elif "tm-file" in request.files:
             tm_file = request.files["tm-file"]
 
             if tm_file.filename == "":
-                flash("No file selected", "error")
+                flash("No file selected", "uploaderror")
                 return redirect(url_for("index"))
 
             if tm_file and allowed_file(tm_file.filename, "tm"):
@@ -110,16 +111,16 @@ def index():
                 tm_timename = datetime.datetime.today().strftime('%Y%m%d-%H%M%S')
                 
                 process_and_upload(tm_file, tm_timename, extension, username, tm_filename, email_address, "tm")
-                flash('File "' + tm_file.filename + '" uploaded')
+                flash('File "' + tm_file.filename + '" uploaded', "upload")
             else:
-                flash("Invalid file format", "error")
+                flash("Invalid file format", "uploaderror")
 
         elif "original-doc" in request.files and "translation-doc" in request.files:
             original_doc = request.files["original-doc"]
             translation_doc = request.files["translation-doc"]
             
             if original_doc.filename == "" or translation_doc.filename == "":
-                flash("No file selected", "error")
+                flash("No file selected", "uploaderror")
                 return redirect(url_for("index"))
 
             if original_doc and translation_doc and allowed_file(original_doc.filename, "td") and allowed_file(translation_doc.filename, "td"):
@@ -130,18 +131,18 @@ def index():
                 translation_extension = re.search("(\..*)$", translation_docname).group(1)
 
                 if original_extension != translation_extension:
-                    flash("The file formats have to match ("+original_extension+" vs "+translation_extension+")", "error")
+                    flash("The file formats have to match ("+original_extension+" vs "+translation_extension+")", "uploaderror")
                     return redirect(url_for("index"))
                 
                 process_and_upload(original_doc, datename, original_extension, username, original_docname, email_address, "original")
                 process_and_upload(translation_doc, datename, translation_extension, username, translation_docname, email_address, "translation")
 
-                flash('Files "' + original_doc.filename + '" and "' + translation_doc.filename + '" uploaded')
+                flash('Files "' + original_doc.filename + '" and "' + translation_doc.filename + '" uploaded', "upload")
             else:
-                flash("Invalid file format", "error")
+                flash("Invalid file format", "uploaderror")
 
         else:
-            flash("No file selected", "error")
+            flash("No file selected", "uploaderror")
 
         return redirect(url_for("index"))
 
