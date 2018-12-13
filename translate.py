@@ -62,14 +62,23 @@ app.secret_key = key
 
 opusapi_connection = create_engine('sqlite:////var/www/opusdata.db')
 
-def process_and_upload(document, datename, extension, username, docname, email_address, directory):
+def process_and_upload(document, datename, extension, username, docname, email_address, directory, sendtmx):
     document.save(os.path.join(app.config['UPLOAD_FOLDER'], "org"+datename+extension))
     path = username + "/" + username + "/uploads/" + directory + "/" + datename + extension
-    response = rh.upload("/storage/" + path, {"uid": username}, UPLOAD_FOLDER+"/org"+datename+extension)
+    parameters = {"uid": username, "action": "import"}
+    if sendtmx:
+        parameters["email"] = email_address
+    response = rh.upload("/storage/" + path, parameters, UPLOAD_FOLDER+"/org"+datename+extension)
     response = rh.post("/metadata/" + path, {"uid": username, "original_name": docname, "email": email_address})
-    response = rh.put("/job/"+path, {"uid": username, "run": "import"})
     os.remove(UPLOAD_FOLDER+"/org"+datename+extension)
 
+def upload_url(username, directory, datename, webpage, email_address, sendtmx):
+    parameters = {"uid": username, "action": "import", "url": webpage}
+    if sendtmx:
+        parameters["email"] = email_address
+    response = rh.put("/storage/"+username+"/"+username+"/uploads/url/"+directory+"/"+datename, parameters)
+    rh.post("/metadata/"+username+"/"+username+"/uploads/url/"+directory+"/"+datename, {"uid": username, "original_url": webpage, "email": email_address})
+    return response
 
 @app.route('/', methods=["GET", "POST"])
 def index():
@@ -82,6 +91,10 @@ def index():
         email_address = request.form["emailaddress"]
         datename = datetime.datetime.today().strftime('%Y%m%d-%H%M%S')
 
+        sendtmx = False
+        if "sendtmx" in request.form and request.form["sendtmx"] == "on" and email_address != "":
+            sendtmx = True
+
         if "webpage-url-original" in request.form.keys():
             webpage_original = request.form["webpage-url-original"]
             webpage_translation = request.form["webpage-url-translation"]
@@ -89,10 +102,8 @@ def index():
                 flash("No webpage selected", "uploaderror")
             else:
                 datename = datename + ".html"
-                response_original = rh.put("/job/"+username+"/"+username+"/uploads/url/original/"+datename, {"uid": username, "action": "import", "url": webpage_original, "run": "download"})
-                rh.post("/metadata/"+username+"/"+username+"/uploads/url/original/"+datename, {"uid": username, "original_url": webpage_original, "email": email_address})
-                response_translation = rh.put("/job/"+username+"/"+username+"/uploads/url/translation/"+datename, {"uid": username, "action": "import", "url": webpage_translation, "run": "download"})
-                rh.post("/metadata/"+username+"/"+username+"/uploads/url/translation/"+datename, {"uid": username, "original_url": webpage_translation, "email": email_address})
+                response_original = upload_url(username, "original", datename, webpage_original, email_address, sendtmx)
+                response_translation = upload_url(username, "translation", datename, webpage_translation, email_address, sendtmx)
                 if 'type="error"' in response_original or 'type="error"' in response_translation:
                     flash("Upload failed", "uploaderror")
                 else:
@@ -110,7 +121,7 @@ def index():
                 extension = re.search("(\..*)$", tm_filename).group(1)
                 tm_timename = datetime.datetime.today().strftime('%Y%m%d-%H%M%S')
                 
-                process_and_upload(tm_file, tm_timename, extension, username, tm_filename, email_address, "tm")
+                process_and_upload(tm_file, tm_timename, extension, username, tm_filename, email_address, "tm", sendtmx)
                 flash('File "' + tm_file.filename + '" uploaded', "upload")
             else:
                 flash("Invalid file format", "uploaderror")
@@ -134,8 +145,8 @@ def index():
                     flash("The file formats have to match ("+original_extension+" vs "+translation_extension+")", "uploaderror")
                     return redirect(url_for("index"))
                 
-                process_and_upload(original_doc, datename, original_extension, username, original_docname, email_address, "original")
-                process_and_upload(translation_doc, datename, translation_extension, username, translation_docname, email_address, "translation")
+                process_and_upload(original_doc, datename, original_extension, username, original_docname, email_address, "original", sendtmx)
+                process_and_upload(translation_doc, datename, translation_extension, username, translation_docname, email_address, "translation", sendtmx)
 
                 flash('Files "' + original_doc.filename + '" and "' + translation_doc.filename + '" uploaded', "upload")
             else:

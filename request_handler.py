@@ -27,7 +27,7 @@ class RequestHandler:
 
     def upload(self, url, params, filename):
         with open(filename, "rb") as f:
-            r = self.s.post(self.root_url+url, params=params, data=f)
+            r = self.s.put(self.root_url+url, params=params, data=f)
         return r.text
 
     def delete(self, url, params):
