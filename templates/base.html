@@ -7,30 +7,38 @@
 </head>
 
 <body>
-  
-  <ul id="navul">
-    <li id="left"><a href="/"><img id="navlia"  src="{{ url_for('static', filename='logo-fiskmo-black.png') }}" style="height: 69px; padding: 0px 0px"></a></li>
-    {% if session.logged_in %}
-    <li id="right"><a id="navlia" href="/logout">Logout</a></li>
-    <li id="right"><a id="navlia" href="/userpage"><span id="username">{{ session.username }}</span></a></li>
-    {% else %}
-    <li id="right"><a id="navlia" href="/login">Login</a></li>
-    <li id="right"><a id="navlia" href="/register">Register</a></li>
-    {% endif %}
-  </ul>
+  <div id="main-content">
+    <div id="body">  
+      <ul id="navul">
+        <li class="left"><a href="https://blogs.helsinki.fi/fiskmo-project/"><img class="navlia"  src="{{ url_for('static', filename='logo-fiskmo-black.png') }}" style="height: 69px; padding: 0px 0px"></a></li>
+        {% if session.logged_in %}
+        <li class="right"><a class="navlia" href="/logout">Logout</a></li>
+        <li class="right"><a class="navlia" href="/userpage"><span id="username">{{ session.username }}</span></a></li>
+        {% else %}
+        <li class="right"><a class="navlia" href="/login">Login</a></li>
+        <li class="right"><a class="navlia" href="/register">Register</a></li>
+        {% endif %}
+      </ul>
 
-  {% with messages = get_flashed_messages(with_categories=true) %}
-  {% if messages %}
-  <ul class="flashes">
-    {% for category, message in messages %}
-    {% if category not in ["upload", "uploaderror"] %}
-    <li class="{{ category }}">{{ message }}</li>
-    {% endif %}
-    {% endfor %}
-  </ul>
-  {% endif %}
-  {% endwith %}
-  
-{% block content %}{% endblock %}
+      {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+      <ul class="flashes">
+        {% for category, message in messages %}
+        {% if category not in ["upload", "uploaderror"] %}
+        <li class="{{ category }}">{{ message }}</li>
+        {% endif %}
+        {% endfor %}
+      </ul>
+      {% endif %}
+      {% endwith %}
+      
+    {% block content %}{% endblock %}
+    </div>
+    <div id="footer">
+      <a class="footer-link" href="https://www.kulturfonden.fi/"><img class="footer-image" src="{{ url_for('static', filename='skf-logo.jpg') }}"></a>
+      <a class="footer-link" href="https://www.helsinki.fi/"><img class="footer-image" src="{{ url_for('static', filename='university-of-helsinki-logo.png') }}"></a>
+      <a class="footer-link" href="https://blogs.helsinki.fi/language-technology/"><img class="footer-image" src="{{ url_for('static', filename='lt-logo.png') }}" ></a>
+    </div>
+  </div>
 </body>
 </html>

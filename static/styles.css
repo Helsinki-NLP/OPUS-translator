@@ -1,3 +1,42 @@
+html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+}
+
+#main-content {
+    min-height: 100%;
+    position: relative;
+}
+
+#body {
+    padding-bottom: 100px;
+}
+
+#footer {
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    height: 60px;
+    width: 100%;
+    line-height: 60px;
+    margin-top: 40px;
+    margin-bottom: 25px;
+    text-align: center;
+}
+
+.footer-link {
+    margin-right: 30px;
+}
+
+.footer-image {
+    height: 60px;
+}
+
+.container {
+    margin: 20px;
+}
+
 #navul {
     list-style-type: none;
     margin: 0;
@@ -5,28 +44,35 @@
     overflow: hidden;
     background-color: #E6E6E6;
 }
-#left {
+
+.left {
     float: left;
 }
-#right {
+
+.right {
     float: right;
 }
-#navlia {
+
+.navlia {
     display: block;
     color: black;
     text-align: center;
     padding: 25px 16px;
     text-decoration: none;
 }
-#navlia:hover {
+
+.navlia:hover {
     background-color: #D8D8D8;
 }
+
 table.borders {
     border-collapse: collapse;
 }
+
 table.borders, table.borders tr, table.borders td {
     border: 2px solid black;
 }
+
 table.borders td {
     width: 30%;
 }
@@ -119,3 +165,4 @@ table.borders td {
 .show-form-button:hover {
     background-color: #D8D8D8;
 }
+
