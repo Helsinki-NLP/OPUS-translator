@@ -9,7 +9,7 @@
 <body>
   <div id="main-content">
     <div id="body">  
-      <ul id="navul" style="background-image: url('static/images/banner.jpg')">
+      <ul id="navul" style="background-image: url('/static/images/banner.jpg')">
         <li class="left"><a href="https://blogs.helsinki.fi/fiskmo-project/"><img class="navlia"  src="{{ url_for('static', filename='images/logo-fiskmo-white.png') }}" style="height: 67px; padding: 0px 0px"></a></li>
         {% if session.logged_in %}
         <li class="right"><a class="navlia" href="/logout">logout</a></li>
