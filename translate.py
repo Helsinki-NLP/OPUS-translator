@@ -444,8 +444,14 @@ def opusapi():
         sou_tar.sort(reverse=True)
         direction = False
 
+    latest = "#EMPTY#"
+    if version == "latest":
+        version = "#EMPTY#"
+        latest = "True"
+    
     parameters = [("source", sou_tar[0]), ("target", sou_tar[1]), ("corpus", thwart(corpus)),
-                  ("preprocessing", thwart(preprocessing)), ("version", thwart(version))]
+                  ("preprocessing", thwart(preprocessing)), ("version", thwart(version)), 
+                  ("latest", latest)]
 
     sql_command = make_sql_command(parameters, direction)
     if sql_command == "SELECT url FROM opusfile":
