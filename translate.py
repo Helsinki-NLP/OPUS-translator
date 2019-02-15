@@ -42,7 +42,7 @@ mail_settings = {
 app.config.update(mail_settings)
 mail = Mail(app)
 
-UPLOAD_FOLDER = "/var/www/uploads"
+UPLOAD_FOLDER = os.environ["UPLOAD_FOLDER"] 
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 tm_extensions = ['tmx', 'xliff']
@@ -59,8 +59,6 @@ def allowed_file(filename, ftype):
 
 key = os.environ["SECRETKEY"]
 app.secret_key = key
-
-opusapi_connection = create_engine('sqlite:////var/www/opusdata.db')
 
 def process_and_upload(document, datename, extension, username, docname, email_address, directory, sendtmx):
     document.save(os.path.join(app.config['UPLOAD_FOLDER'], "org"+datename+extension))
