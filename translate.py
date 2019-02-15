@@ -324,17 +324,17 @@ def translate():
             translation += "\n"
             continue
 
-        sentences = sp.Popen(["/var/www/scripts/split.sh", paragraph], stdout=sp.PIPE).stdout.read().decode("utf-8")
+        sentences = sp.Popen([os.environ["TRSCRIPTS"]+"split.sh", paragraph], stdout=sp.PIPE).stdout.read().decode("utf-8")
         sentences = sentences[:-1].split("\n")
     
         for sentence in sentences:
-            sentence = sp.Popen(["/var/www/scripts/"+preprocess, sentence, sourcelan], stdout=sp.PIPE).stdout.read().decode("utf-8").strip()
+            sentence = sp.Popen([os.environ["TRSCRIPTS"]+preprocess, sentence, sourcelan], stdout=sp.PIPE).stdout.read().decode("utf-8").strip()
             if sourcelan == "fi" and targetlan in ["da", "no", "sv"]:
                 sentence = ">>"+targetlan+"<< "+sentence
 
             ws.send(sentence)
             translation_temp = ws.recv().strip()
-            translation_temp = sp.Popen(["/var/www/scripts/postprocess.sh", translation_temp], stdout=sp.PIPE).stdout.read().decode("utf-8").strip()
+            translation_temp = sp.Popen([os.environ["TRSCRIPTS"]+"postprocess.sh", translation_temp], stdout=sp.PIPE).stdout.read().decode("utf-8").strip()
 
             translation = translation + translation_temp + " "
         translation = translation[:-1] + "\n"
