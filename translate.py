@@ -317,25 +317,22 @@ def translate():
 
     translation = ""
     
+    batch = ""
     for paragraph in paragraphs:
-        if paragraph.strip() == "":
-            translation += "\n"
-            continue
-
         sentences = sp.Popen([os.environ["TRSCRIPTS"]+"split.sh", paragraph], stdout=sp.PIPE).stdout.read().decode("utf-8")
         sentences = sentences[:-1].split("\n")
-    
         for sentence in sentences:
+            if sentence.strip() == "":
+                continue
             sentence = sp.Popen([os.environ["TRSCRIPTS"]+preprocess, sentence, sourcelan], stdout=sp.PIPE).stdout.read().decode("utf-8").strip()
             if sourcelan == "fi" and targetlan in ["da", "no", "sv"]:
                 sentence = ">>"+targetlan+"<< "+sentence
+            batch += "\n"+sentence
 
-            ws.send(sentence)
-            translation_temp = ws.recv().strip()
-            translation_temp = sp.Popen([os.environ["TRSCRIPTS"]+"postprocess.sh", translation_temp], stdout=sp.PIPE).stdout.read().decode("utf-8").strip()
-
-            translation = translation + translation_temp + " "
-        translation = translation[:-1] + "\n"
+    batch = batch.strip()
+    ws.send(batch)
+    translation_temp = ws.recv().strip()
+    translation = sp.Popen([os.environ["TRSCRIPTS"]+"postprocess.sh", translation_temp], stdout=sp.PIPE).stdout.read().decode("utf-8").strip()
 
     ws.close()
 
