@@ -314,16 +314,12 @@ def translate():
     targetlan = direction[-2:]
 
     paragraphs = text.split("\n")
-
-    translation = ""
     
     batch = ""
     for paragraph in paragraphs:
         sentences = sp.Popen([os.environ["TRSCRIPTS"]+"split.sh", paragraph], stdout=sp.PIPE).stdout.read().decode("utf-8")
         sentences = sentences[:-1].split("\n")
         for sentence in sentences:
-            if sentence.strip() == "":
-                continue
             sentence = sp.Popen([os.environ["TRSCRIPTS"]+preprocess, sentence, sourcelan], stdout=sp.PIPE).stdout.read().decode("utf-8").strip()
             if sourcelan == "fi" and targetlan in ["da", "no", "sv"]:
                 sentence = ">>"+targetlan+"<< "+sentence
@@ -331,12 +327,25 @@ def translate():
 
     batch = batch.strip()
     ws.send(batch)
+
     translation_temp = ws.recv().strip()
-    translation = sp.Popen([os.environ["TRSCRIPTS"]+"postprocess.sh", translation_temp], stdout=sp.PIPE).stdout.read().decode("utf-8").strip()
+    translation = ""
+    prev = "start"
+    for i in translation_temp.split("\n"):
+        line = sp.Popen([os.environ["TRSCRIPTS"]+"postprocess.sh", i], stdout=sp.PIPE).stdout.read().decode("utf-8").strip()
+        if line == "":
+            translation += "\n"
+            prev = "br"
+        else:
+            if prev == "start":
+                translation += line
+            elif prev == "txt":
+                translation += " " + line
+            elif prev == "br":
+                translation += "\n" + line
+            prev = "txt"
 
     ws.close()
-
-    translation = translation[:-1]
 
     return jsonify(result=translation, source=sourcelan, target=targetlan)
 
