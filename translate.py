@@ -331,18 +331,15 @@ def translate():
     translation_temp = ws.recv().strip()
     translation = ""
     prev = "start"
+    linestart = {"start": "", "txt": " ", "br": "\n"}
+
     for i in translation_temp.split("\n"):
         line = sp.Popen([os.environ["TRSCRIPTS"]+"postprocess.sh", i], stdout=sp.PIPE).stdout.read().decode("utf-8").strip()
         if line == "":
             translation += "\n"
             prev = "br"
         else:
-            if prev == "start":
-                translation += line
-            elif prev == "txt":
-                translation += " " + line
-            elif prev == "br":
-                translation += "\n" + line
+            translation += linestart[prev] + line
             prev = "txt"
 
     ws.close()
