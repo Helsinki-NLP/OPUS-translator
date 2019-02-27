@@ -1,0 +1,10 @@
+flask
+wtforms
+passlib
+pymysql
+sqlalchemy
+websocket_client
+werkzeug
+requests
+pycld2
+flask_mail

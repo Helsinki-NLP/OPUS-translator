@@ -6,10 +6,71 @@ HelTran is an online translation demonstrator. HelTran is a [Flask](http://flask
 
 The are two ways to deploy the HelTran demonstrator:
 
-1. Launch an instance from a snapshot on cPouta.
-2. Clone the project from GitHub.
+1. Clone the project from GitHub.
+2. Launch an instance from a snapshot on cPouta.
 
-### Deployment method 1: cPouta
+### Deployment method 2: Clone project from GitHub
+
+Clone the repository.
+
+`git clone https://github.com/Helsinki-NLP/OPUS-translator.git`
+
+Compile Marian, see the [documentation](https://marian-nmt.github.io/docs/).
+
+After compiling, run your models with `marian-server`, for example:
+
+`./marian-dev/build/marian-server -c fi-danosv-config.yml > fi_danosv.log 2>&1 &`
+
+This runs the model based on a configuration file and logs messages to a log file. The process is set to run in background. By default, the translator uses ports `5003` and `5004`, so set the port to one of those in the configuration file. `OPUS-translator/scripts/example_config` contains example configuration files.
+
+Install [subword-nmt](https://github.com/rsennrich/subword-nmt).
+
+`pip install subword-nmt`
+
+Create a virtual environment and activate it.
+
+```
+python3 -m venv translatorenv
+source translatorenv/bin/activate
+```
+
+Install requirements:
+
+```
+cd OPUS-translator
+pip3 install -r requirements.txt
+```
+
+Set flask environment to development and set the flask app to `translate.py`:
+
+```
+export FLASK_ENV=development
+export FLASK_APP=translate.py
+```
+
+There are also other environment variables that you need to set for user authenticiation, uploads, databases etc., but if you are only using the translation functionality, you can set them to dummy values.
+
+```
+export EMAILUSER=dummy
+export EMAILPASSWORD=dummy
+export DBUSER=dummy
+export DBPASSWORD=dummy
+export DBNAME=dummy
+export SECRETKEY=dummy
+export BACKENDCERT=dummy
+export BACKENDKEY=dummy
+export BACKENDCA=dummy
+export BACKENDURL=dummy
+export UPLOAD_FOLDER=dummy
+```
+
+Run the flask app.
+
+`flask run`
+
+Go to [localhost:5000](localhost:5000).
+
+### Deployment method 2: cPouta
 
 The following only works if you have access to project 2000661.
 
@@ -28,7 +89,7 @@ Connect to you instance and go to Apache configuration file at `/etc/apache2/sit
 Change `ServerName` to your server name or ip-address.
 
 If you want to use secure connection, you need to set up an SSL certificate. Secure connection is required if you want to keep usernames and passwords safe, when users are registering or logging in. [Let's Encrypt](https://letsencrypt.org/) offers free SSL certificates.
-If you have an SSL certificate, replace `SSLCertificateFile` and `SSLCertigicateKeyFile` with your files.
+If you have an SSL certificate, replace `SSLCertificateFile` and `SSLCertificateKeyFile` with your files.
 
 If you are not worried about usernames and passwords, you can set up the server without a secure connection. In this case, replace the contents of the configuration file with:
 
@@ -117,6 +178,3 @@ sudo systemctl restart apache2
 
 Your model is now online at you ip-address
 
-### Deployment method 2: Clone project from GitHub
-
-Coming soon...
