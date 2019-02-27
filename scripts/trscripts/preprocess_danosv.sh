@@ -1,7 +1,7 @@
 #!/bin/sh
 
-PATHTO=/home/cloud-user/models/tokenizer
-PATHPBE=/home/cloud-user/models/bpe_codes/bpe50000.train.sv
+PATHTO=../models/tokenizer
+PATHPBE=../models/bpe_codes/bpe50000.train.sv
 
 echo $1 |\
     $PATHTO/replace-unicode-punctuation.perl |\

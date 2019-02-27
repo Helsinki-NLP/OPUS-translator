@@ -317,11 +317,11 @@ def translate():
     
     batch = ""
     for paragraph in paragraphs:
-        sentences = sp.Popen([os.environ["TRSCRIPTS"]+"split.sh", paragraph], stdout=sp.PIPE).stdout.read().decode("utf-8")
+        sentences = sp.Popen(["scripts/trscripts/split.sh", paragraph], stdout=sp.PIPE).stdout.read().decode("utf-8")
         sentences = sentences[:-1].split("\n")
         for sentence in sentences:
-            sentence = sp.Popen([os.environ["TRSCRIPTS"]+preprocess, sentence, sourcelan], stdout=sp.PIPE).stdout.read().decode("utf-8").strip()
-            if sourcelan == "fi" and targetlan in ["da", "no", "sv"]:
+            sentence = sp.Popen(["scripts/trscripts/"+preprocess, sentence, sourcelan], stdout=sp.PIPE).stdout.read().decode("utf-8").strip()
+            if sourcelan == "fi" and targetlan in ["da", "no", "sv"] and sentence != "":
                 sentence = ">>"+targetlan+"<< "+sentence
             batch += "\n"+sentence
 
@@ -334,7 +334,7 @@ def translate():
     linestart = {"start": "", "txt": " ", "br": "\n"}
 
     for i in translation_temp.split("\n"):
-        line = sp.Popen([os.environ["TRSCRIPTS"]+"postprocess.sh", i], stdout=sp.PIPE).stdout.read().decode("utf-8").strip()
+        line = sp.Popen(["scripts/trscripts/postprocess.sh", i], stdout=sp.PIPE).stdout.read().decode("utf-8").strip()
         if line == "":
             translation += "\n"
             prev = "br"

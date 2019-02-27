@@ -1,3 +1,3 @@
 #!/bin/sh
 
-echo $1 | /home/cloud-user/tools/split-sentences.perl -q
+echo $1 | ../tools/split-sentences.perl -q
