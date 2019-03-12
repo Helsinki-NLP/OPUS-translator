@@ -321,7 +321,7 @@ def translate():
         sentences = sp.Popen(["scripts/trscripts/split.sh", paragraph], stdout=sp.PIPE).stdout.read().decode("utf-8")
         sentences = sentences[:-1].split("\n")
         for sentence in sentences:
-            sentence = sp.Popen(["scripts/trscripts/"+preprocess, sentence, sourcelan], stdout=sp.PIPE).stdout.read().decode("utf-8").strip()
+            sentence = sp.Popen([preprocess, sentence, sourcelan], stdout=sp.PIPE).stdout.read().decode("utf-8").strip()
             if sourcelan == "fi" and targetlan in ["da", "no", "sv"] and sentence != "":
                 sentence = ">>"+targetlan+"<< "+sentence
             batch += "\n"+sentence
