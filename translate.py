@@ -303,10 +303,11 @@ def translate():
 
     if direction in ["da-fi", "no-fi", "sv-fi"]:
         ws = create_connection("ws://localhost:{}/translate".format(5003))
-        preprocess = "preprocess_danosv.sh"
+        #Use the preprocessing scripts in the model directory
+        preprocess = "/models/5003/preprocess.sh"
     elif direction in ["fi-da", "fi-no", "fi-sv"]:
         ws = create_connection("ws://localhost:{}/translate".format(5004))
-        preprocess = "preprocess_fi.sh"
+        preprocess = "/models/5004/preprocess.sh"
     else:
         return jsonify(result="translation direction not found")
 
