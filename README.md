@@ -1,15 +1,15 @@
-# HelTran
+# OPUS-translator
 
-HelTran is an online translation demonstrator. HelTran is a [Flask](http://flask.pocoo.org/) application that serves translation models online. The translation models are run on [Marian NMT](https://marian-nmt.github.io/).
+OPUS-translator is an online translation demonstrator. OPUS-translator is a [Flask](http://flask.pocoo.org/) application that serves translation models online. The translation models are run on [Marian NMT](https://marian-nmt.github.io/). An example instance is running at [https://translate.ling.helsinki.fi/](https://translate.ling.helsinki.fi/).
 
-## How to deploy HelTran
+## How to deploy OPUS-translator
 
-The are two ways to deploy the HelTran demonstrator:
+The are two ways to deploy OPUS-translator:
 
 1. Clone the project from GitHub.
 2. Launch an instance from a snapshot on cPouta.
 
-### Deployment method 2: Clone project from GitHub
+### Deployment method 1: Clone project from GitHub
 
 Clone the repository.
 
