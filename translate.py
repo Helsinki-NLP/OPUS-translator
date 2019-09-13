@@ -228,7 +228,7 @@ def forgot_password():
             msg = Message(subject="Account management",
                     sender=app.config.get("MAIL_USERNAME"),
                     recipients=[email],
-                    body='Follow this link to reset your Fiskmö and Opus Repository account password:\n\nhttps://translate.ling.helsinki.fi/reset_password/'+token+'\n\nThe link will expire in 60 minutes.')
+                    body='Follow this link to reset your Fiskmö and Opus Repository account password:\n\n'+os.environ['TRBASEURL']+'/reset_password/'+token+'\n\nThe link will expire in 60 minutes.')
             mail.send(msg)
         flash('See your email for further instructions.')
         return redirect(url_for("login_page"))
