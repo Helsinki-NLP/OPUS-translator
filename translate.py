@@ -1,27 +1,29 @@
-from flask import Flask, render_template, request, jsonify, redirect, url_for, flash, session, send_file, send_from_directory
-from wtforms import Form, BooleanField, TextField, PasswordField, validators
-from passlib.hash import sha256_crypt
-from pymysql import escape_string as thwart
-import gc
-from dbconnect import connection
-from functools import wraps
-import sqlite3
-from sqlalchemy import create_engine
 import pickle
-from websocket import create_connection
 import subprocess as sp
 import os
-from werkzeug.utils import secure_filename
 import time
 import re
 from urllib.parse import urlparse, urljoin
 import json
 import datetime
-import request_handler
-import pycld2
-from flask_mail import Mail, Message
 import string
 from random import choice
+import gc
+from functools import wraps
+
+from flask import Flask, render_template, request, jsonify, redirect, url_for, flash, session, send_file, send_from_directory
+from wtforms import Form, BooleanField, TextField, PasswordField, validators
+from passlib.hash import sha256_crypt
+from pymysql import escape_string as thwart
+import sqlite3
+from sqlalchemy import create_engine
+from websocket import create_connection
+from werkzeug.utils import secure_filename
+import pycld2
+from flask_mail import Mail, Message
+
+from dbconnect import connection
+import request_handler
 
 rh = request_handler.RequestHandler()
 
@@ -226,7 +228,7 @@ def forgot_password():
             msg = Message(subject="Account management",
                     sender=app.config.get("MAIL_USERNAME"),
                     recipients=[email],
-                    body='Follow this link to reset your Fiskmö account password:\n\nhttps://translate.ling.helsinki.fi/reset_password/'+token+'\n\nThe link will expire in 60 minutes.')
+                    body='Follow this link to reset your Fiskmö and Opus Repository account password:\n\nhttps://translate.ling.helsinki.fi/reset_password/'+token+'\n\nThe link will expire in 60 minutes.')
             mail.send(msg)
         flash('See your email for further instructions.')
         return redirect(url_for("login_page"))
