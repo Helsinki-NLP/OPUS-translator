@@ -285,6 +285,30 @@ def reset_password(token):
 @app.route('/translate')
 def translate():
     text = request.args.get('sent', 'empty', type=str)
+    direction = request.args.get('direction', 'empty', type=str)
+    
+    if text.strip() == '':
+        return jsonify(result='')
+
+    text = direction+' '+text[:500]
+
+    host = os.environ['TRANSLATION_HOST']
+    port = os.environ['TRANSLATION_PORT']
+
+    ws = create_connection('ws://{}:{}/translate'.format(host, port))
+
+    ws.send(text)
+    result = ws.recv()
+    if result[:5] == 'ERROR':
+        print(result[-5:-3], result[-3:])
+        return jsonify(result=result, source=result[-5:-3], target=result[-2:])
+
+    return result
+
+'''
+@app.route('/translate')
+def translate():
+    text = request.args.get('sent', 'empty', type=str)
 
     if text.strip() == "":
         return jsonify(result="")
@@ -347,6 +371,7 @@ def translate():
     ws.close()
 
     return jsonify(result=translation, source=sourcelan, target=targetlan)
+'''
 
 @app.route('/suggest/')
 def suggest():
@@ -368,7 +393,6 @@ def suggest():
     c.close()
     conn.close()
     gc.collect()
-
 
 @app.route('/report/')
 def report():
