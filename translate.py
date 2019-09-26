@@ -299,11 +299,9 @@ def translate():
 
     ws.send(text)
     result = ws.recv()
-    if result[:5] == 'ERROR':
-        print(result[-5:-3], result[-3:])
-        return jsonify(result=result, source=result[-5:-3], target=result[-2:])
-
-    return result
+    result = json.loads(result)
+    
+    return jsonify(result)
 
 '''
 @app.route('/translate')
