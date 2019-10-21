@@ -159,6 +159,10 @@ def index():
 
     return render_template("index.html", tds = ", .".join(td_extensions), tms = ", .".join(tm_extensions))
 
+@app.route('/fix_language')
+def fix_language():
+    return render_template("fix_language.html", no_logos=True)
+
 def login_required(f):
     @wraps(f)
     def wrap(*args, **kwargs):

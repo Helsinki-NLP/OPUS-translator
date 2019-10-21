@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h2 style="text-align: center">Fix your language!</h2>
+
+<table class="translation-table" style="margin: auto; margin-top: 25px">
+  <tr>
+    <td id="source-language-cell" style="line-height: 210%; padding-left: 20%; padding-right: 20%" colspan="3">
+      <span id="selected-source" class="translation-cell-content source-languages" style="background-color: #D8D8D8" language="DL" style="white-space: nowrap">detect language</span>
+      <span class="translation-cell-content source-languages" language="af">Afrikaans</span>
+      <span class="translation-cell-content source-languages" language="da">Danish</span>
+      <span class="translation-cell-content source-languages" language="nl">Dutch</span>
+      <span class="translation-cell-content source-languages" language="ca">Catalan</span>
+      <span class="translation-cell-content source-languages" language="en">English</span>
+      <span class="translation-cell-content source-languages" language="et">Estonian</span>
+      <span class="translation-cell-content source-languages"  language="fi">Finnish</span>
+      <span class="translation-cell-content source-languages"  language="fo">Faroese</span>
+      <span class="translation-cell-content source-languages" language="fr">French</span>
+      <span class="translation-cell-content source-languages"  language="fy">Frisian</span>
+      <span class="translation-cell-content source-languages" language="ga">Galician</span>
+      <span class="translation-cell-content source-languages" language="de">German</span>
+      <span class="translation-cell-content source-languages" language="hu">Hungarian</span>
+      <span class="translation-cell-content source-languages" language="is">Icelandic</span>
+      <span class="translation-cell-content source-languages" language="it">Italian</span>
+      <span class="translation-cell-content source-languages" language="no">Norwegian</span>
+      <span class="translation-cell-content source-languages" language="oc">Occitan</span>
+      <span class="translation-cell-content source-languages" language="pt">Portuguese</span>
+      <span class="translation-cell-content source-languages" language="es">Spanish</span>
+      <span class="translation-cell-content source-languages" language="sv">Swedish</span>
+    </td>
+    </td>
+  </tr>
+  <tr style="clear: both">
+    <td style="height: 40px" colspan="3"></td>
+  </tr>
+  <tr style="height: 200px">
+    <td style="width: 500px"><textarea id="sentence" class="translation-box" maxlength="500"  autofocus></textarea></td>
+    <td style="width: 100px; text-align: center">
+      <img id="translate" src="{{ url_for('static', filename='images/arrow.png') }}">
+    </td>
+    <td style="width: 500px"><textarea id="translation" class="translation-box" readonly></textarea></td>
+  </tr>
+  <tr>
+    <td style="height: 40px" colspan="3"></td>
+  </tr>
+
+<script src="static/jquery-3.3.1.min.js"> </script>
+<script type="text/javascript" src="{{ url_for('static', filename='fix_language.js') }}"> </script>
+{% endblock %}
