@@ -21,12 +21,14 @@
     <div id="body">  
       <ul id="navul" style="background-image: url('/static/images/banner.jpg')">
         <li class="left"><a href="https://blogs.helsinki.fi/fiskmo-project/"><img class="navlia"  src="{{ url_for('static', filename='images/logo-fiskmo-white.png') }}" style="height: 67px; padding: 0px 0px"></a></li>
+        {% if not no_logos %}
         {% if session.logged_in %}
         <li class="right"><a class="navlia" href="/logout">logout</a></li>
         <li class="right"><a class="navlia" href="/userpage"><span id="username">{{ session.username }}</span></a></li>
         {% else %}
         <li class="right"><a class="navlia" href="/login">login</a></li>
         <li class="right"><a class="navlia" href="/register">register</a></li>
+        {% endif %}
         {% endif %}
       </ul>
 
