@@ -4,23 +4,25 @@
 <table class="translation-table" style="margin: auto; margin-top: 50px">
   <tr>
     <td id="source-language-cell" style="line-height: 210%">
-      <span id="selected-source" class="translation-cell-content source-languages" style="background-color: #D8D8D8" language="fi">Finnish</span>
-      <span class="translation-cell-content source-languages" language="sv" style="white-space: nowrap">Swedish / Norwegian / Danish</span>
       <span class="translation-cell-content source-languages" language="DL" style="white-space: nowrap">detect language</span>
+      <span class="translation-cell-content source-languages" language="da" style="white-space: nowrap">Danish</span>
+      <span id="selected-source" class="translation-cell-content source-languages" style="background-color: #D8D8D8" language="fi">Finnish</span>
+      <span class="translation-cell-content source-languages" language="no" style="white-space: nowrap">Norwegian</span>
+      <span class="translation-cell-content source-languages" language="sv" style="white-space: nowrap">Swedish</span>
     </td>
     <td style="width: 100px"></td>
     <td id="target-language-cell" style="line-height: 210%">
-      <span class="translation-cell-content target-languages" language="fi">Finnish</span>
-      <span id="selected-target" class="translation-cell-content target-languages" style="background-color: #D8D8D8" language="sv">Swedish</span>
-      <span class="translation-cell-content target-languages" language="no">Norwegian</span>
       <span class="translation-cell-content target-languages" language="da">Danish</span>
+      <span class="translation-cell-content target-languages" language="fi">Finnish</span>
+      <span class="translation-cell-content target-languages" language="no">Norwegian</span>
+      <span id="selected-target" class="translation-cell-content target-languages" style="background-color: #D8D8D8" language="sv">Swedish</span>
     </td>
   </tr>
   <tr style="clear: both">
     <td style="height: 40px" colspan="3"></td>
   </tr>
   <tr style="height: 200px">
-    <td style="width: 500px"><textarea id="sentence" class="translation-box" maxlength="500"  autofocus></textarea></td>
+    <td style="width: 500px"><textarea id="sentence" class="translation-box" maxlength="500" autofocus></textarea></td>
     <td style="width: 40px; text-align: center">
       <img id="translate" src="{{ url_for('static', filename='images/arrow.png') }}">
     </td>

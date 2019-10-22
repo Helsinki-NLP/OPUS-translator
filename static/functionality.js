@@ -14,9 +14,12 @@ function translate() {
     let target_lan = $("#selected-target").attr("language");
     var direction = source_lan + "-" + target_lan;
 
+    /*
     if ($.inArray(direction, ["fi-fi", "sv-sv", "sv-no", "sv-da"]) != -1) {
         $("#translation").text(sentence);
-    } else if ($.trim(sentence) != "") {
+    } else
+    */
+    if ($.trim(sentence) != "") {
         $("#translation").css("font-style", "italic");
         $("#translation").text("Translating...");
         $.getJSON(baseurl+"/translate", {
@@ -203,11 +206,13 @@ $(".source-languages").on("click", function() {
     $(this).attr("id", "selected-source");
     let sourcelang = $(this).attr("language");
     let targetlang = $("#selected-target").attr("language");
+    /*
     if (sourcelang == "fi" && targetlang == "fi" ) {
         $("#target-language-cell").find("[language=sv]").click()
     } else if (sourcelang == "sv" && $.inArray(targetlang, ["no", "sv", "da"]) != -1) {
         $("#target-language-cell").find("[language=fi]").click()
     }
+    */
 });
 
 $(".target-languages").on("click", function() {
@@ -217,11 +222,13 @@ $(".target-languages").on("click", function() {
     $(this).attr("id", "selected-target");
     let sourcelang = $("#selected-source").attr("language");
     let targetlang = $(this).attr("language");
+    /*
     if (sourcelang == "fi" && targetlang == "fi" ) {
         $("#source-language-cell").find("[language=sv]").click()
     } else if (sourcelang == "sv" && $.inArray(targetlang, ["no", "sv", "da"]) != -1) {
         $("#source-language-cell").find("[language=fi]").click()    
     }    
+    */
 });
 
 function hideOrShowForm(formid, buttonid) {
