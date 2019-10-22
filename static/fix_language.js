@@ -25,11 +25,21 @@ function translate() {
             $("#status").text("");
             $("#translation").css("font-style", "normal");
             $("#translation").text(data.result);
+
+            highlight_detected(data.source);
         });
         return false;
     } else {
         $("#translation").text("");
         $("#submissionmessage").text("");
+    }
+}
+
+function highlight_detected(source) {
+    if ($("#selected-source").attr("language") == "DL") {
+        $(".source-languages").css({"background-color": "", "border": "1px solid black"});
+        $("#source-language-cell").find("[language=DL]").css("background-color", "#D8D8D8");
+        $("#source-language-cell").find("[language="+source+"]").css({"border": "2px dashed black", "background-color": "#D8D8D8"});
     }
 }
 
@@ -50,13 +60,4 @@ $(".source-languages").on("click", function() {
     $(this).attr("id", "selected-source");
     let sourcelang = $(this).attr("language");
     let targetlang = $("#selected-target").attr("language");
-});
-
-$(".target-languages").on("click", function() {
-    $(".target-languages").css("background-color", "");
-    $(".target-languages").attr("id", "");
-    $(this).css("background-color", "#D8D8D8");
-    $(this).attr("id", "selected-target");
-    let sourcelang = $("#selected-source").attr("language");
-    let targetlang = $(this).attr("language");
 });
