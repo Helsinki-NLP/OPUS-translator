@@ -4,11 +4,7 @@ function translate() {
     $("#asksuggestion").css("display", "none");
     $("#source").text("");
 
-    $("#suggestion").val("");
-
-    $("#trash-div").css("display", "none");
-    
-    let sentence = $("#sentence").val();
+    let sentence = $("#sentence").text();
     
     let source_lan = $("#selected-source").attr("language");
     var direction = source_lan + "-" + source_lan;
@@ -24,7 +20,13 @@ function translate() {
             $("#sourcedirection").text(direction);
             $("#status").text("");
             $("#translation").css("font-style", "normal");
-            $("#translation").text(data.result);
+            $("#sentence").text("");
+            $("#sentence").append(data.sentence);
+            $("#translation").text("");
+            $("#translation").append(data.result);
+
+            console.log(data.n_seg);
+            highlight_on_hover(data.n_seg);
 
             highlight_detected(data.source);
         });
@@ -61,3 +63,27 @@ $(".source-languages").on("click", function() {
     let sourcelang = $(this).attr("language");
     let targetlang = $("#selected-target").attr("language");
 });
+
+function change_color(classname, color1, color2) {
+    elms = document.getElementsByClassName(classname);
+    len = elms.length;
+    for(var i=0; i<len; i++) {
+        elms[i].style.backgroundColor = color1;
+        elms[i].parentElement.style.backgroundColor = color2;
+    }
+}
+
+function highlight_on_hover(n_seg) {
+    for(var i=0; i<n_seg; i++) {
+        elms = document.getElementsByClassName("seg"+i);
+        len = elms.length;
+        for(var j=0; j<len; j++) {
+            elms[j].onmouseover = function() {
+                change_color(this.className, "grey", "silver");
+            };
+            elms[j].onmouseout = function() {
+                change_color(this.className, "", "");
+            };
+        }
+    }
+}

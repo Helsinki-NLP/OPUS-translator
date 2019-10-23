@@ -33,11 +33,11 @@
     <td style="height: 40px" colspan="3"></td>
   </tr>
   <tr style="height: 200px">
-    <td style="width: 500px"><textarea id="sentence" class="translation-box" maxlength="500"  autofocus></textarea></td>
+    <td style="width: 35vw"><div contenteditable="true" id="sentence" class="translation-box"></div></td>
     <td style="width: 100px; text-align: center">
       <img id="translate" src="{{ url_for('static', filename='images/arrow.png') }}">
     </td>
-    <td style="width: 500px"><textarea id="translation" class="translation-box" readonly></textarea></td>
+    <td style="width: 35vw"><div id="translation" class="translation-box"></div></td>
   </tr>
   <tr>
     <td style="height: 40px" colspan="3"></td>

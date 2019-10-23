@@ -24,6 +24,7 @@ from flask_mail import Mail, Message
 
 from dbconnect import connection
 import request_handler
+from highlight import highlight
 
 rh = request_handler.RequestHandler()
 
@@ -290,11 +291,16 @@ def reset_password(token):
 def translate():
     text = request.args.get('sent', 'empty', type=str)
     direction = request.args.get('direction', 'empty', type=str)
+
+    #FOR TESTING
+    text = 'tämä on testilause'
+    direction = 'fi-fi'
     
     if text.strip() == '':
         return jsonify(result='')
 
-    text = direction+' '+text[:500]
+    source = text[:500]
+    text = direction+' '+source
 
     host = os.environ['TRANSLATION_HOST']
     port = os.environ['TRANSLATION_PORT']
@@ -304,8 +310,14 @@ def translate():
     ws.send(text)
     result = ws.recv()
     result = json.loads(result)
+
+    #FOR TESTING
+    result['alignment'] = ['0-0 1-1 2-2 3-3 4-4 5-5 5-6']
+
+    n_seg = len(result['alignment'][0].split())
+    sentence, result = highlight(source, result)
     
-    return jsonify(result)
+    return jsonify(sentence=sentence, result=result, n_seg=n_seg)
 
 '''
 @app.route('/translate')
