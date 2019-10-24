@@ -31,16 +31,18 @@ def highlight(source, data):
     alignment = data['alignment'][0].split()
     source_seg = data['source-segments'][0].split() + ['EOS']
     target_seg = data['target-segments'][0].split() + ['EOS']
-    source_seg_new = [[[], i] for i in source_seg]
-    target_seg_new = [[[], i] for i in target_seg]
+    source_seg_new = [[set(), i] for i in source_seg]
+    target_seg_new = [[set(), i] for i in target_seg]
+    all_segs = set()
 
-    for i, a in enumerate(alignment):
-        a = a.split('-')
-        s, t = int(a[0]), int(a[1])
-        source_seg_new[s][0].append(i)
+    for alig in alignment:
+        alig = alig.split('-')
+        s, t = int(alig[0]), int(alig[1])
+        source_seg_new[s][0].update(['-s'+str(s), '-t'+str(t)])
         source_seg_new[s][1] = source_seg[s]
-        target_seg_new[t][0].append(i)
+        target_seg_new[t][0].update(['-s'+str(s), '-t'+str(t)])
         target_seg_new[t][1] = target_seg[t]
+        all_segs.update(['-s'+str(s), '-t'+str(t)])
 
     source_seg_highlight = addSegs(source_seg_new)
     target_seg_highlight = addSegs(target_seg_new)
@@ -48,6 +50,5 @@ def highlight(source, data):
     source_res = formHighlightString(source, source_seg, source_seg_highlight)
     target_res = formHighlightString(result, target_seg, target_seg_highlight)
 
-    return source_res, target_res
-
+    return source_res, target_res, all_segs
 

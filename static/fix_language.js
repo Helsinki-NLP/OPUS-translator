@@ -25,8 +25,7 @@ function translate() {
             $("#translation").text("");
             $("#translation").append(data.result);
 
-            console.log(data.n_seg);
-            highlight_on_hover(data.n_seg);
+            highlight_on_hover(data.all_segs);
 
             highlight_detected(data.source);
         });
@@ -64,18 +63,21 @@ $(".source-languages").on("click", function() {
     let targetlang = $("#selected-target").attr("language");
 });
 
-function change_color(classname, color1, color2) {
-    elms = document.getElementsByClassName(classname);
-    len = elms.length;
-    for(var i=0; i<len; i++) {
-        elms[i].style.backgroundColor = color1;
-        elms[i].parentElement.style.backgroundColor = color2;
+function change_color(classnames, color1, color2) {
+    classnames = classnames.split(' ');
+    for(var j=0; j<classnames.length; j++) {
+        elms = document.getElementsByClassName(classnames[j]);
+        len = elms.length;
+        for(var i=0; i<len; i++) {
+            elms[i].style.backgroundColor = color1;
+            //elms[i].parentElement.style.backgroundColor = color2;
+        }
     }
 }
 
-function highlight_on_hover(n_seg) {
-    for(var i=0; i<n_seg; i++) {
-        elms = document.getElementsByClassName("seg"+i);
+function highlight_on_hover(all_segs) {
+    for(var i=0; i<all_segs.length; i++) {
+        elms = document.getElementsByClassName("seg"+all_segs[i]);
         len = elms.length;
         for(var j=0; j<len; j++) {
             elms[j].onmouseover = function() {

@@ -295,12 +295,12 @@ def translate():
     #FOR TESTING
     #text = 'tämä on testilause'
     #direction = 'fi-fi'
-    
-    if text.strip() == '':
-        return jsonify(result='')
 
     source = text[:500]
     text = direction+' '+source
+    
+    if text.strip() == '':
+        return jsonify(result='')
 
     host = os.environ['TRANSLATION_HOST']
     port = os.environ['TRANSLATION_PORT']
@@ -311,14 +311,15 @@ def translate():
     response = ws.recv()
     response = json.loads(response)
 
+    ws.close()
+
     #FOR TESTING
-    #result['alignment'] = ['0-0 1-1 2-2 3-3 4-4 5-5 5-6']
+    #response['alignment'] = ['0-0 0-1 0-2 0-3 0-4 0-5 0-6']
 
     if 'alignment' in response.keys():
-        n_seg = len(response['alignment'][0].split())
-        sentence, result = highlight(source, response)
+        sentence, result, all_segs = highlight(source, response)
         
-        return jsonify(sentence=sentence, result=result, n_seg=n_seg)
+        return jsonify(sentence=sentence, result=result, all_segs=list(all_segs))
     else:
         return jsonify(sentence=source, result=response['result'])
 
