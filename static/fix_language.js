@@ -70,7 +70,7 @@ function change_color(classnames, color1, color2) {
         len = elms.length;
         for(var i=0; i<len; i++) {
             elms[i].style.backgroundColor = color1;
-            //elms[i].parentElement.style.backgroundColor = color2;
+            elms[i].parentElement.style.backgroundColor = color2;
         }
     }
 }
