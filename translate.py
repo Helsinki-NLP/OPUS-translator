@@ -293,8 +293,8 @@ def translate():
     direction = request.args.get('direction', 'empty', type=str)
 
     #FOR TESTING
-    text = 'tämä on testilause'
-    direction = 'fi-fi'
+    #text = 'tämä on testilause'
+    #direction = 'fi-fi'
     
     if text.strip() == '':
         return jsonify(result='')
@@ -308,16 +308,20 @@ def translate():
     ws = create_connection('ws://{}:{}/translate'.format(host, port))
 
     ws.send(text)
-    result = ws.recv()
-    result = json.loads(result)
+    response = ws.recv()
+    response = json.loads(response)
 
     #FOR TESTING
-    result['alignment'] = ['0-0 1-1 2-2 3-3 4-4 5-5 5-6']
+    #result['alignment'] = ['0-0 1-1 2-2 3-3 4-4 5-5 5-6']
 
-    n_seg = len(result['alignment'][0].split())
-    sentence, result = highlight(source, result)
-    
-    return jsonify(sentence=sentence, result=result, n_seg=n_seg)
+    if 'alignment' in response.keys():
+        n_seg = len(response['alignment'][0].split())
+        sentence, result = highlight(source, response)
+        
+        return jsonify(sentence=sentence, result=result, n_seg=n_seg)
+    else:
+        return jsonify(sentence=source, result=response['result'])
+
 
 '''
 @app.route('/translate')

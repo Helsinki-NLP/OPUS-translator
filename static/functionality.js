@@ -8,7 +8,7 @@ function translate() {
 
     $("#trash-div").css("display", "none");
     
-    let sentence = $("#sentence").val();
+    let sentence = $("#sentence").text();
     
     let source_lan = $("#selected-source").attr("language");
     let target_lan = $("#selected-target").attr("language");
@@ -31,8 +31,13 @@ function translate() {
             $("#source").val(sentence);
             $("#sourcedirection").text(direction);
             $("#status").text("");
+
+            $("#sentence").text("");
+            $("#sentence").append(data.sentence);
             $("#translation").css("font-style", "normal");
-            $("#translation").text(data.result);
+            $("#translation").text("");
+            $("#translation").append(data.result);
+
             $("#suggestion").val(data.result);
             $("#submissionmessage").text("");
             $("#target-language-cell").find("[language="+data.target+"]").click()
