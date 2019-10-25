@@ -11,10 +11,11 @@ def formHighlightString(sent, orig_seg, tag_seg, raw=False):
                 ret += repl+'</span> <span class="word">'
             else:
                 repl += c
-                if repl == orig_seg[i].replace('@@', ''):
+                if (repl == orig_seg[i].replace('@@', '') or
+                        '@{}@'.format(repl) == orig_seg[i]):
                     if repl in ['.', ',', '!', '?']:
                         ret += '</span><span class="word">'
-                    ret += tag_seg[i].replace('@@', '')
+                    ret += tag_seg[i].replace('@@', '').replace('@-@', '-')
                     i += 1
                     repl = ''
         return ret+'</span> '
