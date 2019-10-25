@@ -25,7 +25,7 @@ function translate() {
         $.getJSON(baseurl+"/translate", {
             sent: sentence,
             direction: direction,
-            highlight: 0
+            highlight: 1
         }, function(data) {
             $("#suggestionbutton").css("display", "block");
             $("#reportbutton").css("display", "block");
@@ -33,12 +33,11 @@ function translate() {
             $("#sourcedirection").text(direction);
             $("#status").text("");
 
-            //$("#sentence").text("");
-            //$("#sentence").append(data.source_seg);
+            $("#sentence").text("");
+            $("#sentence").append(data.source_seg);
             $("#translation").css("font-style", "normal");
-            //$("#translation").text("");
-            //$("#translation").append(data.target_seg);
-            $("#translation").text(data.target_seg);
+            $("#translation").text("");
+            $("#translation").append(data.target_seg);
 
             $("#suggestion").val(data.result);
             $("#submissionmessage").text("");

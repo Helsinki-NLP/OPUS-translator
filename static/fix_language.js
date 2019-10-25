@@ -14,7 +14,8 @@ function translate() {
         $("#translation").text("Translating...");
         $.getJSON(baseurl+"/translate", {
             sent: sentence,
-            direction: direction
+            direction: direction,
+            highlight: 0
         }, function(data) {
             $("#source").val(sentence);
             $("#sourcedirection").text(direction);

@@ -162,7 +162,11 @@ def index():
 
 @app.route('/fix_language')
 def fix_language():
-    return render_template("fix_language.html", no_logos=True)
+    return render_template('fix_language.html', no_logos=True)
+
+@app.route('/highlight_test')
+def highlight_test():
+    return render_template('highlight_test.html', no_logos=True)
 
 def login_required(f):
     @wraps(f)
@@ -291,6 +295,7 @@ def reset_password(token):
 def translate():
     text = request.args.get('sent', 'empty', type=str)
     direction = request.args.get('direction', 'empty', type=str)
+    do_highlight = request.args.get('highlight', 0, type=int)
 
     source = text[:500]
     text = direction+' '+source
@@ -309,7 +314,7 @@ def translate():
 
     ws.close()
 
-    if 'alignment' in response.keys():
+    if do_highlight == 1 and 'alignment' in response.keys():
         if 'source-sentences' in response.keys():
             source_seg, target_seg, all_segs = highlight(response, raw=True)
         else:
@@ -318,8 +323,8 @@ def translate():
         return jsonify(source_seg=source_seg, target_seg=target_seg,
             all_segs=list(all_segs), result=response['result'])
     else:
-        return jsonify(source_seg='', target_seg='', all_segs='',
-            result=response['result'])
+        return jsonify(source_seg=source, target_seg=response['result'],
+            all_segs='', result=response['result'])
 
 
 '''

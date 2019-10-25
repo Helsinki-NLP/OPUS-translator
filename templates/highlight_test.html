@@ -1,0 +1,222 @@
+{% extends "base.html" %}
+{% block content %}
+
+<table class="translation-table" style="margin: auto; margin-top: 50px">
+  <tr>
+    <td id="source-language-cell" style="line-height: 210%">
+    <span id="selected-source" class="translation-cell-content source-languages" style="background-color: #D8D8D8" language="DL" style="white-space: nowrap">detect language</span>
+      <span class="translation-cell-content source-languages" language="af">Afrikaans</span>
+      <span class="translation-cell-content source-languages" language="da">Danish</span>
+      <span class="translation-cell-content source-languages" language="nl">Dutch</span>
+      <span class="translation-cell-content source-languages" language="ca">Catalan</span>
+      <span class="translation-cell-content source-languages" language="en">English</span>
+      <span class="translation-cell-content source-languages" language="et">Estonian</span>
+      <span class="translation-cell-content source-languages"  language="fi">Finnish</span>
+      <span class="translation-cell-content source-languages"  language="fo">Faroese</span>
+      <span class="translation-cell-content source-languages" language="fr">French</span>
+      <span class="translation-cell-content source-languages"  language="fy">Frisian</span>
+      <span class="translation-cell-content source-languages" language="ga">Galician</span>
+      <span class="translation-cell-content source-languages" language="de">German</span>
+      <span class="translation-cell-content source-languages" language="hu">Hungarian</span>
+      <span class="translation-cell-content source-languages" language="is">Icelandic</span>
+      <span class="translation-cell-content source-languages" language="it">Italian</span>
+      <span class="translation-cell-content source-languages" language="no">Norwegian</span>
+      <span class="translation-cell-content source-languages" language="oc">Occitan</span>
+      <span class="translation-cell-content source-languages" language="pt">Portuguese</span>
+      <span class="translation-cell-content source-languages" language="es">Spanish</span>
+      <span class="translation-cell-content source-languages" language="sv">Swedish</span>
+
+    </td>
+    <td style="width: 100px"></td>
+    <td id="target-language-cell" style="line-height: 210%">
+        <span class="translation-cell-content target-languages" language="af">Afrkaans</span>
+        <span class="translation-cell-content target-languages" language="ca">Catalan</span>
+        <span class="translation-cell-content target-languages" language="da">Danish</span>
+        <span class="translation-cell-content target-languages" language="nl">Dutch</span>
+        <span class="translation-cell-content target-languages" language="en">English</span>
+        <span class="translation-cell-content target-languages" language="et">Estonian</span>
+        <span class="translation-cell-content target-languages" language="fi">Finnish</span>
+        <span class="translation-cell-content target-languages" language="fo">Faroese</span>
+        <span id="selected-target" class="translation-cell-content target-languages" style="background-color: #D8D8D8" language="fi">Finnish</span>
+        <span class="translation-cell-content target-languages" language="fr">French</span>
+        <span class="translation-cell-content target-languages" language="ga">Galician</span>
+        <span class="translation-cell-content target-languages" language="de">German</span>
+        <span class="translation-cell-content target-languages" language="hu">Hungarian</span>
+        <span class="translation-cell-content target-languages" language="is">Icelandic</span>
+        <span class="translation-cell-content target-languages" language="it">Italian</span>
+        <span class="translation-cell-content target-languages" language="nb">Norwegian-bokmål</span>
+        <span class="translation-cell-content target-languages" language="nn">Nynorsk</span>
+        <span class="translation-cell-content target-languages" language="oc">Occitan</span>
+        <span class="translation-cell-content target-languages" language="pt">Portuguese</span>
+        <span class="translation-cell-content target-languages" language="pt_br">Portuguese (Brazilian)</span>
+        <span class="translation-cell-content target-languages" language="es">Spanish</span>
+        <span class="translation-cell-content target-languages" language="sv">Swedish</span>
+    </td>
+  </tr>
+  <tr style="clear: both">
+    <td style="height: 40px" colspan="3"></td>
+  </tr>
+  <tr style="height: 200px">
+    <td class="translation-cell"><div contenteditable="true" id="sentence" class="translation-box"></div></td>
+    <td style="width: 100px; text-align: center">
+      <img id="translate" src="{{ url_for('static', filename='images/arrow.png') }}">
+    </td>
+    <td class="translation-cell"><div id="translation" class="translation-box"></div></td>
+  </tr>
+  <tr>
+    <td style="height: 40px" colspan="3"></td>
+  </tr>
+  <tr>
+    <td id="support-title"><b>Support the project by providing additional training data:</b></td>
+    <td></td>
+    <td class="show-form-button" id="show-tm-form">upload translation memory (.{{ tms }})</td>
+  </tr>
+  <tr>
+    <td id="upload-forms" rowspan="3" valign="top">
+ 
+      {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+      <ul class="flashes">
+        {% for category, message in messages %}
+        {% if category in ["upload", "uploaderror"] %}
+          <li class="{{ category }}">{{ message }}</li>
+        {% endif %}
+        {% endfor %}
+      </ul>
+      {% endif %}
+      {% endwith %}
+
+      <form class="upload-form" id="upload-tm-form" method="post" enctype="multipart/form-data" style="display: none">
+	    <table>
+	      <tr>
+	        <td>translation memory:</td>
+	        <td><input id="tm-file" type="file" name="tm-file"></td>
+	      </tr>
+	      <tr>
+	        <td>your email (optional):</td>
+	        <td><input type="text" name="emailaddress" placeholder="your@email.com"></td>
+          </tr>
+	      <tr>
+	        <td></td>
+	        <td><input id="upload-tm-button" type="submit" name="upload-tm-button" value="upload"></td>
+	      </tr>
+	    </table>
+      </form>
+      <form class="upload-form" id="upload-td-form" method="post" enctype="multipart/form-data" style="display: none">
+        <table>
+          <tr>
+            <td>original:</td>
+            <td><input id="original-doc" type="file" name="original-doc"></td>
+          </tr>
+          <tr>
+            <td>translation:</td>
+            <td><input id="translation-doc" type="file" name="translation-doc"></td>
+          </tr>
+          <tr>
+            <td><!--send TMX to-->your email (optional):</td>
+            <td><input type="text" name="emailaddress" placeholder="your@email.com"></td>
+          </tr>
+          <tr>
+            <td>send TMX to your email:</td>
+            <td><input type="checkbox" name="sendtmx"></td>
+          </tr>
+          <tr>
+            <td></td>
+            <td><input id="upload-files-button" type="submit" name="upload-files-button" value="upload"></td>
+          </tr>
+        </table>
+      </form>
+      <form class="upload-form" id="upload-url-form" method="post" enctype="multipart/form-data" style="display: none">
+        <table>
+          <tr>
+            <td>original url:</td>
+            <td><input id="webpage-url-original" type="text" name="webpage-url-original"></td>
+          </tr>
+          <tr>
+            <td>translation url:</td>
+            <td><input id="webpage-url-translation" type="text" name="webpage-url-translation"></td>
+          </tr>
+          <tr>
+            <td><!--send TMX to-->your email (optional):</td>
+            <td><input type="text" name="emailaddress" placeholder="your@email.com"></td>
+          </tr>
+          <tr>
+            <td>send TMX to your email:</td>
+            <td><input type="checkbox" name="sendtmx"></td>
+          </tr>
+          <tr>
+            <td></td>
+            <td><input id="upload-url-button" type="submit" name="upload-url-button" value="upload"></td>
+          </tr>
+        </table>
+      </form>
+    </td>
+
+    <td></td>
+    <td class="show-form-button" id="show-td-form">upload translated documents (.{{ tds }})</td>
+      </tr>
+  <tr>
+    <td></td>
+    <td class="show-form-button" id="show-url-form">upload translated web pages</td>
+  </tr>
+  <tr>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td></td>
+  </tr>
+</table>
+
+<!--
+<div class="container">
+    
+  <select id="direction">
+   
+    <option value="sv-fi">da/no/sv-fi</option>
+    <option value="fi-da">fi-da</option>
+    <option value="fi-no">fi-no</option>
+    <option value="fi-sv">fi-sv</option>
+  </select>
+  <button id="translate">Translate</button>
+  <br><br>
+  <div overflow="none">
+    <div style="float: left;">
+      <textarea id="sentence" maxlength="500" rows="4" cols="30" style="font-size: 20px" autofocus></textarea>
+    </div>
+    <div style="margin-left: 450px;">
+      <textarea id="translation" rows="4" cols="30" style="font-size: 20px;" readonly></textarea>
+    </div>
+  </div>
+  <br><br>
+  <button id="suggestionbutton" style="display: none">Suggest a better translation</button>
+  <button id="reportbutton" style="display: none">Report a bad translation</button>
+  <p style="color: green"><span id="suggestionmessage"></span> <span id="reportmessage"></span><p>
+    <div id="asksuggestion" style="display: none;" overflow="none">
+      <div style="float: left;">
+	<span>Source text:</span>
+	<br>
+	<textarea id="source" rows="4" cols="30" style="font-size: 20px;" readonly></textarea>
+      </div>
+      <div style="margin-left: 450px">
+	<span>Your translation:</span>
+	<br>
+	<textarea id="suggestion" maxlength="500" rows="4" cols="30" style="font-size: 20px;"></textarea>
+      </div>
+      <br>
+      <button id="suggest">Submit</button>
+      <span style="display: none" id="sourcedirection"></span>
+    </div>
+</div>
+<div style="display: none" id="trash-div">
+  Mark the words that are rubbish or
+  <button id="trash-sentence">Mark the whole text</button> :
+  <br><br>
+  <div id="words"></div>
+  <br><br>
+  <button id="report">Submit</button>
+</div>
+-->
+
+<script src="static/jquery-3.3.1.min.js"> </script>
+<script type="text/javascript" src="{{ url_for('static', filename='highlight_test.js') }}"> </script>
+{% endblock %}
