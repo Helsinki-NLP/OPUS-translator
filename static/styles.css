@@ -189,3 +189,7 @@ table.borders td {
     background-color: #D8D8D8;
 }
 
+.translation-cell {
+    width: 35vw;
+    max-width: 35vw;
+}

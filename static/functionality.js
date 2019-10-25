@@ -33,14 +33,17 @@ function translate() {
             $("#status").text("");
 
             $("#sentence").text("");
-            $("#sentence").append(data.sentence);
+            $("#sentence").append(data.source_seg);
             $("#translation").css("font-style", "normal");
             $("#translation").text("");
-            $("#translation").append(data.result);
+            $("#translation").append(data.target_seg);
 
             $("#suggestion").val(data.result);
             $("#submissionmessage").text("");
             $("#target-language-cell").find("[language="+data.target+"]").click()
+
+            highlight_on_hover(data.all_segs);
+
             highlight_detected(data.source);
         });
         return false;
@@ -49,6 +52,33 @@ function translate() {
         $("#suggestionbutton").css("display", "none");
         $("#reportbutton").css("display", "none");
         $("#submissionmessage").text("");
+    }
+}
+
+function change_color(classnames, color1, color2) {
+    classnames = classnames.split(' ');
+    for(var j=0; j<classnames.length; j++) {
+        elms = document.getElementsByClassName(classnames[j]);
+        len = elms.length;
+        for(var i=0; i<len; i++) {
+            elms[i].style.backgroundColor = color1;
+            elms[i].parentElement.style.backgroundColor = color2;
+        }
+    }
+}
+
+function highlight_on_hover(all_segs) {
+    for(var i=0; i<all_segs.length; i++) {
+        elms = document.getElementsByClassName("seg"+all_segs[i]);
+        len = elms.length;
+        for(var j=0; j<len; j++) {
+            elms[j].onmouseover = function() {
+                change_color(this.className, "grey", "silver");
+            };
+            elms[j].onmouseout = function() {
+                change_color(this.className, "", "");
+            };
+        }
     }
 }
 

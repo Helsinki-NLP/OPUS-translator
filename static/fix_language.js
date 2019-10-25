@@ -21,9 +21,9 @@ function translate() {
             $("#status").text("");
             $("#translation").css("font-style", "normal");
             $("#sentence").text("");
-            $("#sentence").append(data.sentence);
+            $("#sentence").append(data.source_seg);
             $("#translation").text("");
-            $("#translation").append(data.result);
+            $("#translation").append(data.target_seg);
 
             highlight_on_hover(data.all_segs);
 

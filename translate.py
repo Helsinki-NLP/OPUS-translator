@@ -292,10 +292,6 @@ def translate():
     text = request.args.get('sent', 'empty', type=str)
     direction = request.args.get('direction', 'empty', type=str)
 
-    #FOR TESTING
-    #text = 'tämä on testilause'
-    #direction = 'fi-fi'
-
     source = text[:500]
     text = direction+' '+source
     
@@ -313,15 +309,17 @@ def translate():
 
     ws.close()
 
-    #FOR TESTING
-    #response['alignment'] = ['0-0 0-1 0-2 0-3 0-4 0-5 0-6']
-
     if 'alignment' in response.keys():
-        sentence, result, all_segs = highlight(source, response)
+        if 'source-sentences' in response.keys():
+            source_seg, target_seg, all_segs = highlight(response, raw=True)
+        else:
+            source_seg, target_seg, all_segs = highlight(response, raw=False)
         
-        return jsonify(sentence=sentence, result=result, all_segs=list(all_segs))
+        return jsonify(source_seg=source_seg, target_seg=target_seg,
+            all_segs=list(all_segs), result=response['result'])
     else:
-        return jsonify(sentence=source, result=response['result'])
+        return jsonify(source_seg='', target_seg='', all_segs='',
+            result=response['result'])
 
 
 '''
