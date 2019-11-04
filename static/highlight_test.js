@@ -11,6 +11,7 @@ function translate() {
     $("#trash-div").css("display", "none");
     
     let sentence = $("#sentence").text();
+    $("#sentence").text(sentence);
     
     let source_lan = $("#selected-source").attr("language");
     let target_lan = $("#selected-target").attr("language");

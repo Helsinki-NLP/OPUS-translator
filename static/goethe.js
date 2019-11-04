@@ -11,17 +11,16 @@ function translate() {
     $("#trash-div").css("display", "none");
     
     let sentence = $("#sentence").text();
+    $("#sentence").text(sentence);
     
-    let source_lan = $("#selected-source").attr("language");
-    let target_lan = $("#selected-target").attr("language");
-    var direction = source_lan + "-" + target_lan;
+    var direction = $("#selected-source").attr("direction");
 
     if ($.trim(sentence) != "") {
         $("#translation").css("font-style", "italic");
         $("#translation").text("Translating...");
         $.getJSON(baseurl+"/translate", {
             sent: sentence,
-            direction: 'goethe',
+            direction: direction,
             highlight: 0
         }, function(data) {
             $("#suggestionbutton").css("display", "block");

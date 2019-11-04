@@ -7,6 +7,7 @@ function translate() {
     $("#source").text("");
 
     let sentence = $("#sentence").text();
+    $("#sentence").text(sentence);
     
     let source_lan = $("#selected-source").attr("language");
     var direction = source_lan + "-" + source_lan;

@@ -301,13 +301,6 @@ def translate():
     direction = request.args.get('direction', 'empty', type=str)
     do_highlight = request.args.get('highlight', 0, type=int)
 
-    if direction == 'goethe':
-        sourcelan = pycld2.detect(text)[2][0][1]
-        if sourcelan == 'de':
-            direction = 'de-fi'
-        else:
-            direction = 'fi-de'
-
     source = text[:500]
     text = direction+' '+source
     
