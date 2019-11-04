@@ -1,5 +1,7 @@
 let baseurl = window.location.protocol + "//" + window.location.host
 
+$("#sentence").focus();
+
 function translate() {
     $("#asksuggestion").css("display", "none");
     $("#source").text("");

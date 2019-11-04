@@ -19,8 +19,16 @@
 <body>
   <div id="main-content">
     <div id="body">  
+      {% if goethe %}
+      <ul id="navul" style="background-color: black">
+      {% else %}
       <ul id="navul" style="background-image: url('/static/images/banner.jpg')">
+      {% endif %}
+        {% if goethe %}
+        <li class="left"><a href="https://www.goethe.de/ins/fi/fi/index.html"><img class="navlia" src="{{ url_for('static', filename='images/goethe_logo.png') }}" style="height: 67px; padding: 0px 0px"></a></li>
+        {% else %}
         <li class="left"><a href="https://blogs.helsinki.fi/fiskmo-project/"><img class="navlia"  src="{{ url_for('static', filename='images/logo-fiskmo-white.png') }}" style="height: 67px; padding: 0px 0px"></a></li>
+        {% endif %}
         {% if not no_logos %}
         {% if session.logged_in %}
         <li class="right"><a class="navlia" href="/logout">logout</a></li>

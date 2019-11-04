@@ -168,6 +168,10 @@ def fix_language():
 def highlight_test():
     return render_template('highlight_test.html', no_logos=True)
 
+@app.route('/goethe')
+def goethe():
+    return render_template('goethe.html', no_logos=True, goethe=True)
+
 def login_required(f):
     @wraps(f)
     def wrap(*args, **kwargs):
@@ -296,6 +300,13 @@ def translate():
     text = request.args.get('sent', 'empty', type=str)
     direction = request.args.get('direction', 'empty', type=str)
     do_highlight = request.args.get('highlight', 0, type=int)
+
+    if direction == 'goethe':
+        sourcelan = pycld2.detect(text)[2][0][1]
+        if sourcelan == 'de':
+            direction = 'de-fi'
+        else:
+            direction = 'fi-de'
 
     source = text[:500]
     text = direction+' '+source

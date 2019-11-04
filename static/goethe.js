@@ -16,18 +16,13 @@ function translate() {
     let target_lan = $("#selected-target").attr("language");
     var direction = source_lan + "-" + target_lan;
 
-    /*
-    if ($.inArray(direction, ["fi-fi", "sv-sv", "sv-no", "sv-da"]) != -1) {
-        $("#translation").text(sentence);
-    } else
-    */
     if ($.trim(sentence) != "") {
         $("#translation").css("font-style", "italic");
         $("#translation").text("Translating...");
         $.getJSON(baseurl+"/translate", {
             sent: sentence,
-            direction: direction,
-            highlight: 1
+            direction: 'goethe',
+            highlight: 0
         }, function(data) {
             $("#suggestionbutton").css("display", "block");
             $("#reportbutton").css("display", "block");
@@ -35,11 +30,12 @@ function translate() {
             $("#sourcedirection").text(direction);
             $("#status").text("");
 
-            $("#sentence").text("");
-            $("#sentence").append(data.source_seg);
+            //$("#sentence").text("");
+            //$("#sentence").append(data.source_seg);
             $("#translation").css("font-style", "normal");
-            $("#translation").text("");
-            $("#translation").append(data.target_seg);
+            //$("#translation").text("");
+            //$("#translation").append(data.target_seg);
+            $("#translation").text(data.target_seg);
 
             $("#suggestion").val(data.result);
             $("#submissionmessage").text("");

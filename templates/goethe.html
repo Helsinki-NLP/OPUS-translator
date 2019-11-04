@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block content %}
+
+<table class="translation-table" style="margin: auto; margin-top: 50px">
+  <tr style="clear: both">
+    <td style="height: 40px" colspan="3"></td>
+  </tr>
+  <tr style="height: 200px">
+    <td class="translation-cell"><div contenteditable="true" id="sentence" class="translation-box"></div></td>
+    <td style="width: 100px; text-align: center">
+      <img id="translate" src="{{ url_for('static', filename='images/arrow.png') }}">
+    </td>
+    <td class="translation-cell"><div id="translation" class="translation-box"></div></td>
+  </tr>
+  <tr>
+    <td style="height: 40px" colspan="3"></td>
+  </tr>
+</table>
+
+<script src="static/jquery-3.3.1.min.js"> </script>
+<script type="text/javascript" src="{{ url_for('static', filename='goethe.js') }}"> </script>
+{% endblock %}
