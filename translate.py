@@ -160,9 +160,18 @@ def index():
 
     return render_template("index.html", tds = ", .".join(td_extensions), tms = ", .".join(tm_extensions))
 
+@app.route('/about')
+def about():
+    return render_template('about.html')
+
 @app.route('/fix_language')
 def fix_language():
-    return render_template('fix_language.html', no_logos=True)
+    return render_template('fix_language.html', no_logos=True,
+        fix_language=True)
+
+@app.route('/about_fix_language')
+def about_fix_language():
+    return render_template('about.html', no_logos=True, fix_language=True)
 
 @app.route('/highlight_test')
 def highlight_test():
@@ -171,6 +180,10 @@ def highlight_test():
 @app.route('/goethe')
 def goethe():
     return render_template('goethe.html', no_logos=True, goethe=True)
+
+@app.route('/about_goethe')
+def about_goethe():
+    return render_template('about.html', no_logos=True, goethe=True)
 
 def login_required(f):
     @wraps(f)

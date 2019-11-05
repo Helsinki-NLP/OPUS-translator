@@ -38,6 +38,13 @@
         <li class="right"><a class="navlia" href="/register">register</a></li>
         {% endif %}
         {% endif %}
+        {% if fix_language %}
+        <li class="right"><a class="navlia" href="/about_fix_language">about</a></li>
+        {% elif goethe %}
+        <li class="right"><a class="navlia" href="/about_goethe">about</a></li>
+        {% else %}
+        <li class="right"><a class="navlia" href="/about">about</a></li>
+        {% endif %}
       </ul>
 
       {% with messages = get_flashed_messages(with_categories=true) %}

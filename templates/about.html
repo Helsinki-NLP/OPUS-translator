@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div style="margin: 50px">
+    <h1>About</h1>
+    {% if fix_language %}
+
+    <p>The monolingual rephrasing tool is able to correct spelling mistakes, grammar errors and rephrase dialectial or colloquial expressions. </p>
+
+    {% elif goethe %}
+
+    <p>About Goethe translator... </p>
+
+    {% else %}
+
+    <p>
+    The Fiskmö translator is able to translate between Danish, Finnish, Norwegian and Swedish. You also have the option to automatically detect the language of the text you want to translate.
+    </p>
+    <p>
+    Additionally, it is possible to donate training data to the Fiskmö project. If you provide two documents or webpages, that are translations of each other, you have the option to receive a TMX file of the texts.
+    </p>
+
+    {% endif %}
+</div>
+{% endblock %}
