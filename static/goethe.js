@@ -11,18 +11,10 @@ function translate() {
     $("#trash-div").css("display", "none");
     
     var sentence = $("#sentence")[0].innerText;
-    var sentencehtml = $("#sentence")[0].innerHtml;
-    console.log(sentence);
-    $("#sentence").text(sentence);
+    $("#sentence")[0].innerHTML = sentence.replace(/\n/g, '<br>');
     
     var direction = $("#selected-source").attr("direction");
 
-    /*
-    var model = 'default';
-    if ($('#button-finetuned')[0].checked == true) {
-        model = 'goethe'
-    }
-    */
     var model = $("#selected-source").attr("model");
 
     if ($.trim(sentence) != "") {
