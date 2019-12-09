@@ -10,10 +10,18 @@ function translate() {
 
     $("#trash-div").css("display", "none");
     
-    let sentence = $("#sentence").text();
+    var sentence = $("#sentence").text();
     $("#sentence").text(sentence);
     
     var direction = $("#selected-source").attr("direction");
+
+    /*
+    var model = 'default';
+    if ($('#button-finetuned')[0].checked == true) {
+        model = 'goethe'
+    }
+    */
+    var model = $("#selected-finetune").attr("model");
 
     if ($.trim(sentence) != "") {
         $("#translation").css("font-style", "italic");
@@ -21,6 +29,7 @@ function translate() {
         $.getJSON(baseurl+"/translate", {
             sent: sentence,
             direction: direction,
+            model: model,
             highlight: 0
         }, function(data) {
             $("#suggestionbutton").css("display", "block");
@@ -231,6 +240,16 @@ function coloredToBracketed() {
     console.log(sentence.trim());
     return sentence.trim();
 }
+
+$("#selected-finetune").on("click", function() {
+    if ($("#selected-finetune").attr("model") == "default") {
+        $("#selected-finetune").css("background-color", "#C6C6C6");
+        $("#selected-finetune").attr("model", "goethe");
+    } else {
+        $("#selected-finetune").css("background-color", "");
+        $("#selected-finetune").attr("model", "default");
+    }
+});
 
 $(".source-languages").on("click", function() {
     $(".source-languages").css({"background-color": "", "border": "1px solid black"});

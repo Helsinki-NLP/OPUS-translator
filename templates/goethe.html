@@ -1,7 +1,16 @@
 {% extends "base.html" %}
 {% block content %}
 
-<table class="translation-table" style="margin: auto; margin-top: 50px">
+<table class="translation-table" style="margin: auto; margin-top: 25px">
+  <tr>
+    <td>
+      <!-- <input id="finetuned-button", type="checkbox", name="model", value="finetuned">Use fine-tuned model --!>
+      <span id="selected-finetune" class="translation-cell-content" model="default" style="white-space: nowrap">Goethe fine-tuned model</span>
+    </td>
+  </tr>
+  <tr>
+    <td style="height: 10px" colspan="3"></td>
+  </tr>
   <tr>
     <td id="source-language-cell" style="line-height: 210%">
       <span id="selected-source" style="background-color: #D8D8D8" class="translation-cell-content source-languages" direction="de-fi" style="white-space: nowrap">German-Finnish</span>
@@ -24,8 +33,7 @@
   <tr>
     <td style="height: 40px" colspan="3"></td>
   </tr>
-</table>
-
+</table> 
 <script src="static/jquery-3.3.1.min.js"> </script>
 <script type="text/javascript" src="{{ url_for('static', filename='goethe.js') }}"> </script>
 {% endblock %}

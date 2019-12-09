@@ -312,10 +312,15 @@ def reset_password(token):
 def translate():
     text = request.args.get('sent', 'empty', type=str)
     direction = request.args.get('direction', 'empty', type=str)
+    model = request.args.get('model', 'empty', type=str)
     do_highlight = request.args.get('highlight', 0, type=int)
 
-    source = text[:500]
-    text = direction+' '+source
+    text = text[:500]
+    source, target = direction.split('-')
+
+    input_json = {'text': text, 'source': source, 'target': target}
+    if model != 'empty':
+        input_json['model'] = model
     
     if text.strip() == '':
         return jsonify(result='')
@@ -325,7 +330,8 @@ def translate():
 
     ws = create_connection('ws://{}:{}/translate'.format(host, port))
 
-    ws.send(text)
+    print(input_json)
+    ws.send(json.dumps(input_json))
     response = ws.recv()
     response = json.loads(response)
 
