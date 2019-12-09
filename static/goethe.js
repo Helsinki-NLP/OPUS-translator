@@ -10,7 +10,9 @@ function translate() {
 
     $("#trash-div").css("display", "none");
     
-    var sentence = $("#sentence").text();
+    var sentence = $("#sentence")[0].innerText;
+    var sentencehtml = $("#sentence")[0].innerHtml;
+    console.log(sentence);
     $("#sentence").text(sentence);
     
     var direction = $("#selected-source").attr("direction");
@@ -21,7 +23,7 @@ function translate() {
         model = 'goethe'
     }
     */
-    var model = $("#selected-finetune").attr("model");
+    var model = $("#selected-source").attr("model");
 
     if ($.trim(sentence) != "") {
         $("#translation").css("font-style", "italic");

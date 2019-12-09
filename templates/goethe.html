@@ -3,18 +3,13 @@
 
 <table class="translation-table" style="margin: auto; margin-top: 25px">
   <tr>
-    <td>
-      <!-- <input id="finetuned-button", type="checkbox", name="model", value="finetuned">Use fine-tuned model --!>
-      <span id="selected-finetune" class="translation-cell-content" model="default" style="white-space: nowrap">Goethe fine-tuned model</span>
-    </td>
-  </tr>
-  <tr>
     <td style="height: 10px" colspan="3"></td>
   </tr>
   <tr>
     <td id="source-language-cell" style="line-height: 210%">
-      <span id="selected-source" style="background-color: #D8D8D8" class="translation-cell-content source-languages" direction="de-fi" style="white-space: nowrap">German-Finnish</span>
-      <span class="translation-cell-content source-languages" direction="fi-de" style="white-space: nowrap">Finnish-German</span>
+      <span id="selected-source" style="background-color: #D8D8D8" class="translation-cell-content source-languages" direction="de-fi" model="goethe" style="white-space: nowrap">German-Finnish (fine-tuned for GI)</span>
+      <span class="translation-cell-content source-languages" direction="de-fi" model="default" style="white-space: nowrap">German-Finnish</span>
+      <span class="translation-cell-content source-languages" direction="fi-de" model="default" style="white-space: nowrap">Finnish-German</span>
     </td>
     <td style="width: 100px"></td>
     <td id="target-language-cell" style="line-height: 210%">
