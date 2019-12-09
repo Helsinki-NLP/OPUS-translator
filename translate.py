@@ -81,84 +81,88 @@ def upload_url(username, directory, datename, webpage, email_address, sendtmx):
     rh.post("/metadata/"+username+"/"+username+"/uploads/url/"+directory+"/"+datename, {"uid": username, "original_url": webpage, "email": email_address})
     return response
 
-@app.route('/', methods=["GET", "POST"])
+def upload_files(request, username):
+    email_address = request.form["emailaddress"]
+    datename = datetime.datetime.today().strftime('%Y%m%d-%H%M%S')
+
+    sendtmx = False
+    if "sendtmx" in request.form and request.form["sendtmx"] == "on" and email_address != "":
+        sendtmx = True
+
+    if "webpage-url-original" in request.form.keys():
+        webpage_original = request.form["webpage-url-original"]
+        webpage_translation = request.form["webpage-url-translation"]
+        if webpage_original == "" or webpage_translation == "":
+            flash("No webpage selected", "uploaderror")
+        else:
+            datename = datename + ".html"
+            response_original = upload_url(username, "original", datename, webpage_original, email_address, sendtmx)
+            response_translation = upload_url(username, "translation", datename, webpage_translation, email_address, sendtmx)
+            if 'type="error"' in response_original or 'type="error"' in response_translation:
+                flash("Upload failed", "uploaderror")
+            else:
+                flash("Webpage uploaded!", "upload")
+
+    elif "tm-file" in request.files:
+        tm_file = request.files["tm-file"]
+
+        if tm_file.filename == "":
+            flash("No file selected", "uploaderror")
+            return redirect(url_for("index"))
+
+        if tm_file and allowed_file(tm_file.filename, "tm"):
+            tm_filename = secure_filename(tm_file.filename)
+            extension = re.search("(\..*)$", tm_filename).group(1)
+            tm_timename = datetime.datetime.today().strftime('%Y%m%d-%H%M%S')
+            
+            process_and_upload(tm_file, tm_timename, extension, username, tm_filename, email_address, "tm", sendtmx)
+            flash('File "' + tm_file.filename + '" uploaded', "upload")
+        else:
+            flash("Invalid file format", "uploaderror")
+
+    elif "original-doc" in request.files and "translation-doc" in request.files:
+        original_doc = request.files["original-doc"]
+        translation_doc = request.files["translation-doc"]
+        
+        if original_doc.filename == "" or translation_doc.filename == "":
+            flash("No file selected", "uploaderror")
+            return redirect(url_for("index"))
+
+        if original_doc and translation_doc and allowed_file(original_doc.filename, "td") and allowed_file(translation_doc.filename, "td"):
+            original_docname = secure_filename(original_doc.filename)
+            translation_docname = secure_filename(translation_doc.filename)
+            
+            original_extension = re.search("(\..*)$", original_docname).group(1)
+            translation_extension = re.search("(\..*)$", translation_docname).group(1)
+
+            if original_extension != translation_extension:
+                flash("The file formats have to match ("+original_extension+" vs "+translation_extension+")", "uploaderror")
+                return redirect(url_for("index"))
+            
+            process_and_upload(original_doc, datename, original_extension, username, original_docname, email_address, "original", sendtmx)
+            process_and_upload(translation_doc, datename, translation_extension, username, translation_docname, email_address, "translation", sendtmx)
+
+            flash('Files "' + original_doc.filename + '" and "' + translation_doc.filename + '" uploaded', "upload")
+        else:
+            flash("Invalid file format", "uploaderror")
+
+    else:
+        flash("No file selected", "uploaderror")
+
+    return redirect(url_for("index"))
+
+@app.route('/', methods=['GET', 'POST'])
 def index():
     if request.method == "POST":
         if session:
-            username = session["username"]
+            username = session['username']
         else:
-            username = "anonymous"
+            username = 'anonymous'
 
-        email_address = request.form["emailaddress"]
-        datename = datetime.datetime.today().strftime('%Y%m%d-%H%M%S')
+        upload_files(request, username)
 
-        sendtmx = False
-        if "sendtmx" in request.form and request.form["sendtmx"] == "on" and email_address != "":
-            sendtmx = True
-
-        if "webpage-url-original" in request.form.keys():
-            webpage_original = request.form["webpage-url-original"]
-            webpage_translation = request.form["webpage-url-translation"]
-            if webpage_original == "" or webpage_translation == "":
-                flash("No webpage selected", "uploaderror")
-            else:
-                datename = datename + ".html"
-                response_original = upload_url(username, "original", datename, webpage_original, email_address, sendtmx)
-                response_translation = upload_url(username, "translation", datename, webpage_translation, email_address, sendtmx)
-                if 'type="error"' in response_original or 'type="error"' in response_translation:
-                    flash("Upload failed", "uploaderror")
-                else:
-                    flash("Webpage uploaded!", "upload")
-
-        elif "tm-file" in request.files:
-            tm_file = request.files["tm-file"]
-
-            if tm_file.filename == "":
-                flash("No file selected", "uploaderror")
-                return redirect(url_for("index"))
-
-            if tm_file and allowed_file(tm_file.filename, "tm"):
-                tm_filename = secure_filename(tm_file.filename)
-                extension = re.search("(\..*)$", tm_filename).group(1)
-                tm_timename = datetime.datetime.today().strftime('%Y%m%d-%H%M%S')
-                
-                process_and_upload(tm_file, tm_timename, extension, username, tm_filename, email_address, "tm", sendtmx)
-                flash('File "' + tm_file.filename + '" uploaded', "upload")
-            else:
-                flash("Invalid file format", "uploaderror")
-
-        elif "original-doc" in request.files and "translation-doc" in request.files:
-            original_doc = request.files["original-doc"]
-            translation_doc = request.files["translation-doc"]
-            
-            if original_doc.filename == "" or translation_doc.filename == "":
-                flash("No file selected", "uploaderror")
-                return redirect(url_for("index"))
-
-            if original_doc and translation_doc and allowed_file(original_doc.filename, "td") and allowed_file(translation_doc.filename, "td"):
-                original_docname = secure_filename(original_doc.filename)
-                translation_docname = secure_filename(translation_doc.filename)
-                
-                original_extension = re.search("(\..*)$", original_docname).group(1)
-                translation_extension = re.search("(\..*)$", translation_docname).group(1)
-
-                if original_extension != translation_extension:
-                    flash("The file formats have to match ("+original_extension+" vs "+translation_extension+")", "uploaderror")
-                    return redirect(url_for("index"))
-                
-                process_and_upload(original_doc, datename, original_extension, username, original_docname, email_address, "original", sendtmx)
-                process_and_upload(translation_doc, datename, translation_extension, username, translation_docname, email_address, "translation", sendtmx)
-
-                flash('Files "' + original_doc.filename + '" and "' + translation_doc.filename + '" uploaded', "upload")
-            else:
-                flash("Invalid file format", "uploaderror")
-
-        else:
-            flash("No file selected", "uploaderror")
-
-        return redirect(url_for("index"))
-
-    return render_template("index.html", tds = ", .".join(td_extensions), tms = ", .".join(tm_extensions))
+    return render_template('index.html', tds=', .'.join(td_extensions),
+        tms=', .'.join(tm_extensions))
 
 @app.route('/about')
 def about():
@@ -177,9 +181,18 @@ def about_fix_language():
 def highlight_test():
     return render_template('highlight_test.html', no_logos=True)
 
-@app.route('/goethe')
+@app.route('/goethe', methods=['GET', 'POST'])
 def goethe():
-    return render_template('goethe.html', no_logos=True, goethe=True)
+    if request.method == 'POST':
+        if session:
+            username = session['username']
+        else:
+            username = 'anonymous'
+
+        upload_files(request, username)
+
+    return render_template('goethe.html', tds=', .'.join(td_extensions),
+        tms=', .'.join(tm_extensions), no_logos=True, goethe=True)
 
 @app.route('/about_goethe')
 def about_goethe():
@@ -330,7 +343,6 @@ def translate():
 
     ws = create_connection('ws://{}:{}/translate'.format(host, port))
 
-    print(input_json)
     ws.send(json.dumps(input_json))
     response = ws.recv()
     response = json.loads(response)

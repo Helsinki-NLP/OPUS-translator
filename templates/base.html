@@ -61,13 +61,13 @@
       
     {% block content %}{% endblock %}
     </div>
-    {% if not no_logos %}
     <div id="footer">
+    {% if not no_logos %}
       <a class="footer-link" href="https://www.kulturfonden.fi/"><img class="footer-image" src="{{ url_for('static', filename='images/skf-logo.jpg') }}"></a>
+    {% endif %}
       <a class="footer-link" href="https://www.helsinki.fi/"><img class="footer-image" src="{{ url_for('static', filename='images/university-of-helsinki-logo.png') }}"></a>
       <a class="footer-link" href="https://blogs.helsinki.fi/language-technology/"><img class="footer-image" src="{{ url_for('static', filename='images/lt-logo.png') }}" ></a>
     </div>
-    {% endif %}
   </div>
 </body>
 </html>

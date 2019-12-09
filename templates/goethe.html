@@ -33,7 +33,110 @@
   <tr>
     <td style="height: 40px" colspan="3"></td>
   </tr>
+  <tr>
+    <td style="height: 40px" colspan="3"></td>
+  </tr>
+  <tr>
+    <td id="support-title"><b>Support the project by providing additional training data:</b></td>
+    <td></td>
+    <td class="show-form-button" id="show-tm-form">upload translation memory (.{{ tms }})</td>
+  </tr>
+  <tr>
+    <td id="upload-forms" rowspan="3" valign="top">
+ 
+      {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+      <ul class="flashes">
+        {% for category, message in messages %}
+        {% if category in ["upload", "uploaderror"] %}
+          <li class="{{ category }}">{{ message }}</li>
+        {% endif %}
+        {% endfor %}
+      </ul>
+      {% endif %}
+      {% endwith %}
+
+      <form class="upload-form" id="upload-tm-form" method="post" enctype="multipart/form-data" style="display: none">
+	    <table>
+	      <tr>
+	        <td>translation memory:</td>
+	        <td><input id="tm-file" type="file" name="tm-file"></td>
+	      </tr>
+	      <tr>
+	        <td>your email (optional):</td>
+	        <td><input type="text" name="emailaddress" placeholder="your@email.com"></td>
+          </tr>
+	      <tr>
+	        <td></td>
+	        <td><input id="upload-tm-button" type="submit" name="upload-tm-button" value="upload"></td>
+	      </tr>
+	    </table>
+      </form>
+      <form class="upload-form" id="upload-td-form" method="post" enctype="multipart/form-data" style="display: none">
+        <table>
+          <tr>
+            <td>original:</td>
+            <td><input id="original-doc" type="file" name="original-doc"></td>
+          </tr>
+          <tr>
+            <td>translation:</td>
+            <td><input id="translation-doc" type="file" name="translation-doc"></td>
+          </tr>
+          <tr>
+            <td><!--send TMX to-->your email (optional):</td>
+            <td><input type="text" name="emailaddress" placeholder="your@email.com"></td>
+          </tr>
+          <tr>
+            <td>send TMX to your email:</td>
+            <td><input type="checkbox" name="sendtmx"></td>
+          </tr>
+          <tr>
+            <td></td>
+            <td><input id="upload-files-button" type="submit" name="upload-files-button" value="upload"></td>
+          </tr>
+        </table>
+      </form>
+      <form class="upload-form" id="upload-url-form" method="post" enctype="multipart/form-data" style="display: none">
+        <table>
+          <tr>
+            <td>original url:</td>
+            <td><input id="webpage-url-original" type="text" name="webpage-url-original"></td>
+          </tr>
+          <tr>
+            <td>translation url:</td>
+            <td><input id="webpage-url-translation" type="text" name="webpage-url-translation"></td>
+          </tr>
+          <tr>
+            <td><!--send TMX to-->your email (optional):</td>
+            <td><input type="text" name="emailaddress" placeholder="your@email.com"></td>
+          </tr>
+          <tr>
+            <td>send TMX to your email:</td>
+            <td><input type="checkbox" name="sendtmx"></td>
+          </tr>
+          <tr>
+            <td></td>
+            <td><input id="upload-url-button" type="submit" name="upload-url-button" value="upload"></td>
+          </tr>
+        </table>
+      </form>
+    </td>
+
+    <td></td>
+    <td class="show-form-button" id="show-td-form">upload translated documents (.{{ tds }})</td>
+      </tr>
+  <tr>
+    <td></td>
+    <td class="show-form-button" id="show-url-form">upload translated web pages</td>
+  </tr>
+  <tr>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td></td>
+  </tr>
 </table> 
+
 <script src="static/jquery-3.3.1.min.js"> </script>
 <script type="text/javascript" src="{{ url_for('static', filename='goethe.js') }}"> </script>
 {% endblock %}
