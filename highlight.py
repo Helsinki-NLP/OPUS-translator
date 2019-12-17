@@ -39,7 +39,8 @@ def addSegs(seg):
         seg_highlight.append(tag)
     return seg_highlight
 
-def highlight_one(source, target, source_seg, target_seg, alignment, si, raw=False):
+def highlight_one(source, target, source_seg, target_seg, alignment, si,
+        raw=False):
     """Return source and target sentences with alignment segments."""
     alignment = alignment.split()
     source_seg_orig = source_seg
@@ -82,7 +83,9 @@ def highlight(data, raw=False):
     else:
         source_sentences = ['' for i in range(len(data['alignment']))]
         target_sentences = ['' for i in range(len(data['alignment']))]
-    for source, target, source_seg, target_seg, alignment in zip(source_sentences, target_sentences, data['source-segments'], data['target-segments'], data['alignment']):
+    for source, target, source_seg, target_seg, alignment in zip(
+            source_sentences, target_sentences, data['source-segments'],
+            data['target-segments'], data['alignment']):
         source_res_temp, target_res_temp, all_segs_temp = highlight_one(
             source, target, source_seg, target_seg, alignment, str(si), raw)
         source_res += source_res_temp

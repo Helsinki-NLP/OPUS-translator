@@ -10,8 +10,8 @@ function translate() {
 
     $("#trash-div").css("display", "none");
     
-    let sentence = $("#sentence").text();
-    $("#sentence").text(sentence);
+    var sentence = $("#sentence")[0].innerText;
+    $("#sentence")[0].innerHTML = sentence.replace(/\n/g, '<br>');
     
     let source_lan = $("#selected-source").attr("language");
     let target_lan = $("#selected-target").attr("language");
@@ -36,12 +36,11 @@ function translate() {
             $("#sourcedirection").text(direction);
             $("#status").text("");
 
-            //$("#sentence").text("");
-            //$("#sentence").append(data.source_seg);
+            if (data.all_segs != '') {
+                $("#sentence")[0].innerHTML=data.source_seg;
+            }
             $("#translation").css("font-style", "normal");
-            //$("#translation").text("");
-            //$("#translation").append(data.target_seg);
-            $("#translation").text(data.target_seg);
+            $("#translation")[0].innerHTML=data.target_seg;
 
             $("#suggestion").val(data.result);
             $("#submissionmessage").text("");
