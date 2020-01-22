@@ -20,12 +20,9 @@ function translate() {
             direction: direction,
             highlight: 0
         }, function(data) {
-            $("#source").val(sentence);
             $("#sourcedirection").text(direction);
             $("#status").text("");
             $("#translation").css("font-style", "normal");
-            $("#sentence").text("");
-            $("#sentence").append(data.source_seg);
             $("#translation").text("");
             $("#translation").append(data.target_seg);
 
