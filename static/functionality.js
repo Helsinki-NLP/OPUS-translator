@@ -13,8 +13,13 @@ function translate() {
     var sentence = $("#sentence")[0].innerText;
     $("#sentence")[0].innerHTML = sentence.replace(/\n/g, '<br>');
     
-    let source_lan = $("#selected-source").attr("language");
-    let target_lan = $("#selected-target").attr("language");
+    if ($("#source-drop").val()) {
+        var source_lan = $("#source-drop").val();
+        var target_lan = $("#target-drop").val();
+    } else {
+        var source_lan = $("#selected-source").attr("language");
+        var target_lan = $("#selected-target").attr("language");
+    }
     var direction = source_lan + "-" + target_lan;
 
     /*

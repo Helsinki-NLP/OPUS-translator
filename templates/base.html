@@ -21,29 +21,36 @@
     <div id="body">  
       {% if goethe %}
       <ul id="navul" style="background-color: black">
+      {% elif ui_config %}
+      <ul id="navul" style="background-color: {{ ui_config['banner_color'] }}">
       {% else %}
       <ul id="navul" style="background-image: url('/static/images/banner.jpg')">
       {% endif %}
         {% if goethe %}
         <li class="left"><a href="https://www.goethe.de/ins/fi/fi/index.html"><img class="navlia" src="{{ url_for('static', filename='images/goethe_logo.png') }}" style="height: 67px; padding: 0px 0px"></a></li>
+        {% elif ui_config %}
+        <li class="left"><h2 style="color: {{ ui_config['name_color'] }}; padding-left: 20px">{{ ui_config['name'] }}</h2></li>
         {% else %}
         <li class="left"><a href="https://blogs.helsinki.fi/fiskmo-project/"><img class="navlia"  src="{{ url_for('static', filename='images/logo-fiskmo-white.png') }}" style="height: 67px; padding: 0px 0px"></a></li>
         {% endif %}
-        {% if not no_logos %}
-        {% if session.logged_in %}
+
+        {% if not ui_config %}
+          {% if not no_logos %}
+            {% if session.logged_in %}
         <li class="right"><a class="navlia" href="/logout">logout</a></li>
         <li class="right"><a class="navlia" href="/userpage"><span id="username">{{ session.username }}</span></a></li>
-        {% else %}
+            {% else %}
         <li class="right"><a class="navlia" href="/login">login</a></li>
         <li class="right"><a class="navlia" href="/register">register</a></li>
-        {% endif %}
-        {% endif %}
-        {% if fix_language %}
+            {% endif %}
+          {% endif %}
+          {% if fix_language %}
         <li class="right"><a class="navlia" href="/about_fix_language">about</a></li>
-        {% elif goethe %}
+          {% elif goethe %}
         <li class="right"><a class="navlia" href="/about_goethe">about</a></li>
-        {% else %}
+          {% else %}
         <li class="right"><a class="navlia" href="/about">about</a></li>
+          {% endif %}
         {% endif %}
       </ul>
 
@@ -63,7 +70,9 @@
     </div>
     <div id="footer">
     {% if not no_logos %}
+      {% if not ui_config %}
       <a class="footer-link" href="https://www.kulturfonden.fi/"><img class="footer-image" src="{{ url_for('static', filename='images/skf-logo.jpg') }}"></a>
+      {% endif %}
     {% endif %}
       <a class="footer-link" href="https://www.helsinki.fi/"><img class="footer-image" src="{{ url_for('static', filename='images/university-of-helsinki-logo.png') }}"></a>
       <a class="footer-link" href="https://blogs.helsinki.fi/language-technology/"><img class="footer-image" src="{{ url_for('static', filename='images/lt-logo.png') }}" ></a>

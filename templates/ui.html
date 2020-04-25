@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block content %}
+
+<table class="translation-table" style="margin: auto; margin-top: 50px">
+  <tr>
+    <td id="source-language-cell" style="line-height: 210%">
+      <select id="source-drop">
+        {% for item in ui_config['src_langs'] %}
+        <option value='{{ item[1] }}'>{{ item[0] }}</option>
+        {% endfor %}
+      </select>
+    </td>
+    <td style="width: 100px"></td>
+    <td id="target-language-cell" style="line-height: 210%">
+      <select id="target-drop">
+        {% for item in ui_config['tgt_langs'] %}
+        <option value='{{ item[1] }}'>{{ item[0] }}</option>
+        {% endfor %}
+      </select>
+  </tr>
+  <tr style="clear: both">
+    <td style="height: 40px" colspan="3"></td>
+  </tr>
+  <tr style="height: 200px">
+    <td class="translation-cell"><div contenteditable="true" id="sentence" class="translation-box"></div></td>
+    <td style="width: 100px; text-align: center">
+      <img id="translate" src="{{ url_for('static', filename='images/arrow.png') }}">
+    </td>
+    <td class="translation-cell"><div id="translation" class="translation-box"></div></td>
+  </tr>
+  <tr>
+    <td style="height: 40px" colspan="3"></td>
+  </tr>
+</table>
+
+
+<script src="{{ url_for('static', filename='jquery-3.3.1.min.js') }}"> </script>
+<script type="text/javascript" src="{{ url_for('static', filename='functionality.js') }}"> </script>
+{% endblock %}

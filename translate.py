@@ -19,6 +19,7 @@ from sqlalchemy import create_engine
 from websocket import create_connection
 import pycld2
 from flask_mail import Mail, Message
+from iso639 import languages as iso_languages
 
 from dbconnect import connection
 import request_handler
@@ -80,6 +81,41 @@ def index():
 
     return render_template('index.html', tds=', .'.join(td_extensions),
         tms=', .'.join(tm_extensions))
+
+def create_language_list(language_str):
+    languages = []
+    for lan in language_str.split():
+        if len(lan) == 2:
+            lan_name = iso_languages.get(alpha2=lan).name
+        elif len(lan) == 3:
+            lan_name = iso_languages.get(part3=lan).name
+        languages.append((lan_name, lan))
+    return languages
+
+@app.route('/ui/<ui_name>')
+def show_ui(ui_name):
+    test = {
+        'test': {
+            'name': 'test', 
+            'name_color': 'white',
+            'banner_color': 'black',
+            'src_langs': [('Finnish', 'fi')],
+            'tgt_langs': [('Swedish', 'sv'), ('Norwegian', 'no'), ('Danish', 'da')]
+        }, 
+        'celtic': {
+            'name': 'Celtic',
+            'name_color': 'white',
+            'banner_color': 'black',
+            'src_langs': [('English', 'en'), ('Irish', 'ga'), ('Welsh', 'cy'), ('Breton', 'br'), ('Scottish Gaelic', 'gd'), ('Cornish', 'kw'), ('Manx', 'gv')],
+            'tgt_langs': [('Irish', 'ga'), ('Welsh', 'cy'), ('Breton', 'br'), ('Scottish Gaelic', 'gd'), ('Cornish', 'kw'), ('Manx', 'gv'), ('English', 'en')]
+        }
+    }
+
+    return render_template('ui.html', ui_config=test[ui_name])
+
+@app.route('/new_ui')
+def new_ui():
+    return render_template('new_ui.html')
 
 @app.route('/about')
 def about():
