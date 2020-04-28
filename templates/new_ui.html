@@ -1,17 +1,19 @@
 <div class="container">
   <h4>Create UI</h4>
-  <form >
+  <form method=post action="/new_ui">
     <dl>
       <dt>Key</dt>
-      <dd><input type="password" placeholder="****************"></dd>
+      <dd><input type="password" name="key" value="{{ prev_form['key'] }}"><span style="color: red"> {{ errors['key'] }}</span></dd>
       <dt>Name</dt>
-      <dd><input type="text" placeholder="Celtic"></dd>
+      <dd><input type="text" name="name" placeholder="Celtic" value="{{ prev_form['name'] }}"><span style="color: red"> {{ errors['name'] }}</span></dd>
       <dt>Name color</dt>
-      <dd><input type="text" placeholder="white"></dd>
+      <dd><input type="text" name="name_color" placeholder="black / #000000" value="{{ prev_form['name_color'] }}"></dd>
       <dt>Banner color</dt>
-      <dd><input type="text" placeholder="black"></dd>
-      <dt>Languages</dt>
-      <dd><input type="text" placeholder="ga cy br gd kw gv <-> en"></dd>
+      <dd><input type="text" name="banner_color" placeholder="lightgray / #E6E6E6" value="{{ prev_form['banner_color'] }}"></dd>
+      <dt>Source languages</dt>
+      <dd><input type="text" name="src_langs" placeholder="en" value="{{ prev_form['src_langs'] }}"><span style="color: red"> {{ errors['src_langs'] }}</span></dd>
+      <dt>Target languages</dt>
+      <dd><input type="text" name="tgt_langs" placeholder="ga cy br gd kw gv" value="{{ prev_form['tgt_langs'] }}"><span style="color: red"> {{ errors['tgt_langs'] }}</span></dd>
     </dl>
     <p><input type=submit value=Submit></p>
   </form>
