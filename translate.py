@@ -93,6 +93,12 @@ def create_language_list(language_str):
         languages.append((lan_name, lan))
     return languages
 
+def combine_language_lists(src_langs, tgt_langs):
+    for l in tgt_langs:
+        if l not in src_langs:
+            src_langs.append(l)
+    return src_langs
+
 @app.route('/ui/<ui_name>')
 def show_ui(ui_name):
     with open('ui_db.pickle', 'rb') as f:
@@ -103,8 +109,8 @@ def show_ui(ui_name):
 
         src_langs = ui_config['src_langs']
         tgt_langs = ui_config['tgt_langs']
-        src_langs = sorted(set(src_langs + tgt_langs))
-        tgt_langs = sorted(set(src_langs + tgt_langs))
+        src_langs = combine_language_lists(src_langs, tgt_langs)
+        tgt_langs = combine_language_lists(tgt_langs, src_langs)
         ui_config['src_langs'] = src_langs
         ui_config['tgt_langs'] = tgt_langs
 
