@@ -98,26 +98,27 @@ def show_ui(ui_name):
     with open('ui_db.pickle', 'rb') as f:
         ui_db = pickle.load(f)
 
-    ui_config = ui_db[ui_name].copy()
+    if ui_name in ui_db.keys():
+        ui_config = ui_db[ui_name].copy()
 
-    src_langs = ui_config['src_langs']
-    tgt_langs = ui_config['tgt_langs']
-    src_langs = sorted(set(src_langs + tgt_langs))
-    tgt_langs = sorted(set(src_langs + tgt_langs))
-    ui_config['src_langs'] = src_langs
-    ui_config['tgt_langs'] = tgt_langs
+        src_langs = ui_config['src_langs']
+        tgt_langs = ui_config['tgt_langs']
+        src_langs = sorted(set(src_langs + tgt_langs))
+        tgt_langs = sorted(set(src_langs + tgt_langs))
+        ui_config['src_langs'] = src_langs
+        ui_config['tgt_langs'] = tgt_langs
 
-    return render_template('ui.html', ui_config=ui_config)
+        return render_template('ui.html', ui_config=ui_config)
 
-def validate_ui_form(form, url_name, existing_uis):
+    return 'No such UI'
+
+def validate_ui_form(form):
     errors = {}
     ui_key = form['key']
     if not sha256_crypt.verify(ui_key, os.environ['UI_KEY']):
         errors['key'] = "Wrong key"
     if form['name'] == '':
         errors['name'] = "No name specified"
-    if url_name in existing_uis:
-        errors['name'] = "URL '/ui/{}' already exists".format(url_name)
     if request.form['src_langs'] == '':
         errors['src_langs'] = "No source languages specified"
     if request.form['tgt_langs'] == '':
@@ -136,7 +137,7 @@ def new_ui():
         src_langs = create_language_list(request.form['src_langs'])
         tgt_langs = create_language_list(request.form['tgt_langs'])
 
-        errors = validate_ui_form(request.form, url_name, ui_db.keys())
+        errors = validate_ui_form(request.form)
         if errors != {}:
             return render_template('new_ui.html', prev_form=request.form, errors=errors)
 
