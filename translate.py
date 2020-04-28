@@ -86,11 +86,14 @@ def index():
 def create_language_list(language_str):
     languages = []
     for lan in language_str.split():
-        if len(lan) == 2:
-            lan_name = iso_languages.get(alpha2=lan).name
-        elif len(lan) == 3:
-            lan_name = iso_languages.get(part3=lan).name
-        languages.append((lan_name, lan))
+        try:
+            if len(lan) == 2:
+                lan_name = iso_languages.get(alpha2=lan).name
+            elif len(lan) == 3:
+                lan_name = iso_languages.get(part3=lan).name
+            languages.append((lan_name, lan))
+        except:
+            pass
     return languages
 
 def combine_language_lists(src_langs, tgt_langs):
