@@ -5,15 +5,21 @@
       <dt>Key</dt>
       <dd><input type="password" name="key" value="{{ prev_form['key'] }}"><span style="color: red"> {{ errors['key'] }}</span></dd>
       <dt>Name</dt>
-      <dd><input type="text" name="name" placeholder="Celtic" value="{{ prev_form['name'] }}"><span style="color: red"> {{ errors['name'] }}</span></dd>
+      <dd><input type="text" name="name" placeholder="Test" value="{{ prev_form['name'] }}"><span style="color: red"> {{ errors['name'] }}</span></dd>
       <dt>Name color</dt>
       <dd><input type="text" name="name_color" placeholder="black / #000000" value="{{ prev_form['name_color'] }}"></dd>
       <dt>Banner color</dt>
       <dd><input type="text" name="banner_color" placeholder="lightgray / #E6E6E6" value="{{ prev_form['banner_color'] }}"></dd>
-      <dt>Source languages</dt>
-      <dd><input type="text" name="src_langs" placeholder="en" value="{{ prev_form['src_langs'] }}"><span style="color: red"> {{ errors['src_langs'] }}</span></dd>
-      <dt>Target languages</dt>
-      <dd><input type="text" name="tgt_langs" placeholder="ga cy br gd kw gv" value="{{ prev_form['tgt_langs'] }}"><span style="color: red"> {{ errors['tgt_langs'] }}</span></dd>
+      <dt>Language pairs</dt>
+      <dd><input type="text" name="lang_pairs" style="width: 500" placeholder="fr en<->ga cy, fr en->fi sv, (sv no da)" value="{{ prev_form['lang_pairs'] }}"><span style="color: red"> {{ errors['lang_pairs'] }}</span></dd>
+      <dd>Language pairs can be specified in three different kinds of units:
+        <ul>
+          <li><code><-></code>   -unit: translation in both directions</li>
+          <li><code>-></code>    -unit: translation in one direction</li>
+          <li><code>(...)</code> -unit: translation in all direction combinations</li>
+        </ul>
+        Units must be separated with a comma and a space
+      </dd>
     </dl>
     <p><input type=submit value=Submit></p>
   </form>

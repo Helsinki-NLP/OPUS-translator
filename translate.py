@@ -26,6 +26,7 @@ from dbconnect import connection
 import request_handler
 from highlight import highlight
 from file_uploader import upload_webpage, upload_tm, upload_translations, tm_extensions, td_extensions
+from language_util import get_lang_directions
 
 rh = request_handler.RequestHandler()
 
@@ -83,25 +84,6 @@ def index():
     return render_template('index.html', tds=', .'.join(td_extensions),
         tms=', .'.join(tm_extensions))
 
-def create_language_list(language_str):
-    languages = []
-    for lan in language_str.split():
-        try:
-            if len(lan) == 2:
-                lan_name = iso_languages.get(alpha2=lan).name
-            elif len(lan) == 3:
-                lan_name = iso_languages.get(part3=lan).name
-            languages.append((lan_name, lan))
-        except:
-            pass
-    return languages
-
-def combine_language_lists(src_langs, tgt_langs):
-    for l in tgt_langs:
-        if l not in src_langs:
-            src_langs.append(l)
-    return src_langs
-
 @app.route('/ui/<ui_name>')
 def show_ui(ui_name):
     with open('ui_db.pickle', 'rb') as f:
@@ -110,13 +92,6 @@ def show_ui(ui_name):
     if ui_name in ui_db.keys():
         ui_config = ui_db[ui_name].copy()
 
-        src_langs = ui_config['src_langs']
-        tgt_langs = ui_config['tgt_langs']
-        src_langs = combine_language_lists(src_langs, tgt_langs)
-        tgt_langs = combine_language_lists(tgt_langs, src_langs)
-        ui_config['src_langs'] = src_langs
-        ui_config['tgt_langs'] = tgt_langs
-
         return render_template('ui.html', ui_config=ui_config)
 
     return 'No such UI'
@@ -124,14 +99,13 @@ def show_ui(ui_name):
 def validate_ui_form(form):
     errors = {}
     ui_key = form['key']
+    lp = request.form['lang_pairs']
     if not sha256_crypt.verify(ui_key, os.environ['UI_KEY']):
         errors['key'] = "Wrong key"
     if form['name'] == '':
         errors['name'] = "No name specified"
-    if request.form['src_langs'] == '':
-        errors['src_langs'] = "No source languages specified"
-    if request.form['tgt_langs'] == '':
-        errors['tgt_langs'] = "No target languages specified"
+    if lp == '':
+        errors['lang_pairs'] = "No language pairs specified"
     return errors
 
 @app.route('/new_ui', methods=['GET', 'POST'])
@@ -143,8 +117,10 @@ def new_ui():
         url_name = re.sub('\W+', '_', url_name)
         url_name = re.sub('^_|_$', '', url_name)
 
-        src_langs = create_language_list(request.form['src_langs'])
-        tgt_langs = create_language_list(request.form['tgt_langs'])
+        pairs = request.form['lang_pairs']
+        src_langs, tgt_langs = get_lang_directions(pairs)
+        print(src_langs)
+        print(tgt_langs)
 
         errors = validate_ui_form(request.form)
         if errors != {}:
@@ -155,7 +131,7 @@ def new_ui():
             'name_color': request.form['name_color'],
             'banner_color': request.form['banner_color'],
             'src_langs': src_langs,
-            'tgt_langs': tgt_langs
+            'tgt_langs': tgt_langs,
         }
 
         with open('ui_db.pickle', 'wb') as f:
