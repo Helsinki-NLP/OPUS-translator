@@ -193,3 +193,12 @@ table.borders td {
     width: 35vw;
     max-width: 35vw;
 }
+
+.ui-link {
+    color: black;
+    text-decoration: none;
+}
+
+.ui-link:hover {
+    text-decoration: underline;
+}

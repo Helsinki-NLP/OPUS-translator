@@ -127,6 +127,7 @@ def new_ui():
         ui_db[url_name] = {
             'name': request.form['name'],
             'logo': request.form['logo'],
+            'link': request.form['link'],
             'name_color': request.form['name_color'],
             'banner_color': request.form['banner_color'],
             'src_langs': src_langs,
