@@ -1,16 +1,17 @@
 from iso639 import languages as iso_languages
 
-def add_languages(languages, srcs, tgts):
-    """Add language directions to a dictionary"""
+def add_languages(src_langs, tgt_langs, srcs_str, tgts_str):
+    """Add language directions lists"""
 
-    for sl in srcs.split():
-        for tl in tgts.split():
+    for sl in srcs_str.split():
+        for tl in tgts_str.split():
             if sl != tl:
-                if sl not in languages:
-                    languages[sl] = [tl]
+                if sl not in src_langs:
+                    src_langs.append(sl)
+                    tgt_langs.append([tl])
                 else:
-                    languages[sl].append(tl)
-    return languages
+                    tgt_langs[src_langs.index(sl)].append(tl)
+    return src_langs, tgt_langs
 
 def get_lang_name(lan):
     """Get language name from iso639 abbreviation"""
@@ -40,32 +41,33 @@ def get_lang_directions(langstr):
     a list of tgt languages from a string such as
     'fr en<->ga cy wl, en->fi sv, (sv no da)'"""
 
-    languages = {}
+    src_langs, tgt_langs = [], []
     units = langstr.split(', ')
 
     for unit in units:
         if '<->' in unit:
             srcs, tgts = unit.split('<->')
-            languages = add_languages(languages, srcs, tgts)
-            languages = add_languages(languages, tgts, srcs)
+            languages = add_languages(src_langs, tgt_langs, srcs, tgts)
+            languages = add_languages(src_langs, tgt_langs, tgts, srcs)
         elif '->' in unit:
             srcs, tgts = unit.split('->')
-            languages = add_languages(languages, srcs, tgts)
+            languages = add_languages(src_langs, tgt_langs, srcs, tgts)
         elif '(' in unit and ')' in unit:
             unit = unit[1:-1]
-            languages = add_languages(languages, unit, unit)
+            languages = add_languages(src_langs, tgt_langs, unit, unit)
 
-    source_langs = {}
-    target_langs = []
+    src_lang_names = []
+    tgt_lang_names = []
 
-    for key in languages.keys():
-        lan_name = get_lang_name(key)
+    for sl in src_langs:
+        lan_name = get_lang_name(sl)
         if lan_name:
-            source_langs[(lan_name, key)] = languages[key]
-            for tgt_lan in languages[key]:
-                if tgt_lan not in target_langs:
-                    target_langs.append(tgt_lan)
+            src_lang_names.append(
+                (lan_name, sl, tgt_langs[src_langs.index(sl)]))
+            for tgt_lan in tgt_langs[src_langs.index(sl)]:
+                if tgt_lan not in tgt_lang_names:
+                    tgt_lang_names.append(tgt_lan)
 
-    target_langs = create_language_list(target_langs)
+    tgt_lang_names = create_language_list(tgt_lang_names)
 
-    return source_langs, target_langs
+    return src_lang_names, tgt_lang_names

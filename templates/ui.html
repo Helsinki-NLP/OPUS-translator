@@ -5,8 +5,8 @@
   <tr>
     <td id="source-language-cell" style="line-height: 210%">
       <select id="source-drop">
-        {% for item in ui_config['src_langs'].keys() %}
-        <option value='{{ item[1] }}' tgts='{{ ui_config['src_langs'][item] }}'>{{ item[0] }}</option>
+        {% for item in ui_config['src_langs'] %}
+        <option value='{{ item[1] }}' tgts='{{ item[2] }}'>{{ item[0] }}</option>
         {% endfor %}
       </select>
     </td>
