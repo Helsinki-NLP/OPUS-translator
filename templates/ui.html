@@ -6,7 +6,7 @@
     <td id="source-language-cell" style="line-height: 210%">
       <select id="source-drop">
         {% for item in ui_config['src_langs'] %}
-        <option value='{{ item[1] }}' tgts='{{ item[2] }}'>{{ item[0] }}</option>
+        <option id='src-{{ item[1] }}' value='{{ item[1] }}' tgts='{{ item[2] }}'>{{ item[0] }}</option>
         {% endfor %}
       </select>
     </td>
@@ -14,7 +14,7 @@
     <td id="target-language-cell" style="line-height: 210%">
       <select id="target-drop">
         {% for item in ui_config['tgt_langs'] %}
-        <option value='{{ item[1] }}'>{{ item[0] }}</option>
+        <option id='tgt-{{ item[1] }}' value='{{ item[1] }}'>{{ item[0] }}</option>
         {% endfor %}
       </select>
   </tr>

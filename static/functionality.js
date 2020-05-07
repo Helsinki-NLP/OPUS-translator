@@ -1,6 +1,9 @@
 let baseurl = window.location.protocol + "//" + window.location.host
 
 $("#sentence").focus();
+if (window.location.pathname.substring(0,4) == '/ui/'){
+    set_avail_langs();
+}
 
 function translate() {
     $("#asksuggestion").css("display", "none");
@@ -299,3 +302,29 @@ $("#show-td-form").on("click", function() {
 $("#show-url-form").on("click", function() {
     hideOrShowForm("upload-url-form", "show-url-form");
 });
+
+function set_avail_langs() {
+    var src_lan = $("#source-drop").val();
+    var avail_tgts = $("#src-"+src_lan).attr('tgts').split(' ');
+    var tgt_langs = $("#target-drop").children();
+    var first_avail = '';
+    for (var i=0; i<tgt_langs.length; i++) {
+        var tgt_lan = tgt_langs[i].value
+        if ($.inArray(tgt_lan, avail_tgts) != -1) {
+            $("#tgt-"+tgt_lan).removeAttr('disabled');
+            if (first_avail == '') {
+                first_avail = tgt_lan;
+            }
+        }else{
+            $("#tgt-"+tgt_lan).attr('disabled', 'disabled');
+        }
+    }
+    if ($("#target-drop").val() == null) {
+        $("#target-drop").val(first_avail);
+    }
+}
+
+$("#source-drop").change( function() {
+    set_avail_langs();
+});
+

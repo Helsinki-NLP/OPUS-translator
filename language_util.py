@@ -63,7 +63,7 @@ def get_lang_directions(langstr):
         lan_name = get_lang_name(sl)
         if lan_name:
             src_lang_names.append(
-                (lan_name, sl, tgt_langs[src_langs.index(sl)]))
+                (lan_name, sl, " ".join(tgt_langs[src_langs.index(sl)])))
             for tgt_lan in tgt_langs[src_langs.index(sl)]:
                 if tgt_lan not in tgt_lang_names:
                     tgt_lang_names.append(tgt_lan)
