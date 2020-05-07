@@ -29,7 +29,11 @@
         {% if goethe %}
         <li class="left"><a href="https://www.goethe.de/ins/fi/fi/index.html"><img class="navlia" src="{{ url_for('static', filename='images/goethe_logo.png') }}" style="height: 67px; padding: 0px 0px"></a></li>
         {% elif ui_config %}
+          {% if ui_config['logo'] %}
+        <li class="left"><a><img class="navlia" src="{{ ui_config['logo'] }}" style="height: 67px; padding: 0px 0px"></a></li>
+          {% else %}
         <li class="left"><h2 style="color: {{ ui_config['name_color'] }}; padding-left: 20px">{{ ui_config['name'] }}</h2></li>
+          {% endif %}
         {% else %}
         <li class="left"><a href="https://blogs.helsinki.fi/fiskmo-project/"><img class="navlia"  src="{{ url_for('static', filename='images/logo-fiskmo-white.png') }}" style="height: 67px; padding: 0px 0px"></a></li>
         {% endif %}

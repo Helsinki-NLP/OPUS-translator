@@ -3,13 +3,15 @@
   <form method=post action="/new_ui">
     <dl>
       <dt>Key</dt>
-      <dd><input type="password" name="key" value="{{ prev_form['key'] }}"><span style="color: red"> {{ errors['key'] }}</span></dd>
+      <dd><input type="password" name="key" style="width: 500" value="{{ prev_form['key'] }}"><span style="color: red"> {{ errors['key'] }}</span></dd>
       <dt>Name</dt>
-      <dd><input type="text" name="name" placeholder="Test" value="{{ prev_form['name'] }}"><span style="color: red"> {{ errors['name'] }}</span></dd>
+      <dd><input type="text" name="name" style="width: 500" placeholder="Test" value="{{ prev_form['name'] }}"><span style="color: red"> {{ errors['name'] }}</span></dd>
+      <dt>Logo</dt>
+      <dd><input type="text" name="logo" style="width: 500" placeholder="https://translate.ling.helsinki.fi/static/images/lt-logo.png" value="{{ prev_form['logo'] }}"></dd>
       <dt>Name color</dt>
-      <dd><input type="text" name="name_color" placeholder="black / #000000" value="{{ prev_form['name_color'] }}"></dd>
+      <dd><input type="text" name="name_color" style="width: 500" placeholder="black / #000000" value="{{ prev_form['name_color'] }}"></dd>
       <dt>Banner color</dt>
-      <dd><input type="text" name="banner_color" placeholder="lightgray / #E6E6E6" value="{{ prev_form['banner_color'] }}"></dd>
+      <dd><input type="text" name="banner_color" style="width: 500" placeholder="lightgray / #E6E6E6" value="{{ prev_form['banner_color'] }}"></dd>
       <dt>Language pairs</dt>
       <dd><input type="text" name="lang_pairs" style="width: 500" placeholder="fr en<->ga cy, fr en->fi sv, (sv no da)" value="{{ prev_form['lang_pairs'] }}"><span style="color: red"> {{ errors['lang_pairs'] }}</span></dd>
       <dd>Language pairs can be specified in three different kinds of units:

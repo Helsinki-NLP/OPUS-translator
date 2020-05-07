@@ -119,8 +119,6 @@ def new_ui():
 
         pairs = request.form['lang_pairs']
         src_langs, tgt_langs = get_lang_directions(pairs)
-        print(src_langs)
-        print(tgt_langs)
 
         errors = validate_ui_form(request.form)
         if errors != {}:
@@ -128,6 +126,7 @@ def new_ui():
 
         ui_db[url_name] = {
             'name': request.form['name'],
+            'logo': request.form['logo'],
             'name_color': request.form['name_color'],
             'banner_color': request.form['banner_color'],
             'src_langs': src_langs,
