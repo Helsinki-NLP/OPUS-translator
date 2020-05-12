@@ -19,7 +19,6 @@ import sqlite3
 from sqlalchemy import create_engine
 from websocket import create_connection
 import pycld2
-from flask_mail import Mail, Message
 from iso639 import languages as iso_languages
 
 from dbconnect import connection
@@ -31,21 +30,6 @@ from language_util import get_lang_directions
 rh = request_handler.RequestHandler()
 
 app = Flask(__name__)
-
-euser = os.environ["EMAILUSER"]
-epass = os.environ["EMAILPASSWORD"]
-    
-mail_settings = {
-        "MAIL_SERVER": 'smtp.gmail.com',
-        "MAIL_PORT": 465,
-        "MAIL_USER_TLS": False,
-        "MAIL_USE_SSL": True,
-        "MAIL_USERNAME": euser,
-        "MAIL_PASSWORD": epass
-    }
-
-app.config.update(mail_settings)
-mail = Mail(app)
 
 key = os.environ["SECRETKEY"]
 app.secret_key = key
@@ -240,12 +224,14 @@ def forgot_password():
         conn.close()
         gc.collect()
 
-        with app.app_context():
-            msg = Message(subject="Account management",
-                    sender=app.config.get("MAIL_USERNAME"),
-                    recipients=[email],
-                    body='Follow this link to reset your Fiskmö and Opus Repository account password:\n\n'+os.environ['TRBASEURL']+'/reset_password/'+token+'\n\nThe link will expire in 60 minutes.')
-            mail.send(msg)
+        body = ('Follow this link to reset your Fiskmö and Opus Repository '
+            'account password:\n\n'+os.environ['TRBASEURL']+
+            '/reset_password/'+token+'\n\nThe link will expire in 60 minutes.')
+
+        message = sp.Popen(['echo', '-e', 'Subject: Account management\n\n'+body+'\n'], stdout=sp.PIPE)
+        output = sp.check_output(('sendmail', 'aulamo.mikko@gmail.com'), stdin=message.stdout)
+        message.wait()
+
         flash('See your email for further instructions.')
         return redirect(url_for("login_page"))
 
