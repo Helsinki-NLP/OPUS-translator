@@ -229,7 +229,7 @@ def forgot_password():
             '/reset_password/'+token+'\n\nThe link will expire in 60 minutes.')
 
         message = sp.Popen(['echo', '-e', 'Subject: Account management\n\n'+body+'\n'], stdout=sp.PIPE)
-        output = sp.check_output(('sendmail', 'aulamo.mikko@gmail.com'), stdin=message.stdout)
+        output = sp.check_output(['sendmail', '-f', 'noreply@translate.ling.helsinki.fi', email], stdin=message.stdout)
         message.wait()
 
         flash('See your email for further instructions.')
